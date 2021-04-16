@@ -1,7 +1,7 @@
-package com.moonsky.mapper.processing;
+package com.moonsky.mapper;
 
 import com.moonsky.mapper.annotation.MapperFor;
-import com.moonsky.mapper.processing.holder.Holders;
+import com.moonsky.processing.holder.Holders;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;

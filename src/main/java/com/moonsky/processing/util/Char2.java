@@ -1,4 +1,4 @@
-package com.moonsky.mapper.processing.util;
+package com.moonsky.processing.util;
 
 /**
  * @author benshaoye

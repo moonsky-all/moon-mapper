@@ -1,4 +1,4 @@
-package com.moonsky.mapper.processing.util;
+package com.moonsky.processing.util;
 
 import java.beans.Introspector;
 import java.util.ArrayList;
@@ -53,6 +53,8 @@ public enum String2 {
         }
         return true;
     }
+
+    public static boolean isNotBlank(String str) { return !isBlank(str); }
 
     /**
      * 验证字符串中所有字符是否存在符合验证条件的字符
@@ -286,5 +288,4 @@ public enum String2 {
     public static String toSetterName(String field) {
         return Const2.SET + capitalize(field);
     }
-
 }
