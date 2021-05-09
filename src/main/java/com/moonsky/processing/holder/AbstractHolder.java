@@ -17,4 +17,10 @@ public abstract class AbstractHolder {
     public final Types getTypes() { return getHolders().getTypes(); }
 
     protected final Holders getHolders() { return holders; }
+
+    protected final TypeHolder typeHolder() { return holders.typeHolder(); }
+
+    protected final CopierHolder copierHolder() { return holders.copierHolder(); }
+
+    protected final MapperHolder mapperHolder() { return holders.mapperHolder(); }
 }

@@ -7,6 +7,16 @@
   <groupId>moonsky-all</groupId>
   <artifactId>moon-mapper</artifactId>
   <version>1.0-SNAPSHOT</version>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.google.auto.service</groupId>
+      <artifactId>auto-service</artifactId>
+      <version>1.0-rc7</version>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
   <build>
     <plugins>
       <plugin>
@@ -15,6 +25,7 @@
         <configuration>
           <source>8</source>
           <target>8</target>
+          <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
     </plugins>

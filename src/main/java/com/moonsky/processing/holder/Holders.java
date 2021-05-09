@@ -12,14 +12,22 @@ public enum Holders {
     INSTANCE;
 
     private final TypeHolder typeHolder = new TypeHolder(this);
+    private final CopierHolder copierHolder = new CopierHolder(this);
+    private final MapperHolder mapperHolder = new MapperHolder(this);
 
     private final ThreadLocal<ProcessingEnvironment> ENV = new ThreadLocal<>();
 
     public void init(ProcessingEnvironment environment) { ENV.set(environment); }
 
-    public final ProcessingEnvironment getEnvironment() { return ENV.get(); }
+    public ProcessingEnvironment getEnvironment() { return ENV.get(); }
 
-    public final Elements getUtils() { return getEnvironment().getElementUtils(); }
+    public Elements getUtils() { return getEnvironment().getElementUtils(); }
 
-    public final Types getTypes() { return getEnvironment().getTypeUtils(); }
+    public Types getTypes() { return getEnvironment().getTypeUtils(); }
+
+    public TypeHolder typeHolder() { return typeHolder; }
+
+    public CopierHolder copierHolder() { return copierHolder; }
+
+    public MapperHolder mapperHolder() { return mapperHolder; }
 }

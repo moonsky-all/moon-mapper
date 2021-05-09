@@ -1,5 +1,6 @@
 package com.moonsky.processing.util;
 
+import javax.lang.model.element.TypeElement;
 import java.beans.Introspector;
 import java.util.ArrayList;
 import java.util.List;
@@ -280,6 +281,65 @@ public enum String2 {
         chars[0] = Character.toUpperCase(chars[0]);
         return new String(chars);
     }
+
+    /**
+     * 格式化字符串，将模板中的占位符（{}）按顺序替换为指定值的字符串形式，剩余的值
+     * <p>
+     * 直接追加到最终字符串末尾
+     *
+     * @param template 字符串模板
+     * @param values   有序的待替换值
+     *
+     * @return 替换完成后的字符串
+     */
+    public static String format(String template, Object... values) {
+        if (template == null) {
+            return null;
+        }
+        if (values == null || values.length == 0) {
+            return template;
+        }
+        int startIdx = 0, idx = 0;
+        final int valueLen = values.length, tempLen = template.length();
+        StringBuilder builder = new StringBuilder(tempLen);
+        for (int at, nextStartAt; ; ) {
+            at = template.indexOf("{}", startIdx);
+            if (at >= 0) {
+                nextStartAt = at + 2;
+                builder.append(template, startIdx, at);
+                builder.append(values[idx++]);
+                if (idx >= valueLen) {
+                    return builder.append(template, nextStartAt, tempLen).toString();
+                }
+                startIdx = nextStartAt;
+            } else {
+                for (int i = idx; i < valueLen; i++) {
+                    builder.append(values[i]);
+                }
+                return builder.toString();
+            }
+        }
+    }
+
+    public static String formatTypes(String typeTemplate, Object... types) {
+        if (types == null) {
+            return typeTemplate;
+        }
+        Object[] typesStringify = new String[types.length];
+        for (int i = 0; i < types.length; i++) {
+            Object type = types[i];
+            if (type instanceof Class<?>) {
+                typesStringify[i] = Element2.getQualifiedName((Class<?>) type);
+            } else if (type instanceof TypeElement) {
+                typesStringify[i] = Element2.getQualifiedName((TypeElement) type);
+            } else {
+                typesStringify[i] = String.valueOf(type);
+            }
+        }
+        return String2.format(typeTemplate, typesStringify);
+    }
+
+    public static String keyOf(String... keys) { return String.join(":", keys); }
 
     public static String toGetterName(String field, String type) {
         return ("boolean".equals(type) ? Const2.IS : Const2.GET) + capitalize(field);
