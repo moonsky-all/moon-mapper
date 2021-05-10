@@ -6,6 +6,8 @@ package com.moonsky.processing.util;
 public enum Const2 {
     ;
 
+    public final static String[] EMPTY_STRINGS = {};
+
     public final static char DOT = '.';
 
     public final static String IS = "is", GET = "get", SET = "set";

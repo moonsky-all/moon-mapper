@@ -60,6 +60,17 @@ public enum Element2 {
         }
     }
 
+    public static String[] toClassnames(Class<?>... classes) {
+        if (classes == null) {
+            return Const2.EMPTY_STRINGS;
+        }
+        String[] names = new String[classes.length];
+        for (int i = 0; i < classes.length; i++) {
+            names[i] = classes[i].getCanonicalName();
+        }
+        return names;
+    }
+
     public static String toPropertyName(ExecutableElement elem) {
         String name = elem.getSimpleName().toString();
         return String2.decapitalize(name.substring(name.startsWith(Const2.IS) ? 2 : 3));

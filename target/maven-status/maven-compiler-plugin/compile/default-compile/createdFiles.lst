@@ -1,12 +1,15 @@
+com\moonsky\processing\processor\MapperForProcessor.class
 com\moonsky\processing\util\Test2.class
+com\moonsky\processing\util\LinkedHashKeyMap.class
 com\moonsky\processing\util\Generic2$ClassGenericTask.class
 com\moonsky\processing\holder\CopierHolder.class
 com\moonsky\mapper\annotation\MapperFor$List.class
+com\moonsky\processing\util\Key.class
 com\moonsky\processing\util\Const2.class
-com\moonsky\mapper\MapperForProcessor.class
 com\moonsky\processing\holder\Holders.class
 com\moonsky\processing\util\Generic2$GenericTask.class
 com\moonsky\mapper\Mappers.class
+com\moonsky\processing\util\Importer.class
 com\moonsky\processing\util\Generic2.class
 com\moonsky\processing\util\OnceRunner.class
 META-INF\services\javax.annotation.processing.Processor

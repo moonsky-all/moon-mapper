@@ -54,7 +54,10 @@ public class MapperForProcessor extends AbstractProcessor {
             MapperFor mapperFor = mapperForAnnotated.getAnnotation(MapperFor.class);
             Collection<TypeElement> classes = getValueClasses(mapperForAnnotated, MapperFor.class, "value");
             Map<String, GenericDeclared> genericsMap = Generic2.from(mapperForAnnotated);
-            Log2.warn(genericsMap);
+            genericsMap.forEach((key, decl) -> {
+                Log2.warn("---------------->> {}", key);
+                Log2.warn(decl);
+            });
         });
     }
 
