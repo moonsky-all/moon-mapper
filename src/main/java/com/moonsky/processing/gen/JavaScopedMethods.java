@@ -14,6 +14,10 @@ public class JavaScopedMethods extends JavaScopedMembers<JavaElemMethod> {
         super(importer, enclosingGenericsList, inInterface);
     }
 
+    public JavaElemMethod declareMethod(String methodName) {
+        return declareMethod(methodName, p -> {});
+    }
+
     public JavaElemMethod declareMethod(String methodName, Consumer<JavaElemParametersList> parametersBuilder) {
         return declareMethod(methodName, l -> {}, parametersBuilder);
     }

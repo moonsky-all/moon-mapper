@@ -4,7 +4,9 @@ import com.moonsky.processing.util.Importer;
 import com.moonsky.processing.util.String2;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author benshaoye
@@ -13,6 +15,7 @@ public abstract class BaseBlockCommentable extends BaseAnnotatedElement {
 
     private final List<String> blockComments = new ArrayList<>();
     private final List<String> docComments = new ArrayList<>();
+    private final Map<String, List<JavaTypeComments>> throwsComments = new LinkedHashMap<>();
     private boolean isAllBlank = true;
 
     public BaseBlockCommentable(
@@ -58,6 +61,14 @@ public abstract class BaseBlockCommentable extends BaseAnnotatedElement {
     private void addCommentToList(List<String> list, Object comment) {
         if (comment == null) {
             list.add(null);
+        }
+        if (comment instanceof CharSequence) {
+            String str = comment.toString();
+            if (String2.isBlank(str)) {
+                list.add(null);
+            } else {
+                list.add(str);
+            }
         } else if (comment instanceof Class<?>) {
             list.add(((Class<?>) comment).getCanonicalName());
             this.isAllBlank = false;
@@ -67,28 +78,37 @@ public abstract class BaseBlockCommentable extends BaseAnnotatedElement {
         }
     }
 
-    @Override
-    public void add(JavaAddr addr) {
-        if (addBlockComments(addr)) {
+    protected boolean hasDocSupplementComments() { return false; }
+
+    protected void addDocSupplementComments(JavaAddr addr) { }
+
+    protected final boolean addBlockComments(JavaAddr addr) {
+        boolean added = addComments(addr, getBlockComments(), "/*", false);
+        if (added) {
             addr.next();
         }
-        addDocComments(addr);
+        return added;
     }
 
-    private boolean addBlockComments(JavaAddr addr) {
-        return addComments(addr, getBlockComments(), "/*");
+    protected final boolean addDocComments(JavaAddr addr) {
+        return addComments(addr, getBlockComments(), "/**", true);
     }
 
-    private boolean addDocComments(JavaAddr addr) {
-        return addComments(addr, getBlockComments(), "/*");
-    }
-
-    private boolean addComments(JavaAddr addr, List<String> comments, String open) {
+    private boolean addComments(JavaAddr addr, List<String> comments, String open, boolean docAddr) {
         if (isAllBlank || comments.isEmpty()) {
             return false;
         }
         String close = " */";
-        if (comments.size() == 1) {
+        if (comments.size() > 1 || (docAddr && hasDocSupplementComments())) {
+            addr.newLine(open);
+            for (String comment : comments) {
+                addr.newLine(" * ").add(comment);
+            }
+            if (docAddr) {
+                addDocSupplementComments(addr);
+            }
+            addr.newLine(close);
+        } else {
             String comment = comments.get(0);
             if (String2.isBlank(comment)) {
                 return false;
@@ -100,12 +120,6 @@ public abstract class BaseBlockCommentable extends BaseAnnotatedElement {
             } else {
                 addr.newLine(open).add(' ').add(comment).add(close);
             }
-        } else {
-            addr.newLine(open);
-            for (String comment : comments) {
-                addr.newLine(" * ").add(comment);
-            }
-            addr.newLine(close);
         }
         return true;
     }

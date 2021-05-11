@@ -5,8 +5,10 @@ package com.moonsky.processing.gen;
  */
 public abstract class JavaFileImplementation extends JavaFileInterfaceImpl {
 
-    protected JavaFileImplementation(String packageName, String simpleName, JavaElementEnum elementEnum) {
-        super(packageName, simpleName, elementEnum);
+    protected JavaFileImplementation(
+        String packageName, String simpleName, JavaElementEnum elementEnum
+    ) {
+        super(packageName, simpleName, elementEnum, JavaImplementsList.Keyword.IMPLEMENTS);
     }
 
     @Override

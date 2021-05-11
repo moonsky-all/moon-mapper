@@ -26,6 +26,15 @@ public class JavaAddr {
         this.maxLineLength = maxLineLength;
     }
 
+    public static JavaAddr newPackageOf(String packageName) {
+        return new JavaAddr().packageOf(packageName);
+    }
+
+    public JavaAddr packageOf(String packageName) {
+        builder.setLength(0);
+        return add("package ").add(packageName).end();
+    }
+
     public JavaAddr newLine(Object lineScript) {
         return next().indent().add(lineScript);
     }
@@ -35,8 +44,23 @@ public class JavaAddr {
         return this;
     }
 
-    public JavaAddr next() {
-        builder.append('\n');
+    public JavaAddr next() { return next(1); }
+
+    public JavaAddr next(int n) {
+        switch (n) {
+            case 3:
+                builder.append('\n');
+            case 2:
+                builder.append('\n');
+            case 1:
+                builder.append('\n');
+                break;
+            default:
+                char[] chars = new char[n];
+                Arrays.fill(chars, '\n');
+                builder.append(chars);
+                break;
+        }
         return this;
     }
 
@@ -86,14 +110,37 @@ public class JavaAddr {
                     return this;
                 }
                 str.append(';');
+                break;
             }
         }
         return this;
     }
 
+    public JavaAddr deleteLastChar() {
+        return deleteCharAt(lastIndex());
+    }
+
+    public JavaAddr deleteCharAt(int index) {
+        builder.deleteCharAt(index);
+        return this;
+    }
+
+    public boolean endWithSpaceChar() { return getLastChar() == ' '; }
+
+    public char getLastChar() { return charAt(lastIndex()); }
+
+    public char charAt(int index) { return builder.charAt(index); }
+
+    public int length() { return builder.length(); }
+
+    public int lastIndex() { return length() - 1; }
+
     public void open() { indentUnit++; }
 
     public void close() { indentUnit--; }
+
+    @Override
+    public String toString() { return builder.toString(); }
 
     /**
      * 标记，可通过{@link Mark#with(CharSequence)}向标记处插入字符串等数据

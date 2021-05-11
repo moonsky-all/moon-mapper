@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * @author benshaoye
  */
-public class JavaGenericsList extends AbstractImportable {
+public class JavaGenericsList extends AbstractImportable implements Addable {
 
     private final Map<String, JavaGeneric> genericsMap = new LinkedHashMap<>();
 
@@ -24,5 +24,21 @@ public class JavaGenericsList extends AbstractImportable {
 
     public JavaGeneric get(String declareName) {
         return genericsMap.get(declareName);
+    }
+
+    private Map<String, JavaGeneric> getGenericsMap() { return genericsMap; }
+
+    @Override
+    public void add(JavaAddr addr) {
+        Map<String, JavaGeneric> genericMap = getGenericsMap();
+        if (genericMap.isEmpty()) {
+            return;
+        }
+        addr.add("<");
+        for (Map.Entry<String, JavaGeneric> genericEntry : genericMap.entrySet()) {
+            genericEntry.getValue().add(addr);
+            addr.add(',');
+        }
+        addr.deleteLastChar().add(">");
     }
 }

@@ -2,11 +2,12 @@ package com.moonsky.processing.gen;
 
 import com.moonsky.processing.util.Generic2;
 import com.moonsky.processing.util.Importer;
+import com.moonsky.processing.util.String2;
 
 /**
  * @author benshaoye
  */
-public class JavaGeneric extends AbstractImportable {
+public class JavaGeneric extends AbstractImportable implements Addable {
 
     private final String declare;
     private final String bound;
@@ -24,4 +25,12 @@ public class JavaGeneric extends AbstractImportable {
     public String getBound() { return bound; }
 
     public String getTypeSimplify() { return typeSimplify; }
+
+    @Override
+    public void add(JavaAddr addr) {
+        addr.add(declare);
+        if (String2.isNotBlank(bound)) {
+            addr.add(" extends ").add(bound);
+        }
+    }
 }

@@ -1,9 +1,14 @@
 package com.moonsky.processing.gen;
 
+import com.moonsky.processing.holder.ValueHolder;
 import com.moonsky.processing.util.Importer;
+import com.moonsky.processing.util.String2;
 
 import javax.lang.model.element.Modifier;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * @author benshaoye
@@ -15,7 +20,7 @@ public class JavaElemField extends BaseBlockCommentable {
     private final String fieldType;
     private final String fieldName;
 
-    private Map<String, JavaElemMethod> setterMethodMap;
+    private final Map<String, JavaElemMethod> setterMethodMap = new LinkedHashMap<>();
     private JavaElemMethod getterMethod;
 
     public JavaElemField(
@@ -35,6 +40,75 @@ public class JavaElemField extends BaseBlockCommentable {
         return inInterface() ? modifier == Modifier.STATIC : Modifier2.CLASS_FIELD_MODIFIERS.contains(modifier);
     }
 
+    public JavaElemMethod withDefaultSetValue4SetterMethod(JavaElemMethod setterMethod) {
+        if (setterMethodMap.containsValue(setterMethod)) {
+            // TODO this.fieldName = fieldName;
+        }
+        return setterMethod;
+    }
+
+    public JavaElemMethod withDefaultSetterMethod() {
+        JavaElemMethod setterMethod = withSetterMethod();
+        withDefaultSetValue4SetterMethod(setterMethod);
+        return setterMethod;
+    }
+
+    public JavaElemMethod withSetterMethod() {
+        return withSetterMethod(fieldName, fieldType);
+    }
+
+    public JavaElemMethod withSetterMethod(String parameterName, String parameterTypeTemplate, Object... types) {
+        String setterName = String2.toSetterName(fieldName);
+        ValueHolder<JavaElemParameter> parameterHolder = new ValueHolder<>();
+        JavaElemMethod setterMethod = scopedMethods.declareMethod(setterName, parameterBuilder -> {
+            parameterBuilder.add(parameterName, parameter -> {
+                parameterHolder.set(parameter);
+            }, parameterTypeTemplate, types);
+        }).typeOf("void");
+        String formattedParameterType = parameterHolder.get().getParameterType();
+        setterMethodMap.put(formattedParameterType, setterMethod);
+        return setterMethod;
+    }
+
+    public JavaElemField returningDefault4GetterMethod() {
+        if (getterMethod != null) {
+            getterMethod.returning(this.fieldName);
+        }
+        return this;
+    }
+
+    public JavaElemMethod withGetterMethod() { return withGetterMethod(fieldType); }
+
+    public JavaElemMethod withGetterMethod(String returnTypeTemplate, Object... types) {
+        return withGetterMethod(g -> {}, returnTypeTemplate, types);
+    }
+
+    /**
+     * 定义 getter 方法
+     *
+     * @param genericsBuilder
+     * @param returnTypeTemplate
+     * @param types
+     *
+     * @return
+     */
+    public JavaElemMethod withGetterMethod(
+        Consumer<JavaGenericsList> genericsBuilder, String returnTypeTemplate, Object... types
+    ) {
+        withNonGetterMethod();
+        String formatted = TypeFormatter2.with(returnTypeTemplate, types);
+        String getterName = String2.toGetterName(fieldName, formatted);
+        JavaElemMethod getterMethod = scopedMethods.declareMethod(getterName, genericsBuilder, p -> {});
+        // 设置返回值类型
+        getterMethod.typeOf(formatted);
+        this.getterMethod = getterMethod;
+        // 默认返回值
+        if (Objects.equals(getterMethod.getReturnType(), fieldType)) {
+            returningDefault4GetterMethod();
+        }
+        return getterMethod;
+    }
+
     public JavaElemField withNonGetterMethod() {
         if (getterMethod != null) {
             scopedMethods.remove(getterMethod);
@@ -43,9 +117,7 @@ public class JavaElemField extends BaseBlockCommentable {
     }
 
     public JavaElemField withNonSetterMethod() {
-        if (setterMethodMap != null) {
-            setterMethodMap.values().forEach(scopedMethods::remove);
-        }
+        setterMethodMap.values().forEach(scopedMethods::remove);
         return this;
     }
 }

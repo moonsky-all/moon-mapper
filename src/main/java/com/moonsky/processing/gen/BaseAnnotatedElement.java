@@ -2,7 +2,6 @@ package com.moonsky.processing.gen;
 
 import com.moonsky.mapper.annotation.CopierImplGenerated;
 import com.moonsky.mapper.annotation.MapperImplGenerated;
-import com.moonsky.processing.processor.MapperForProcessor;
 import com.moonsky.processing.util.Imported;
 import com.moonsky.processing.util.Importer;
 import com.moonsky.processing.util.Processing2;
@@ -12,6 +11,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Generated;
+import javax.annotation.processing.Processor;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import java.lang.annotation.Annotation;
@@ -39,8 +39,10 @@ public abstract class BaseAnnotatedElement extends AbstractModifierCapable {
         this.utils = Processing2.getUtils();
     }
 
+    private Map<String, Collection<JavaAnnotation>> getAnnotationsMap() { return annotationsMap; }
+
     private Collection<JavaAnnotation> obtainAnnotations(String annotationName) {
-        return annotationsMap.computeIfAbsent(annotationName, k -> new ArrayList<>());
+        return getAnnotationsMap().computeIfAbsent(annotationName, k -> new ArrayList<>());
     }
 
     /**
@@ -73,9 +75,9 @@ public abstract class BaseAnnotatedElement extends AbstractModifierCapable {
     ) { return annotationOf(annotationClass.getCanonicalName(), annotationUsing); }
 
     public BaseAnnotatedElement annotationOf(String annotationName) {
-        JavaAnnotation annotation = new JavaAnnotation(getImporter(), elementEnum, annotationName);
         Collection<JavaAnnotation> annotations = obtainAnnotations(annotationName);
         if (annotations.isEmpty() || isRepeatable(annotationName)) {
+            JavaAnnotation annotation = new JavaAnnotation(getImporter(), elementEnum, annotationName);
             annotations.add(annotation);
         }
         return this;
@@ -113,10 +115,14 @@ public abstract class BaseAnnotatedElement extends AbstractModifierCapable {
      */
 
     public BaseAnnotatedElement annotationGenerated() {
+        return annotationGeneratedBy(Processor.class);
+    }
+
+    public BaseAnnotatedElement annotationGeneratedBy(Class<?> target) {
         if (Imported.GENERATED) {
             annotationOf(Generated.class, annotation -> {
                 annotation.stringOf("date", DATETIME);
-                annotation.stringOf("value", MapperForProcessor.class);
+                annotation.stringOf("value", target.getCanonicalName());
             });
         }
         return this;
@@ -175,7 +181,10 @@ public abstract class BaseAnnotatedElement extends AbstractModifierCapable {
         return this;
     }
 
-    public void add(JavaAddr addr) {
-
+    protected final boolean addDeclareAnnotations(JavaAddr addr) {
+        for (Collection<JavaAnnotation> annotations : getAnnotationsMap().values()) {
+            annotations.forEach(annotation -> annotation.add(addr));
+        }
+        return !getAnnotationsMap().isEmpty();
     }
 }

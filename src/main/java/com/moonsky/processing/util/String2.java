@@ -3,6 +3,7 @@ package com.moonsky.processing.util;
 import javax.lang.model.element.TypeElement;
 import java.beans.Introspector;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.IntPredicate;
 
@@ -11,6 +12,12 @@ import java.util.function.IntPredicate;
  */
 public enum String2 {
     ;
+
+    public static String toSpaceString(int length) {
+        char[] chars = new char[length];
+        Arrays.fill(chars, ' ');
+        return new String(chars);
+    }
 
     public static String dotClass(Class<?> cls) { return cls == null ? null : dotClass(cls.getCanonicalName()); }
 

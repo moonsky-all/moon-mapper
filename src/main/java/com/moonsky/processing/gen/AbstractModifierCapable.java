@@ -5,6 +5,7 @@ import com.moonsky.processing.util.Importer;
 import javax.lang.model.element.Modifier;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * 可修饰的
@@ -23,7 +24,7 @@ public abstract class AbstractModifierCapable extends AbstractImportable {
 
     public AbstractModifierCapable modifierWith(Modifier modifier) {
         if (isAllowModifierWith(modifier)) {
-            Modifier2.useModifier(modifierSet, modifier);
+            Modifier2.useModifier(getOriginModifierSet(), modifier);
         }
         return this;
     }
@@ -34,15 +35,19 @@ public abstract class AbstractModifierCapable extends AbstractImportable {
      * @return this
      */
     public AbstractModifierCapable packageAccessLevel() {
-        modifierSet.removeAll(Modifier2.ACCESS_MODIFIERS);
+        getOriginModifierSet().removeAll(Modifier2.ACCESS_MODIFIERS);
         return this;
     }
 
-    public final boolean has(Modifier modifier) {
-        return modifierSet.contains(modifier);
-    }
+    public final boolean has(Modifier modifier) { return getOriginModifierSet().contains(modifier); }
 
-    public final boolean isStatic() { return has(Modifier.STATIC); }
+    public final boolean isModifierWithStatic() { return has(Modifier.STATIC); }
+
+    public final boolean isModifierWithDefault() { return has(Modifier.DEFAULT); }
+
+    private Set<Modifier> getOriginModifierSet() { return modifierSet; }
+
+    protected Set<Modifier> getModifierSet() { return new TreeSet<>(getOriginModifierSet()); }
 
     /**
      * 是否允许使用该修饰符
@@ -54,4 +59,13 @@ public abstract class AbstractModifierCapable extends AbstractImportable {
      * @return 允许时返回 true，否则返回 false
      */
     protected abstract boolean isAllowModifierWith(Modifier modifier);
+
+    protected final boolean addDeclareModifiers(JavaAddr addr) {
+        Set<Modifier> modifiers = getModifierSet();
+        if (modifiers.isEmpty()) {
+            return false;
+        }
+        addr.add(modifiers.stream().map(m -> m.name().toLowerCase()).collect(Collectors.joining(" ")));
+        return true;
+    }
 }

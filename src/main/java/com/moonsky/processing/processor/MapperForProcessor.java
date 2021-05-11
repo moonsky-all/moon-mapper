@@ -3,6 +3,7 @@ package com.moonsky.processing.processor;
 import com.google.auto.service.AutoService;
 import com.moonsky.mapper.annotation.MapperFor;
 import com.moonsky.processing.decl.GenericDeclared;
+import com.moonsky.processing.gen.JavaFileInterfaceImpl;
 import com.moonsky.processing.holder.Holders;
 import com.moonsky.processing.util.Generic2;
 import com.moonsky.processing.util.Log2;
@@ -45,6 +46,8 @@ public class MapperForProcessor extends AbstractProcessor {
             doProcessingMapperFor(roundEnv);
             Log2.warn("+++++++++++++++++++++++++++++++++++++++++");
         });
+        JavaFileInterfaceImpl javaFile = new JavaFileInterfaceImpl("com.moon.detail", "TestInterfaceDeclare");
+        JavaFiler.write(javaFile);
         return true;
     }
 

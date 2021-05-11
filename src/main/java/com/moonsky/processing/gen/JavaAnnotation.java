@@ -12,7 +12,7 @@ import static com.moonsky.processing.util.Const2.EMPTY_STRINGS;
 /**
  * @author benshaoye
  */
-public class JavaAnnotation extends AbstractImportable {
+public class JavaAnnotation extends AbstractImportable implements Addable {
 
     private final Map<String, JavaAnnotationValue> valuesMap = new TreeMap<>();
 
@@ -80,13 +80,33 @@ public class JavaAnnotation extends AbstractImportable {
     public JavaAnnotation falseOf(String method) { return booleanOf(method, false); }
 
     public JavaAnnotationValue with(String method) {
-        JavaAnnotationValue value = valuesMap.get(method);
+        JavaAnnotationValue value = getValuesMap().get(method);
         return value == null ? putVal(method, null, null) : value;
     }
 
     private JavaAnnotationValue putVal(String method, JavaAnnotationValueType type, String value, String... values) {
         JavaAnnotationValue val = new JavaAnnotationValue(getImporter(), method, type, value, values);
-        valuesMap.put(method, val);
+        getValuesMap().put(method, val);
         return val;
+    }
+
+    public Map<String, JavaAnnotationValue> getValuesMap() { return valuesMap; }
+
+    @Override
+    public void add(JavaAddr addr) {
+        addr.newLine("@").add(onImported(annotationName));
+        if (getValuesMap().isEmpty()) {
+            return;
+        }
+        addr.add("(").open();
+        for (JavaAnnotationValue value : getValuesMap().values()) {
+            if (value.isAvailable()) {
+                value.add(addr);
+                addr.add(',');
+            }
+        }
+        // 删除最后一个逗号
+        addr.deleteLastChar().close();
+        addr.newLine(')');
     }
 }

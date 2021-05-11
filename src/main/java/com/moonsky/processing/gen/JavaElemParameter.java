@@ -13,14 +13,14 @@ public class JavaElemParameter extends BaseBlockCommentable {
 
     private final String parameterType;
     private final String parameterName;
-    private final JavaTempTester staticTester;
+    private final JavaElemExecutable executionCommentable;
     private final JavaGenericsList enclosingGenericsList;
     private final JavaGenericsList executableGenericsList;
     private final boolean maybeGenericType;
 
     public JavaElemParameter(
         Importer importer,
-        JavaTempTester staticTester,
+        JavaElemExecutable executionCommentable,
         JavaGenericsList enclosingGenericsList,
         JavaGenericsList executableGenericsList,
         String parameterName,
@@ -30,11 +30,17 @@ public class JavaElemParameter extends BaseBlockCommentable {
         super(importer, JavaElementEnum.PARAMETER);
         this.enclosingGenericsList = enclosingGenericsList;
         this.executableGenericsList = executableGenericsList;
-        this.staticTester = staticTester;
+        this.executionCommentable = executionCommentable;
         this.parameterName = parameterName;
         this.parameterType = TypeFormatter2.with(typeTemplate, types);
         this.maybeGenericType = Processing2.getUtils().getTypeElement(parameterType) == null;
     }
+
+    public void commentsOf(String... comments) {
+        executionCommentable.paramCommentsOf(parameterName, comments);
+    }
+
+    public String getParameterType() { return parameterType; }
 
     /**
      * 简化的类型，
@@ -52,7 +58,7 @@ public class JavaElemParameter extends BaseBlockCommentable {
             if (executableGeneric != null) {
                 return executableGeneric.getTypeSimplify();
             }
-            if (staticTester.isMatched()) {
+            if (executionCommentable.isModifierWithStatic()) {
                 return Object.class.getCanonicalName();
             }
             JavaGeneric enclosingGeneric = enclosingGenericsList.get(parameterType);
@@ -65,7 +71,5 @@ public class JavaElemParameter extends BaseBlockCommentable {
     }
 
     @Override
-    protected boolean isAllowModifierWith(Modifier modifier) {
-        return modifier == Modifier.FINAL;
-    }
+    protected boolean isAllowModifierWith(Modifier modifier) { return modifier == Modifier.FINAL; }
 }
