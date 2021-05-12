@@ -56,12 +56,16 @@ public class JavaFileInterfaceImpl extends BaseBlockCommentable implements JavaD
 
     public JavaGenericsList getGenericsList() { return genericsList; }
 
+    public JavaScopedFields fields() { return this.scopedFields; }
+
+    public JavaScopedMethods methods() { return this.scopedMethods; }
+
     @Override
     public String getClassname() { return classname; }
 
     @Override
     public String toString() {
-        JavaAddr addr = JavaAddr.newPackageOf(packageName).next(3);
+        JavaAddr addr = JavaAddr.newPackageOf(packageName).next(2);
 
         // import 块儿, import 放最后设置
         JavaAddr.Mark importMark = addr.mark();
@@ -75,7 +79,8 @@ public class JavaFileInterfaceImpl extends BaseBlockCommentable implements JavaD
         addr.add(" {").open();
 
         // 类定义
-
+        fields().addDeclareFields(addr);
+        methods().addDeclareMethods(addr);
 
         // 类结束
         addr.close();
@@ -96,23 +101,20 @@ public class JavaFileInterfaceImpl extends BaseBlockCommentable implements JavaD
         addDeclareImplementsInterfaces(addr);
     }
 
-    protected boolean addDeclareImplementsInterfaces(JavaAddr addr) {
+    protected void addDeclareImplementsInterfaces(JavaAddr addr) {
         getImplementsList().add(addr);
-        return true;
     }
 
-    protected boolean addDeclareSuperclass(JavaAddr addr) { return false; }
+    protected void addDeclareSuperclass(JavaAddr addr) { }
 
-    protected final boolean addDeclareGenericsList(JavaAddr addr) {
+    protected final void addDeclareGenericsList(JavaAddr addr) {
         getGenericsList().add(addr);
-        return true;
     }
 
-    protected final boolean addDeclareClass(JavaAddr addr) {
+    protected final void addDeclareClass(JavaAddr addr) {
         if (!addr.endWithSpaceChar()) {
             addr.add(SPACE_CHAR);
         }
         addr.add("interface ").add(simpleName);
-        return true;
     }
 }

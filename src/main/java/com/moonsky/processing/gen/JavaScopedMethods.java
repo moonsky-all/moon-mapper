@@ -47,4 +47,8 @@ public class JavaScopedMethods extends JavaScopedMembers<JavaElemMethod> {
         parametersList.withUnmodifiable();
         return new JavaElemMethod(getImporter(), genericsList, methodName, parametersList, inInterface());
     }
+
+    public void addDeclareMethods(JavaAddr addr) {
+
+    }
 }

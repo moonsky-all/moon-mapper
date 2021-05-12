@@ -46,6 +46,7 @@ public class JavaAddr {
 
     public JavaAddr next() { return next(1); }
 
+    @SuppressWarnings("all")
     public JavaAddr next(int n) {
         switch (n) {
             case 3:
@@ -71,16 +72,12 @@ public class JavaAddr {
         return this;
     }
 
+    public JavaAddr keepEndsWith(char value) {
+        return getLastChar() == value ? this : add(value);
+    }
+
     public int getIndentSize() {
         return indentSize.length() * indentUnit;
-    }
-
-    public boolean isOverLength() {
-        return isOverLength(0);
-    }
-
-    public boolean isOverLength(CharSequence willAddLength) {
-        return isOverLength(willAddLength == null ? 0 : willAddLength.length());
     }
 
     public boolean isOverLength(int willAddLength) {

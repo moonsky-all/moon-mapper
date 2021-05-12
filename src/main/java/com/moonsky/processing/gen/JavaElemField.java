@@ -23,6 +23,8 @@ public class JavaElemField extends BaseBlockCommentable {
     private final Map<String, JavaElemMethod> setterMethodMap = new LinkedHashMap<>();
     private JavaElemMethod getterMethod;
 
+    private JavaElemFieldValue value;
+
     public JavaElemField(
         Importer importer, JavaScopedMethods scopedMethods, String fieldType, String fieldName, boolean inInterface
     ) {
@@ -33,11 +35,13 @@ public class JavaElemField extends BaseBlockCommentable {
         this.fieldName = fieldName;
     }
 
+    protected JavaElemFieldValue getValue() { return value; }
+
     public boolean inInterface() { return inInterface; }
 
     @Override
     protected boolean isAllowModifierWith(Modifier modifier) {
-        return inInterface() ? modifier == Modifier.STATIC : Modifier2.CLASS_FIELD_MODIFIERS.contains(modifier);
+        return !inInterface() && Modifier2.CLASS_FIELD_MODIFIERS.contains(modifier);
     }
 
     public JavaElemMethod withDefaultSetValue4SetterMethod(JavaElemMethod setterMethod) {
@@ -61,9 +65,7 @@ public class JavaElemField extends BaseBlockCommentable {
         String setterName = String2.toSetterName(fieldName);
         ValueHolder<JavaElemParameter> parameterHolder = new ValueHolder<>();
         JavaElemMethod setterMethod = scopedMethods.declareMethod(setterName, parameterBuilder -> {
-            parameterBuilder.add(parameterName, parameter -> {
-                parameterHolder.set(parameter);
-            }, parameterTypeTemplate, types);
+            parameterBuilder.add(parameterName, parameterHolder::set, parameterTypeTemplate, types);
         }).typeOf("void");
         String formattedParameterType = parameterHolder.get().getParameterType();
         setterMethodMap.put(formattedParameterType, setterMethod);
@@ -119,5 +121,32 @@ public class JavaElemField extends BaseBlockCommentable {
     public JavaElemField withNonSetterMethod() {
         setterMethodMap.values().forEach(scopedMethods::remove);
         return this;
+    }
+
+    public void addDeclareField(JavaAddr addr) {
+        if (inInterface()) {
+            modifierWith(Modifier.STATIC);
+        }
+        addr.next();
+        addBlockComments(addr);
+        addDocComments(addr);
+        addDeclareAnnotations(addr);
+        addr.newLine("");
+        if (addDeclareModifiers(addr)) {
+            addr.add(' ');
+        }
+        String importedFieldType = onImported(fieldType);
+        addr.add(importedFieldType).add(' ').add(fieldName);
+        addDeclaredFieldValue(addr, importedFieldType);
+        addr.end();
+    }
+
+    private void addDeclaredFieldValue(JavaAddr addr, String importedFieldType) {
+        JavaElemFieldValue value = this.getValue();
+        if (value != null && value.isAvailable()) {
+            value.addFieldValue(addr);
+        } else {
+            JavaElemFieldValue.addPrimitiveRequiredFieldValue(addr, importedFieldType);
+        }
     }
 }

@@ -47,6 +47,7 @@ public class MapperForProcessor extends AbstractProcessor {
             Log2.warn("+++++++++++++++++++++++++++++++++++++++++");
         });
         JavaFileInterfaceImpl javaFile = new JavaFileInterfaceImpl("com.moon.detail", "TestInterfaceDeclare");
+        javaFile.fields().declareField("CONST", "boolean");
         JavaFiler.write(javaFile);
         return true;
     }

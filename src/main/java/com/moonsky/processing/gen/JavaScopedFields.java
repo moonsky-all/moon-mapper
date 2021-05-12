@@ -2,9 +2,6 @@ package com.moonsky.processing.gen;
 
 import com.moonsky.processing.util.Importer;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 /**
  * @author benshaoye
  */
@@ -13,8 +10,10 @@ public class JavaScopedFields extends JavaScopedMembers<JavaElemField> {
     private final VarHelper vars = new VarHelper();
     private final JavaScopedMethods scopedMethods;
 
-    public JavaScopedFields(Importer importer,JavaGenericsList enclosingGenericsList, boolean inInterface, JavaScopedMethods scopedMethods) {
-        super(importer, enclosingGenericsList,inInterface);
+    public JavaScopedFields(
+        Importer importer, JavaGenericsList enclosingGenericsList, boolean inInterface, JavaScopedMethods scopedMethods
+    ) {
+        super(importer, enclosingGenericsList, inInterface);
         this.scopedMethods = scopedMethods;
     }
 
@@ -42,5 +41,14 @@ public class JavaScopedFields extends JavaScopedMembers<JavaElemField> {
         field.withNonGetterMethod().withNonSetterMethod();
         getMemberMap().remove(fieldName);
         return this;
+    }
+
+    void addDeclareFields(JavaAddr addr) {
+        if (getMemberMap().isEmpty()) {
+            return;
+        }
+        getMemberMap().forEach((name, field) -> {
+            field.addDeclareField(addr);
+        });
     }
 }
