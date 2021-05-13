@@ -14,6 +14,8 @@ import static com.moonsky.processing.util.Const2.EMPTY_STRINGS;
  */
 public class JavaAnnotation extends AbstractImportable implements Addable {
 
+    private final static String VALUE_NAME = "value";
+
     private final Map<String, JavaAnnotationValue> valuesMap = new TreeMap<>();
 
     private final JavaElementEnum elementEnum;
@@ -95,18 +97,28 @@ public class JavaAnnotation extends AbstractImportable implements Addable {
     @Override
     public void add(JavaAddr addr) {
         addr.newLine("@").add(onImported(annotationName));
-        if (getValuesMap().isEmpty()) {
+
+        Map<String, JavaAnnotationValue> valueMap = getValuesMap();
+        if (valueMap.isEmpty()) {
             return;
         }
-        addr.add("(").open();
-        for (JavaAnnotationValue value : getValuesMap().values()) {
-            if (value.isAvailable()) {
-                value.add(addr);
-                addr.add(',');
+
+        addr.add("(");
+        if (valueMap.size() == 1 && valueMap.containsKey(VALUE_NAME)) {
+            valueMap.get(VALUE_NAME).add(addr);
+            addr.add(')');
+        } else {
+            addr.open();
+            for (JavaAnnotationValue value : getValuesMap().values()) {
+                if (value.isAvailable()) {
+                    addr.newLine(value.getMethod()).add(" = ");
+                    value.add(addr);
+                    addr.add(',');
+                }
             }
+            // 删除最后一个逗号
+            addr.deleteLastChar().close();
+            addr.newLine(')');
         }
-        // 删除最后一个逗号
-        addr.deleteLastChar().close();
-        addr.newLine(')');
     }
 }

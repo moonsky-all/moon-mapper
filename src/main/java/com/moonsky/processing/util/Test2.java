@@ -3,6 +3,7 @@ package com.moonsky.processing.util;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -74,15 +75,18 @@ public enum Test2 {
     }
 
     public static boolean isAny(Element elem, Modifier modifier, Modifier... modifiers) {
-        if (elem == null) {
+        return elem != null && hasAny(elem.getModifiers(), modifier, modifiers);
+    }
+
+    public static <T> boolean hasAny(Collection<T> collect, T v, T... values) {
+        if (collect == null) {
             return false;
         }
-        Set<Modifier> modifierSet = elem.getModifiers();
-        if (modifierSet.contains(modifier)) {
+        if (collect.contains(v)) {
             return true;
-        } else if (modifiers != null) {
-            for (Modifier m : modifiers) {
-                if (modifierSet.contains(m)) {
+        } else if (values != null) {
+            for (T m : values) {
+                if (collect.contains(m)) {
                     return true;
                 }
             }

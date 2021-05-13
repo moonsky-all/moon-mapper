@@ -4,6 +4,7 @@ import com.moonsky.processing.util.Importer;
 import com.moonsky.processing.util.String2;
 import com.moonsky.processing.util.Test2;
 
+import javax.lang.model.element.TypeElement;
 import java.util.Objects;
 
 /**
@@ -34,11 +35,11 @@ public class JavaElemFieldValue extends AbstractImportable {
         this.value = value;
     }
 
-    public void valueOf(Object value) {
-        this.withValue(String.valueOf(value));
-    }
+    public void valueOf(Object value) { withValue(String.valueOf(value)); }
 
     public void valueOfClassRef(Class<?> klass) { valueOf(onImported(klass) + ".class"); }
+
+    public void valueOfClassRef(TypeElement klass) { valueOf(onImported(klass) + ".class"); }
 
     public void valueOfClassRef(String classname) { valueOf(onImported(classname) + ".class"); }
 
@@ -52,14 +53,33 @@ public class JavaElemFieldValue extends AbstractImportable {
         valueOf(TypeFormatter2.with(template, values));
     }
 
+    /**
+     * 指定类静态字段引用
+     *
+     * @param classname
+     * @param staticMemberName
+     */
     public void valueOfStaticRef(String classname, String staticMemberName) {
         valueOf(String2.format("{}.{}", onImported(classname), staticMemberName));
     }
 
-    public void valueOfEnumConstRef(String enumKlass, String enumConstName) {
-        valueOfStaticRef(enumKlass, enumConstName);
+    /**
+     * 指定枚举指定枚举值引用
+     *
+     * @param enumClass
+     * @param enumConstName
+     */
+    public void valueOfEnumConstRef(String enumClass, String enumConstName) {
+        valueOfStaticRef(enumClass, enumConstName);
     }
 
+    /**
+     * 指定枚举类指定枚举值的指定字段引用
+     *
+     * @param enumClass
+     * @param enumConstName
+     * @param memberRef
+     */
     public void valueOfEnumMemberRef(String enumClass, String enumConstName, String memberRef) {
         if (Objects.equals(thisClass, enumClass)) {
             valueOfThisEnumMemberRef(enumConstName, memberRef);
@@ -68,21 +88,15 @@ public class JavaElemFieldValue extends AbstractImportable {
         }
     }
 
+    /**
+     * 当前类如果是枚举，这个引用本类枚举的某个成员字段
+     *
+     * @param enumValue
+     * @param memberRef
+     */
     public void valueOfThisEnumMemberRef(String enumValue, String memberRef) {
         withValue(String2.format("{}.{}", enumValue, memberRef));
     }
 
-    void addFieldValue(JavaAddr addr) {
-        addr.add(" = ").add(value);
-    }
-
-    static void addPrimitiveRequiredFieldValue(JavaAddr addr, String importedFieldType) {
-        if (Test2.isPrimitiveBool(importedFieldType)) {
-            addr.add(" = false");
-        } else if (Test2.isPrimitiveNumber(importedFieldType)) {
-            addr.add(" = 0");
-        } else {
-            addr.add(" = null");
-        }
-    }
+    void addFieldValue(JavaAddr addr) { addr.add(" = ").add(value); }
 }

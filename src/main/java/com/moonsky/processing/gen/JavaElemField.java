@@ -74,7 +74,7 @@ public class JavaElemField extends BaseBlockCommentable {
 
     public JavaElemField returningDefault4GetterMethod() {
         if (getterMethod != null) {
-            getterMethod.returning(this.fieldName);
+            getterMethod.scripts().returning(this.fieldName);
         }
         return this;
     }
@@ -128,8 +128,8 @@ public class JavaElemField extends BaseBlockCommentable {
             modifierWith(Modifier.STATIC);
         }
         addr.next();
-        addBlockComments(addr);
-        addDocComments(addr);
+        addDeclareBlockComments(addr);
+        addDeclareDocComments(addr);
         addDeclareAnnotations(addr);
         addr.newLine("");
         if (addDeclareModifiers(addr)) {
@@ -146,7 +146,7 @@ public class JavaElemField extends BaseBlockCommentable {
         if (value != null && value.isAvailable()) {
             value.addFieldValue(addr);
         } else {
-            JavaElemFieldValue.addPrimitiveRequiredFieldValue(addr, importedFieldType);
+            addr.add(" = ").add(TypeFormatter2.defaultVal(importedFieldType));
         }
     }
 }

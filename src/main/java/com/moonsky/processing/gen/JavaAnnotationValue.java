@@ -59,9 +59,10 @@ public class JavaAnnotationValue extends AbstractImportable implements Addable {
 
     public JavaAnnotationValueType getType() { return type; }
 
+    public String getMethod() { return method; }
+
     @Override
     public void add(JavaAddr addr) {
-        addr.newLine(method).add(" = ");
         List<String> values = getValues();
         if (values.isEmpty()) {
             addr.add("{}");

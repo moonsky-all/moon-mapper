@@ -3,6 +3,7 @@ package com.moonsky.processing.gen;
 import com.moonsky.processing.util.Generic2;
 import com.moonsky.processing.util.Importer;
 import com.moonsky.processing.util.Processing2;
+import com.moonsky.processing.util.Test2;
 
 import javax.lang.model.element.Modifier;
 
@@ -17,12 +18,14 @@ public class JavaElemParameter extends BaseBlockCommentable {
     private final JavaGenericsList enclosingGenericsList;
     private final JavaGenericsList executableGenericsList;
     private final boolean maybeGenericType;
+    private final JavaElemParametersList belongParametersList;
 
     public JavaElemParameter(
         Importer importer,
         JavaElemExecutable executionCommentable,
         JavaGenericsList enclosingGenericsList,
         JavaGenericsList executableGenericsList,
+        JavaElemParametersList belongParametersList,
         String parameterName,
         String typeTemplate,
         Object... types
@@ -31,6 +34,7 @@ public class JavaElemParameter extends BaseBlockCommentable {
         this.enclosingGenericsList = enclosingGenericsList;
         this.executableGenericsList = executableGenericsList;
         this.executionCommentable = executionCommentable;
+        this.belongParametersList = belongParametersList;
         this.parameterName = parameterName;
         this.parameterType = TypeFormatter2.with(typeTemplate, types);
         this.maybeGenericType = Processing2.getUtils().getTypeElement(parameterType) == null;
@@ -53,6 +57,9 @@ public class JavaElemParameter extends BaseBlockCommentable {
         if (parameterType.contains(".")) {
             return Generic2.typeSimplify(parameterType);
         }
+        if (Test2.isPrimitive(parameterType)) {
+            return parameterType;
+        }
         if (maybeGenericType) {
             JavaGeneric executableGeneric = executableGenericsList.get(parameterType);
             if (executableGeneric != null) {
@@ -72,4 +79,17 @@ public class JavaElemParameter extends BaseBlockCommentable {
 
     @Override
     protected boolean isAllowModifierWith(Modifier modifier) { return modifier == Modifier.FINAL; }
+
+    public void addDeclareSimpleParameter(JavaAddr addr) {
+        addr.add(onImported(parameterType)).add(' ').add(parameterName);
+    }
+
+    public void addDeclareAnnotatedParameter(JavaAddr addr) {
+        if (addDeclareAnnotations(addr)) {
+            addr.add(' ');
+        } else {
+            addr.newLine("");
+        }
+        addDeclareSimpleParameter(addr);
+    }
 }

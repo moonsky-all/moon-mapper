@@ -30,8 +30,14 @@ public abstract class JavaElemExecutable extends BaseBlockCommentable {
         }
     }
 
+    public JavaElemParametersList getParameterList() { return parameterList; }
+
     @Override
     protected void addDocSupplementComments(JavaAddr addr) {
 
+    }
+
+    protected final boolean addDeclareExecutableParametersList(JavaAddr addr) {
+        return getParameterList().addDeclareElemParameter(addr);
     }
 }

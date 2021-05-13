@@ -66,15 +66,15 @@ public abstract class BaseAnnotatedElement extends AbstractModifierCapable {
         return repeatable;
     }
 
-    public BaseAnnotatedElement annotationOf(Class<? extends Annotation> annotationClass) {
-        return annotationOf(annotationClass.getCanonicalName());
+    public BaseAnnotatedElement annotateOf(Class<? extends Annotation> annotationClass) {
+        return annotateOf(annotationClass.getCanonicalName());
     }
 
-    public BaseAnnotatedElement annotationOf(
+    public BaseAnnotatedElement annotateOf(
         Class<? extends Annotation> annotationClass, Consumer<JavaAnnotation> annotationUsing
-    ) { return annotationOf(annotationClass.getCanonicalName(), annotationUsing); }
+    ) { return annotateOf(annotationClass.getCanonicalName(), annotationUsing); }
 
-    public BaseAnnotatedElement annotationOf(String annotationName) {
+    public BaseAnnotatedElement annotateOf(String annotationName) {
         Collection<JavaAnnotation> annotations = obtainAnnotations(annotationName);
         if (annotations.isEmpty() || isRepeatable(annotationName)) {
             JavaAnnotation annotation = new JavaAnnotation(getImporter(), elementEnum, annotationName);
@@ -83,7 +83,7 @@ public abstract class BaseAnnotatedElement extends AbstractModifierCapable {
         return this;
     }
 
-    public BaseAnnotatedElement annotationOf(String annotationName, Consumer<JavaAnnotation> annotationUsing) {
+    public BaseAnnotatedElement annotateOf(String annotationName, Consumer<JavaAnnotation> annotationUsing) {
         Collection<JavaAnnotation> annotations = obtainAnnotations(annotationName);
         if (annotations.isEmpty() || isRepeatable(annotationName)) {
             JavaAnnotation annotation = new JavaAnnotation(getImporter(), elementEnum, annotationName);
@@ -110,17 +110,27 @@ public abstract class BaseAnnotatedElement extends AbstractModifierCapable {
         return false;
     }
 
+    public final int annotationsCount(){
+        Map<String, Collection<JavaAnnotation>> annotationsMap = this.annotationsMap;
+        if (annotationsMap.isEmpty()) {
+            return 0;
+        }
+        int count = 0;
+        for (Collection<JavaAnnotation> value : annotationsMap.values()) {
+            count += value.size();
+        }
+        return count;
+    }
+
     /*
      * annotations
      */
 
-    public BaseAnnotatedElement annotationGenerated() {
-        return annotationGeneratedBy(Processor.class);
-    }
+    public BaseAnnotatedElement annotateGenerated() { return annotateGeneratedBy(Processor.class); }
 
-    public BaseAnnotatedElement annotationGeneratedBy(Class<?> target) {
+    public BaseAnnotatedElement annotateGeneratedBy(Class<?> target) {
         if (Imported.GENERATED) {
-            annotationOf(Generated.class, annotation -> {
+            annotateOf(Generated.class, annotation -> {
                 annotation.stringOf("date", DATETIME);
                 annotation.stringOf("value", target.getCanonicalName());
             });
@@ -128,32 +138,32 @@ public abstract class BaseAnnotatedElement extends AbstractModifierCapable {
         return this;
     }
 
-    public BaseAnnotatedElement annotationRepository() {
+    public BaseAnnotatedElement annotateRepository() {
         if (Imported.REPOSITORY) {
-            annotationOf(Repository.class);
+            annotateOf(Repository.class);
         }
         return this;
     }
 
-    public BaseAnnotatedElement annotationQualifier(String qualifierName) {
+    public BaseAnnotatedElement annotateQualifier(String qualifierName) {
         if (Imported.QUALIFIER) {
-            annotationOf(Qualifier.class, a -> a.stringOf("value", qualifierName));
+            annotateOf(Qualifier.class, a -> a.stringOf("value", qualifierName));
         }
         return this;
     }
 
-    public BaseAnnotatedElement annotationQualifierIfNotBlank(String qualifierName) {
+    public BaseAnnotatedElement annotateQualifierIfNotBlank(String qualifierName) {
         if (String2.isNotBlank(qualifierName)) {
-            return annotationQualifier(qualifierName);
+            return annotateQualifier(qualifierName);
         }
         return this;
     }
 
-    public BaseAnnotatedElement annotationAutowired() { return annotationAutowired(true); }
+    public BaseAnnotatedElement annotateAutowired() { return annotateAutowired(true); }
 
-    public BaseAnnotatedElement annotationAutowired(boolean required) {
+    public BaseAnnotatedElement annotateAutowired(boolean required) {
         if (Imported.AUTOWIRED) {
-            annotationOf(Autowired.class, annotation -> {
+            annotateOf(Autowired.class, annotation -> {
                 if (!required) {
                     annotation.falseOf("required");
                 }
@@ -162,21 +172,21 @@ public abstract class BaseAnnotatedElement extends AbstractModifierCapable {
         return this;
     }
 
-    public BaseAnnotatedElement annotationOverride() {
-        annotationOf(Override.class);
+    public BaseAnnotatedElement annotateOverride() {
+        annotateOf(Override.class);
         return this;
     }
 
-    public BaseAnnotatedElement annotationCopierImplGenerated() {
+    public BaseAnnotatedElement annotateCopierImplGenerated() {
         if (Imported.COPIER_IMPL_GENERATED) {
-            annotationOf(CopierImplGenerated.class);
+            annotateOf(CopierImplGenerated.class);
         }
         return this;
     }
 
-    public BaseAnnotatedElement annotationMapperImplGenerated() {
+    public BaseAnnotatedElement annotateMapperImplGenerated() {
         if (Imported.COPIER_IMPL_GENERATED) {
-            annotationOf(MapperImplGenerated.class);
+            annotateOf(MapperImplGenerated.class);
         }
         return this;
     }

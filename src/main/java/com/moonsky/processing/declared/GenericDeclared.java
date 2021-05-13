@@ -1,4 +1,4 @@
-package com.moonsky.processing.decl;
+package com.moonsky.processing.declared;
 
 import com.moonsky.processing.util.Generic2;
 

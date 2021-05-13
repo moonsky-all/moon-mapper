@@ -1,6 +1,7 @@
 package com.moonsky.processing.gen;
 
 import com.moonsky.processing.util.Importer;
+import com.moonsky.processing.util.Test2;
 
 import javax.lang.model.element.Modifier;
 import java.util.Set;
@@ -40,6 +41,12 @@ public abstract class AbstractModifierCapable extends AbstractImportable {
     }
 
     public final boolean has(Modifier modifier) { return getOriginModifierSet().contains(modifier); }
+
+    public final boolean hasAny(Modifier modifier, Modifier...modifiers) {
+        return Test2.hasAny(getOriginModifierSet(), modifier, modifiers);
+    }
+
+    public final boolean isNotExisted(Modifier modifier) { return !has(modifier); }
 
     public final boolean isModifierWithStatic() { return has(Modifier.STATIC); }
 

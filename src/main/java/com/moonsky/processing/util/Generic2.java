@@ -1,6 +1,6 @@
 package com.moonsky.processing.util;
 
-import com.moonsky.processing.decl.GenericDeclared;
+import com.moonsky.processing.declared.GenericDeclared;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;

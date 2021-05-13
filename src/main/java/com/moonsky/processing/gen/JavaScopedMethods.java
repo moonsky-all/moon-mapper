@@ -3,6 +3,7 @@ package com.moonsky.processing.gen;
 import com.moonsky.processing.util.Importer;
 
 import javax.lang.model.element.Modifier;
+import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -23,7 +24,9 @@ public class JavaScopedMethods extends JavaScopedMembers<JavaElemMethod> {
     }
 
     public JavaElemMethod declareMethod(
-        String methodName, Consumer<JavaGenericsList> genericsBuilder, Consumer<JavaElemParametersList> parametersBuilder
+        String methodName,
+        Consumer<JavaGenericsList> genericsBuilder,
+        Consumer<JavaElemParametersList> parametersBuilder
     ) {
         JavaElemMethod method = newMethod(methodName, genericsBuilder, parametersBuilder);
         method.modifierWith(Modifier.PUBLIC);
@@ -36,7 +39,9 @@ public class JavaScopedMethods extends JavaScopedMembers<JavaElemMethod> {
     }
 
     private JavaElemMethod newMethod(
-        String methodName, Consumer<JavaGenericsList> genericsBuilder, Consumer<JavaElemParametersList> parametersBuilder
+        String methodName,
+        Consumer<JavaGenericsList> genericsBuilder,
+        Consumer<JavaElemParametersList> parametersBuilder
     ) {
         JavaGenericsList genericsList = new JavaGenericsList(getImporter());
         genericsBuilder.accept(genericsList);
@@ -49,6 +54,13 @@ public class JavaScopedMethods extends JavaScopedMembers<JavaElemMethod> {
     }
 
     public void addDeclareMethods(JavaAddr addr) {
-
+        Map<String, JavaElemMethod> methods = getMemberMap();
+        if (methods.isEmpty()) {
+            return;
+        }
+        for (Map.Entry<String, JavaElemMethod> methodEntry : methods.entrySet()) {
+            addr.next();
+            methodEntry.getValue().addDeclareMethod(addr);
+        }
     }
 }

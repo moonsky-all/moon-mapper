@@ -8,7 +8,7 @@ import javax.lang.model.element.Modifier;
 /**
  * @author benshaoye
  */
-public class JavaFileInterfaceImpl extends BaseBlockCommentable implements JavaDefinition {
+public class JavaFileInterfaceDefinition extends BaseBlockCommentable implements JavaDefinition {
 
     protected final static char SPACE_CHAR = ' ';
 
@@ -21,11 +21,11 @@ public class JavaFileInterfaceImpl extends BaseBlockCommentable implements JavaD
     private final JavaScopedMethods scopedMethods;
     private final JavaImplementsList implementsList;
 
-    public JavaFileInterfaceImpl(String packageName, String simpleName) {
+    public JavaFileInterfaceDefinition(String packageName, String simpleName) {
         this(packageName, simpleName, JavaElementEnum.INTERFACE, JavaImplementsList.Keyword.EXTENDS);
     }
 
-    protected JavaFileInterfaceImpl(
+    protected JavaFileInterfaceDefinition(
         String packageName, String simpleName, JavaElementEnum elementEnum, JavaImplementsList.Keyword keyword
     ) {
         super(new Importer(packageName), elementEnum);
@@ -44,7 +44,7 @@ public class JavaFileInterfaceImpl extends BaseBlockCommentable implements JavaD
         this.implementsList = implementsList;
 
         modifierWith(Modifier.PUBLIC);
-        annotationGenerated();
+        annotateGenerated();
     }
 
     protected boolean inInterface() { return true; }
@@ -70,8 +70,8 @@ public class JavaFileInterfaceImpl extends BaseBlockCommentable implements JavaD
         // import 块儿, import 放最后设置
         JavaAddr.Mark importMark = addr.mark();
         // 注释
-        addBlockComments(addr.next());
-        addDocComments(addr);
+        addDeclareBlockComments(addr.next());
+        addDeclareDocComments(addr);
         // 注解
         addDeclareAnnotations(addr);
         // 类声明
@@ -87,7 +87,7 @@ public class JavaFileInterfaceImpl extends BaseBlockCommentable implements JavaD
         addr.newLine("}").next();
 
         // 应用 import
-        importMark.with(getImporter().toString());
+        importMark.with(getImporter().toString("\n"));
         return addr.toString();
     }
 
@@ -95,23 +95,19 @@ public class JavaFileInterfaceImpl extends BaseBlockCommentable implements JavaD
         // 类声明
         addr.newLine("");
         addDeclareModifiers(addr);
-        addDeclareClass(addr);
+        addDeclareClassname(addr);
         addDeclareGenericsList(addr);
         addDeclareSuperclass(addr);
         addDeclareImplementsInterfaces(addr);
     }
 
-    protected void addDeclareImplementsInterfaces(JavaAddr addr) {
-        getImplementsList().add(addr);
-    }
+    protected void addDeclareImplementsInterfaces(JavaAddr addr) { getImplementsList().add(addr); }
 
     protected void addDeclareSuperclass(JavaAddr addr) { }
 
-    protected final void addDeclareGenericsList(JavaAddr addr) {
-        getGenericsList().add(addr);
-    }
+    protected final void addDeclareGenericsList(JavaAddr addr) { getGenericsList().add(addr); }
 
-    protected final void addDeclareClass(JavaAddr addr) {
+    protected final void addDeclareClassname(JavaAddr addr) {
         if (!addr.endWithSpaceChar()) {
             addr.add(SPACE_CHAR);
         }

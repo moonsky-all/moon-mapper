@@ -2,6 +2,7 @@ package com.moonsky.processing.gen;
 
 import com.moonsky.processing.util.Element2;
 import com.moonsky.processing.util.String2;
+import com.moonsky.processing.util.Test2;
 
 import javax.lang.model.element.TypeElement;
 import java.util.Arrays;
@@ -22,5 +23,15 @@ enum TypeFormatter2 {
             }
             return String.valueOf(type);
         }).toArray());
+    }
+
+    public static String defaultVal(String type) {
+        if (Test2.isPrimitiveBool(type)) {
+            return Boolean.FALSE.toString();
+        } else if (Test2.isPrimitive(type)) {
+            return "0";
+        } else {
+            return "null";
+        }
     }
 }

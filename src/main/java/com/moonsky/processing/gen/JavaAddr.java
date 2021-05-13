@@ -82,7 +82,7 @@ public class JavaAddr {
 
     public boolean isOverLength(int willAddLength) {
         int index = builder.lastIndexOf("\n");
-        if (index > 0) {
+        if (index < 0) {
             return false;
         }
         return (builder.length() - (index + 1) + willAddLength) > maxLineLength;

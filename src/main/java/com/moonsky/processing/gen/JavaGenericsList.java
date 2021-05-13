@@ -14,6 +14,8 @@ public class JavaGenericsList extends AbstractImportable implements Addable {
 
     public JavaGenericsList(Importer importer) { super(importer); }
 
+    public JavaGenericsList add(String declareName) { return add(declareName, null); }
+
     public JavaGenericsList add(String declareName, String actualTypeTemplate, Object... types) {
         JavaGeneric generic = new JavaGeneric(getImporter(),
             declareName,
@@ -34,10 +36,15 @@ public class JavaGenericsList extends AbstractImportable implements Addable {
         if (genericMap.isEmpty()) {
             return;
         }
+        int idx = 0;
         addr.add("<");
         for (Map.Entry<String, JavaGeneric> genericEntry : genericMap.entrySet()) {
+            if (idx > 0) {
+                addr.add(" ");
+            }
             genericEntry.getValue().add(addr);
             addr.add(',');
+            idx++;
         }
         addr.deleteLastChar().add(">");
     }
