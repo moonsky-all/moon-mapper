@@ -8,6 +8,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import static com.moonsky.processing.util.Const2.*;
+import static javax.lang.model.element.ElementKind.CONSTRUCTOR;
+
 /**
  * @author benshaoye
  */
@@ -209,4 +212,40 @@ public enum Test2 {
     }
 
     private static String getName(Class<?> cls) { return cls.getCanonicalName(); }
+
+    public static boolean isVoid(String classname) { return "void".equals(classname); }
+
+    public static boolean isVoid(Class<?> klass) { return klass == void.class; }
+
+    public static boolean isPublicMemberMethod(Element elem) {
+        return isMethod(elem) && isMember(elem) && isPublic(elem);
+    }
+
+    public static boolean isSetterMethod(Element elem) {
+        if (isPublicMemberMethod(elem)) {
+            ExecutableElement exe = (ExecutableElement) elem;
+            String name = exe.getSimpleName().toString();
+            boolean maybeSet = name.length() > 3 && name.startsWith(SET);
+            maybeSet = maybeSet && exe.getParameters().size() == 1;
+            // maybeSet = maybeSet && isTypeKind(exe.getReturnType(), TypeKind.VOID);
+            return maybeSet;
+        }
+        return false;
+    }
+
+    public static boolean isGetterMethod(Element elem) {
+        if (isPublicMemberMethod(elem)) {
+            ExecutableElement exe = (ExecutableElement) elem;
+            String name = exe.getSimpleName().toString();
+            boolean maybeGet = exe.getParameters().isEmpty();
+            if (name.startsWith(GET)) {
+                return maybeGet && name.length() > 3 && !name.equals(GET_CLASS);
+            } else if (name.startsWith(IS)) {
+                return maybeGet && name.length() > 2 && isTypeKind(exe.getReturnType(), TypeKind.BOOLEAN);
+            }
+        }
+        return false;
+    }
+
+    public static boolean isConstructor(Element elem) { return isElemKind(elem, CONSTRUCTOR); }
 }

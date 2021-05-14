@@ -1,5 +1,7 @@
 package com.moonsky.processing.util;
 
+import com.moonsky.processing.wrapper.Import;
+
 import javax.lang.model.element.TypeElement;
 import java.beans.Introspector;
 import java.util.ArrayList;
@@ -328,7 +330,38 @@ public enum String2 {
         }
     }
 
-    public static String formatTypes(String typeTemplate, Object... types) {
+    /**
+     * 格式化可能带有{@link Import}的数据，具体方式参考{@link #format(String, Object...)}
+     * <p>
+     * 但是会将{@code types}中的{@link Import}对象进行{@code import}转换
+     *
+     * @param importer
+     * @param template
+     * @param types
+     *
+     * @return
+     */
+    public static String formatImported(Importer importer, String template, Object... types) {
+        if (types == null || template == null) {
+            return template;
+        }
+        if (importer == null) {
+            return format(template, types);
+        }
+        Object value;
+        Object[] stringify = new Object[types.length];
+        for (int i = 0; i < types.length; i++) {
+            value = types[i];
+            if (value instanceof Import<?>) {
+                stringify[i] = ((Import<?>) value).toString(importer);
+            } else {
+                stringify[i] = String.valueOf(value);
+            }
+        }
+        return format(template, stringify);
+    }
+
+    public static String typeFormatted(String typeTemplate, Object... types) {
         if (types == null) {
             return typeTemplate;
         }
@@ -352,7 +385,5 @@ public enum String2 {
         return ("boolean".equals(type) ? Const2.IS : Const2.GET) + capitalize(field);
     }
 
-    public static String toSetterName(String field) {
-        return Const2.SET + capitalize(field);
-    }
+    public static String toSetterName(String field) { return Const2.SET + capitalize(field); }
 }

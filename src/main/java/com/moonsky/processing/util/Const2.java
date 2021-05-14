@@ -6,13 +6,11 @@ package com.moonsky.processing.util;
 public enum Const2 {
     ;
 
+    public final static String IS = "is", GET = "get", SET = "set", GET_CLASS = "getClass";
+
+    public final static String FIELD = "field", INSTANCE = "INSTANCE";
+
     public final static String[] EMPTY_STRINGS = {};
 
     public final static char DOT = '.';
-
-    public final static String IS = "is", GET = "get", SET = "set";
-
-    public final static String FIELD = "field";
-
-    public final static String INSTANCE = "INSTANCE";
 }

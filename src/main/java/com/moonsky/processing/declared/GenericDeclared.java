@@ -7,16 +7,8 @@ import java.util.Objects;
 /**
  * @author benshaoye
  */
-public class GenericDeclared {
+public class GenericDeclared extends TypeDeclared {
 
-    /**
-     * 泛型声明类型，如：T
-     */
-    private final String declare;
-    /**
-     * 泛型实际类型：如：java.lang.String
-     */
-    private final String actual;
     /**
      * 泛型边界，如：java.util.function.Supplier&lt;T>
      * <p>
@@ -36,32 +28,29 @@ public class GenericDeclared {
     private final String simpleType;
 
     public GenericDeclared(String declare, String actual, String bound) {
-        this.declare = declare;
-        this.actual = actual;
+        super(declare, actual);
         this.bound = bound;
         boolean isBound = actual == null || Objects.equals(actual, declare);
         this.effectType = isBound ? bound : actual;
         this.simpleType = Generic2.typeSimplify(this.effectType);
     }
 
-    public String getDeclare() { return declare; }
-
-    public String getActual() { return actual; }
-
     public String getBound() { return bound; }
 
+    @Override
     public String getEffectType() { return effectType; }
 
+    @Override
     public String getSimpleType() { return simpleType; }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("DeclareGeneric{");
-        sb.append("declare='").append(declare).append('\'');
-        sb.append(", actual='").append(actual).append('\'');
-        sb.append(", bound='").append(bound).append('\'');
-        sb.append(", effectType='").append(effectType).append('\'');
-        sb.append(", simpleType='").append(simpleType).append('\'');
+        sb.append("declare='").append(getDeclare()).append('\'');
+        sb.append(", actual='").append(getActual()).append('\'');
+        sb.append(", bound='").append(getBound()).append('\'');
+        sb.append(", effectType='").append(getEffectType()).append('\'');
+        sb.append(", simpleType='").append(getSimpleType()).append('\'');
         sb.append('}');
         return sb.toString();
     }

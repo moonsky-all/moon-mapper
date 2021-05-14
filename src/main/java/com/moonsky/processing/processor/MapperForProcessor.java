@@ -3,11 +3,11 @@ package com.moonsky.processing.processor;
 import com.google.auto.service.AutoService;
 import com.moonsky.mapper.annotation.MapperFor;
 import com.moonsky.processing.declared.GenericDeclared;
-import com.moonsky.processing.gen.JavaFileInterfaceDefinition;
+import com.moonsky.processing.generate.JavaFileInterfaceDefinition;
 import com.moonsky.processing.holder.Holders;
-import com.moonsky.processing.util.Generic2;
-import com.moonsky.processing.util.Log2;
-import com.moonsky.processing.util.OnceRunner;
+import com.moonsky.processing.util.*;
+import com.moonsky.processing.wrapper.Import;
+import com.moonsky.processing.wrapper.Stringify;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -17,6 +17,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
 import static com.moonsky.processing.util.Extract2.getValueClasses;
@@ -45,6 +46,7 @@ public class MapperForProcessor extends AbstractProcessor {
             doProcessingMapperFor(roundEnv);
 
             Log2.warn("+++++++++++++++++++++++++++++++++++++++++");
+
             JavaFileInterfaceDefinition javaFile = new JavaFileInterfaceDefinition("com.moon.detail",
                 "TestInterfaceDeclare");
             javaFile.fields().declareField("CONST_boolean", "boolean");
@@ -75,10 +77,38 @@ public class MapperForProcessor extends AbstractProcessor {
                 .annotateOf(SuppressWarnings.class, annotation -> {
                     annotation.stringOf("value", "all");
                 });
+
             javaFile.methods().declareMethod("hasBody", param -> {
                 param.add("name", String.class);
                 param.add("age", int.class);
             }).typeOf(int.class).modifierWith(Modifier.DEFAULT);
+
+            javaFile.methods()
+                .declareMethod("defaultReturnVoid", param -> {
+                    param.add("price", BigDecimal.class);
+                    param.add("scale", "{}<{}>", List.class, BigInteger.class);
+                })
+                .typeOf(void.class)
+                .scripts()
+                .scriptOf("1", "System.out.println(1)")
+                .scriptOf("2", "System.out.println(2)")
+                .scriptOf("3", "System.out.println({})", Stringify.of("123456"))
+                .end()
+                .modifierWith(Modifier.DEFAULT);
+
+            javaFile.methods()
+                .declareMethod("staticReturnVoid")
+                .typeOf(void.class)
+                .scripts()
+                .scriptOf("1",
+                    "{} value = new {}({})",
+                    Import.of(BigDecimal.class),
+                    Import.of(BigDecimal.class),
+                    Stringify.of("123.456"))
+                .scriptOf("", "System.out.println(value)")
+                .end()
+                .modifierWith(Modifier.STATIC);
+
             JavaFiler.write(javaFile);
         });
 

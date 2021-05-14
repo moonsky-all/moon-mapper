@@ -1,13 +1,8 @@
 package com.moonsky.processing.util;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.QualifiedNameable;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.MirroredTypeException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 
 import static com.moonsky.processing.util.Processing2.getUtils;
@@ -17,6 +12,10 @@ import static com.moonsky.processing.util.Processing2.getUtils;
  */
 public enum Element2 {
     ;
+
+    public static <T> T cast(Object obj) { return (T) obj; }
+
+    private final static Map<QualifiedNameable, String> QUALIFIED_NAME_CACHED = new IdentityHashMap<>();
 
     public static String getSimpleName(String fullName) {
         int last = fullName.indexOf("<"), idx;
@@ -35,7 +34,14 @@ public enum Element2 {
 
     public static String getQualifiedName(Class<?> elem) { return elem.getCanonicalName(); }
 
-    public static String getQualifiedName(QualifiedNameable elem) { return elem.getQualifiedName().toString(); }
+    public static String getQualifiedName(QualifiedNameable elem) {
+        String classname = QUALIFIED_NAME_CACHED.get(elem);
+        if (classname == null) {
+            classname = elem.getQualifiedName().toString();
+            QUALIFIED_NAME_CACHED.put(elem, classname);
+        }
+        return classname;
+    }
 
     public static String getPackageName(Class<?> clazz) { return clazz.getPackage().getName(); }
 
