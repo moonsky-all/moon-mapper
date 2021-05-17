@@ -1,6 +1,7 @@
 package com.moonsky.processing.processor;
 
 import com.moonsky.processing.holder.Holders;
+import com.moonsky.processing.util.String2;
 
 import javax.annotation.processing.Filer;
 import java.io.PrintWriter;
@@ -15,19 +16,19 @@ public enum JavaFiler {
     ;
 
     private final static byte[] BYTES = {};
-    private final static Map<String, Object> writtenJava = new ConcurrentHashMap<>();
+    private final static Map<String, Object> WRITTEN_JAVA = new ConcurrentHashMap<>();
 
     private static boolean isWritable(String classname) {
         // 已经生成过的不重新生成
-        if (writtenJava.containsKey(classname)) {
+        if (String2.isBlank(classname) || WRITTEN_JAVA.containsKey(classname)) {
             return false;
         }
         // 已经存在的不生成
         if (Holders.INSTANCE.getUtils().getTypeElement(classname) != null) {
-            writtenJava.put(classname, BYTES);
+            WRITTEN_JAVA.put(classname, BYTES);
             return false;
         }
-        writtenJava.put(classname, BYTES);
+        WRITTEN_JAVA.put(classname, BYTES);
         return true;
     }
 
@@ -38,7 +39,7 @@ public enum JavaFiler {
     public static void write(JavaDefinition definition) {
         if (definition != null && isWritable(definition.getClassname())) {
             try (Writer jw = getFiler().createSourceFile(definition.getClassname()).openWriter();
-                PrintWriter writer = new PrintWriter(jw)) {
+                 PrintWriter writer = new PrintWriter(jw)) {
                 writer.write(definition.toString());
             } catch (/* IOException */Throwable e) {
                 throw new IllegalStateException(e);

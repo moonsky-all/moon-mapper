@@ -14,7 +14,7 @@ import java.util.*;
 /**
  * @author benshaoye
  */
-public class ClassHelper extends AbstractHolder {
+final class ClassHelper extends AbstractHolder {
 
     private final static String TOP_CLASS = Object.class.getCanonicalName();
 
@@ -31,8 +31,7 @@ public class ClassHelper extends AbstractHolder {
     protected ClassHelper(Holders holders, TypeElement typeElement) {
         super(holders);
         this.types = holders.getTypes();
-        ClassDeclared declared = new ClassDeclared(holders, typeElement);
-        this.typeDeclared = declared;
+        this.typeDeclared = new ClassDeclared(holders, typeElement);
         this.typeElement = typeElement;
         this.parsedKeys = new HashSet<>();
     }
@@ -43,7 +42,7 @@ public class ClassHelper extends AbstractHolder {
         properties.forEach((name, prop) -> prop.onCompleted());
         typeDeclared.setProperties(properties);
         typeDeclared.setStaticFieldsMap(this.staticFieldsMap);
-        typeDeclared.setStaticMethodsMap(this.memberMethodsMap);
+        typeDeclared.setStaticMethodsMap(this.staticMethodsMap);
         typeDeclared.setMemberMethodsMap(this.memberMethodsMap);
         typeDeclared.setConstructorsMap(this.constructorsMap);
         return typeDeclared;
@@ -75,7 +74,7 @@ public class ClassHelper extends AbstractHolder {
             if (isParsedSetter(name, actualType)) {
                 return;
             }
-            withPropertyDeclared(name, parsingElem).withTypedSetterIfAbsent(elem, actualType);
+            withPropertyDeclared(name, parsingElem).withSetterTypedIfAbsent(elem, actualType);
         } else if (Test2.isGetterMethod(element)) {
             ExecutableElement elem = (ExecutableElement) element;
             String name = Element2.toPropertyName(elem);

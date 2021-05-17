@@ -23,6 +23,15 @@ public abstract class AbstractModifierCapable extends AbstractImportable {
         this.elementEnum = elementEnum;
     }
 
+    public AbstractModifierCapable modifierWithAll(Modifier... modifiers) {
+        if (modifiers != null) {
+            for (Modifier modifier : modifiers) {
+                modifierWith(modifier);
+            }
+        }
+        return this;
+    }
+
     public AbstractModifierCapable modifierWith(Modifier modifier) {
         if (isAllowModifierWith(modifier)) {
             Modifier2.useModifier(getOriginModifierSet(), modifier);
@@ -42,7 +51,7 @@ public abstract class AbstractModifierCapable extends AbstractImportable {
 
     public final boolean has(Modifier modifier) { return getOriginModifierSet().contains(modifier); }
 
-    public final boolean hasAny(Modifier modifier, Modifier...modifiers) {
+    public final boolean hasAny(Modifier modifier, Modifier... modifiers) {
         return Test2.hasAny(getOriginModifierSet(), modifier, modifiers);
     }
 

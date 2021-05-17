@@ -6,6 +6,7 @@ import com.moonsky.processing.util.Test2;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import java.lang.annotation.Annotation;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -87,4 +88,8 @@ public abstract class BaseExecuteDeclarable extends BaseDeclarable {
     public final String getMethodName() { return methodName; }
 
     public String getSignature() { return parametersSignature; }
+
+    public <A extends Annotation> A[] getAnnotations(Class<A> annotationType) {
+        return getExecutableElement().getAnnotationsByType(annotationType);
+    }
 }

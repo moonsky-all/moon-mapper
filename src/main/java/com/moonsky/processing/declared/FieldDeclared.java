@@ -65,4 +65,8 @@ public class FieldDeclared extends BaseDeclarable {
     public String getName() { return name; }
 
     public String getDeclaredType() { return declaredType; }
+
+    public <A extends Annotation> A[] getAnnotations(Class<A> annotationType) {
+        return getFieldElement().getAnnotationsByType(annotationType);
+    }
 }

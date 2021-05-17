@@ -1,55 +1,57 @@
 package com.moonsky.processing.generate;
 
-import com.moonsky.processing.util.Importer;
 import com.moonsky.processing.util.String2;
 
 import javax.lang.model.element.TypeElement;
-import java.util.Objects;
 
 /**
  * @author benshaoye
  */
 public class JavaElemFieldValue extends AbstractImportable {
 
-    private final String thisClass;
+    private final JavaElemField field;
     private final String fieldType;
     private boolean available;
     private String value;
 
-    public JavaElemFieldValue(Importer importer, String thisClass, String fieldType) {
-        super(importer);
-        this.thisClass = thisClass;
+    public JavaElemFieldValue(JavaElemField field, String fieldType) {
+        super(field.getImporter());
         this.fieldType = fieldType;
+        this.field = field;
     }
 
-    public void clear() {
+    public JavaElemField end() { return field; }
+
+    public JavaElemFieldValue clear() {
         this.value = null;
         this.available = false;
+        return this;
     }
 
     public boolean isAvailable() { return available; }
 
-    private void withValue(String value) {
+    private JavaElemFieldValue withValue(String value) {
         this.available = true;
         this.value = value;
+        return this;
     }
 
-    public void valueOf(Object value) { withValue(String.valueOf(value)); }
+    public JavaElemFieldValue valueOf(Object value) {return withValue(String.valueOf(value)); }
 
-    public void valueOfClassRef(Class<?> klass) { valueOf(onImported(klass) + ".class"); }
+    public JavaElemFieldValue valueOfClassRef(Class<?> klass) { return valueOf(onImported(klass) + ".class"); }
 
-    public void valueOfClassRef(TypeElement klass) { valueOf(onImported(klass) + ".class"); }
+    public JavaElemFieldValue valueOfClassRef(TypeElement klass) {return valueOf(onImported(klass) + ".class"); }
 
-    public void valueOfClassRef(String classname) { valueOf(onImported(classname) + ".class"); }
+    public JavaElemFieldValue valueOfClassRef(String classname) {return valueOf(onImported(classname) + ".class"); }
 
-    public void valueOfStringify(String value) { valueOf('"' + value + '"'); }
+    public JavaElemFieldValue valueOfStringify(String value) { return valueOf('"' + value + '"'); }
 
-    public void valueOfFormatted(String template, Object... values) {
-        valueOf(String2.format(template, values));
+    public JavaElemFieldValue valueOfFormatted(String template, Object... values) {
+        return valueOf(String2.formatImported(getImporter(), template, values));
     }
 
-    public void valueOfTypeFormatted(String template, Object... values) {
-        valueOf(TypeFormatter2.with(template, values));
+    public JavaElemFieldValue valueOfTypeFormatted(String template, Object... values) {
+        return valueOf(TypeFormatter2.with(template, values));
     }
 
     /**
@@ -58,8 +60,8 @@ public class JavaElemFieldValue extends AbstractImportable {
      * @param classname
      * @param staticMemberName
      */
-    public void valueOfStaticRef(String classname, String staticMemberName) {
-        valueOf(String2.format("{}.{}", onImported(classname), staticMemberName));
+    public JavaElemFieldValue valueOfStaticRef(String classname, String staticMemberName) {
+        return valueOf(String2.format("{}.{}", onImported(classname), staticMemberName));
     }
 
     /**
@@ -68,8 +70,8 @@ public class JavaElemFieldValue extends AbstractImportable {
      * @param enumClass
      * @param enumConstName
      */
-    public void valueOfEnumConstRef(String enumClass, String enumConstName) {
-        valueOfStaticRef(enumClass, enumConstName);
+    public JavaElemFieldValue valueOfEnumConstRef(String enumClass, String enumConstName) {
+        return valueOfStaticRef(enumClass, enumConstName);
     }
 
     /**
@@ -79,12 +81,8 @@ public class JavaElemFieldValue extends AbstractImportable {
      * @param enumConstName
      * @param memberRef
      */
-    public void valueOfEnumMemberRef(String enumClass, String enumConstName, String memberRef) {
-        if (Objects.equals(thisClass, enumClass)) {
-            valueOfThisEnumMemberRef(enumConstName, memberRef);
-        } else {
-            valueOf(String2.format("{}.{}.{}", onImported(enumClass), enumConstName, memberRef));
-        }
+    public JavaElemFieldValue valueOfEnumMemberRef(String enumClass, String enumConstName, String memberRef) {
+        return valueOf(String2.format("{}.{}.{}", onImported(enumClass), enumConstName, memberRef));
     }
 
     /**
@@ -93,9 +91,13 @@ public class JavaElemFieldValue extends AbstractImportable {
      * @param enumValue
      * @param memberRef
      */
-    public void valueOfThisEnumMemberRef(String enumValue, String memberRef) {
-        withValue(String2.format("{}.{}", enumValue, memberRef));
+    public JavaElemFieldValue valueOfThisEnumMemberRef(String enumValue, String memberRef) {
+        return withValue(String2.format("{}.{}", enumValue, memberRef));
     }
 
-    void addFieldValue(JavaAddr addr) { addr.add(" = ").add(value); }
+    void addFieldValue(JavaAddr addr) {
+        if (isAvailable()) {
+            addr.add(" = ").add(value);
+        }
+    }
 }

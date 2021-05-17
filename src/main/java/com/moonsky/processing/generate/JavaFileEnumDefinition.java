@@ -5,7 +5,7 @@ package com.moonsky.processing.generate;
  */
 public class JavaFileEnumDefinition extends JavaFileImplementation {
 
-    protected JavaFileEnumDefinition(String packageName, String simpleName) {
-        super(packageName, simpleName, JavaElementEnum.ENUM);
+    public JavaFileEnumDefinition(String packageName, String simpleName) {
+        super(packageName, simpleName, JavaFileKeywordEnum.ENUM, JavaElementEnum.ENUM);
     }
 }

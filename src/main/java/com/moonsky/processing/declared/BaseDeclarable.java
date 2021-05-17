@@ -7,7 +7,7 @@ import com.moonsky.processing.util.Element2;
 import javax.lang.model.element.QualifiedNameable;
 import javax.lang.model.element.TypeElement;
 
-import static com.moonsky.processing.util.Element2.getQualifiedName;
+import static com.moonsky.processing.util.Element2.*;
 
 /**
  * @author benshaoye
@@ -43,6 +43,8 @@ public abstract class BaseDeclarable extends AbstractHolder {
      * @see Element2#getQualifiedName(QualifiedNameable)
      */
     private final String enclosingClassname;
+    private final String thisPackageName;
+    private final String thisSimpleName;
 
     protected BaseDeclarable(
         Holders holders, TypeElement thisElement, TypeElement enclosingElement, GenericsMap thisGenericsMap
@@ -51,6 +53,8 @@ public abstract class BaseDeclarable extends AbstractHolder {
         this.thisElement = thisElement;
         this.enclosingElement = enclosingElement;
         this.thisGenericsMap = thisGenericsMap;
+        this.thisSimpleName = getSimpleName(thisElement);
+        this.thisPackageName = getPackageName(thisElement);
         this.thisClassname = getQualifiedName(thisElement);
         this.enclosingClassname = getQualifiedName(enclosingElement);
     }
@@ -60,6 +64,10 @@ public abstract class BaseDeclarable extends AbstractHolder {
     }
 
     public final String getThisClassname() { return thisClassname; }
+
+    public final String getThisSimpleName() { return thisSimpleName; }
+
+    public final String getThisPackageName() { return thisPackageName; }
 
     public final String getEnclosingClassname() { return enclosingClassname; }
 

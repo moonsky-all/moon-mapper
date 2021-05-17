@@ -6,9 +6,9 @@ package com.moonsky.processing.generate;
 public abstract class JavaFileImplementation extends JavaFileInterfaceDefinition {
 
     protected JavaFileImplementation(
-        String packageName, String simpleName, JavaElementEnum elementEnum
+        String packageName, String simpleName, JavaFileKeywordEnum javaKeyword, JavaElementEnum elementEnum
     ) {
-        super(packageName, simpleName, elementEnum, JavaImplementsList.Keyword.IMPLEMENTS);
+        super(packageName, simpleName, javaKeyword, elementEnum, JavaImplementsList.Keyword.IMPLEMENTS);
     }
 
     @Override

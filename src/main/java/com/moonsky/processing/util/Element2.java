@@ -1,6 +1,9 @@
 package com.moonsky.processing.util;
 
-import javax.lang.model.element.*;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.QualifiedNameable;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.MirroredTypeException;
 import java.util.*;
 import java.util.function.Function;
@@ -17,6 +20,7 @@ public enum Element2 {
 
     private final static Map<QualifiedNameable, String> QUALIFIED_NAME_CACHED = new IdentityHashMap<>();
 
+    @SuppressWarnings("all")
     public static String getSimpleName(String fullName) {
         int last = fullName.indexOf("<"), idx;
         if (last > 0) {

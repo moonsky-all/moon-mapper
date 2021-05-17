@@ -7,14 +7,19 @@ import com.moonsky.processing.util.Importer;
  */
 public class JavaScopedFields extends JavaScopedMembers<JavaElemField> {
 
-    private final VarHelper vars = new VarHelper();
     private final JavaScopedMethods scopedMethods;
+    private final VarHelper vars;
 
     public JavaScopedFields(
-        Importer importer, JavaGenericsList enclosingGenericsList, boolean inInterface, JavaScopedMethods scopedMethods
+        Importer importer,
+        String classname,
+        JavaGenericsList enclosingGenericsList,
+        boolean inInterface,
+        JavaScopedMethods scopedMethods
     ) {
-        super(importer, enclosingGenericsList, inInterface);
+        super(importer, classname, enclosingGenericsList, inInterface);
         this.scopedMethods = scopedMethods;
+        this.vars = VarHelper.of(classname);
     }
 
     public String nextVar() { return vars.next(getMemberMap().keySet()); }

@@ -12,6 +12,7 @@ import java.util.function.IntPredicate;
 /**
  * @author benshaoye
  */
+@SuppressWarnings("all")
 public enum String2 {
     ;
 
@@ -386,4 +387,14 @@ public enum String2 {
     }
 
     public static String toSetterName(String field) { return Const2.SET + capitalize(field); }
+
+    public static String deleteWhitespace(String value) {
+        StringBuilder builder = new StringBuilder();
+        for (char ch : value.toCharArray()) {
+            if (!Character.isWhitespace(ch)) {
+                builder.append(ch);
+            }
+        }
+        return builder.toString();
+    }
 }

@@ -11,8 +11,16 @@ import java.util.function.Consumer;
  */
 public class JavaScopedMethods extends JavaScopedMembers<JavaElemMethod> {
 
-    public JavaScopedMethods(Importer importer, JavaGenericsList enclosingGenericsList, boolean inInterface) {
-        super(importer, enclosingGenericsList, inInterface);
+    private final JavaFileInterfaceDefinition javaDef;
+
+    public JavaScopedMethods(
+        Importer importer,
+        JavaFileInterfaceDefinition javaDef,
+        JavaGenericsList enclosingGenericsList,
+        boolean inInterface
+    ) {
+        super(importer, javaDef.getClassname(), enclosingGenericsList, inInterface);
+        this.javaDef = javaDef;
     }
 
     public JavaElemMethod declareMethod(String methodName) {
@@ -34,6 +42,8 @@ public class JavaScopedMethods extends JavaScopedMembers<JavaElemMethod> {
         return method;
     }
 
+    public JavaScopedFields classFields() { return javaDef.fields(); }
+
     public void remove(JavaElemMethod method) {
         remove(method.getSignature());
     }
@@ -50,7 +60,12 @@ public class JavaScopedMethods extends JavaScopedMembers<JavaElemMethod> {
             genericsList);
         parametersBuilder.accept(parametersList);
         parametersList.withUnmodifiable();
-        return new JavaElemMethod(getImporter(), genericsList, methodName, parametersList, inInterface());
+        return new JavaElemMethod(getImporter(),
+            getClassname(),
+            genericsList,
+            methodName,
+            parametersList,
+            inInterface());
     }
 
     public void addDeclareMethods(JavaAddr addr) {

@@ -40,6 +40,18 @@ public class ClassDeclared extends BaseDeclarable {
         super(holders, typeElement, typeElement, new GenericsMap(typeElement));
     }
 
+    public Map<String, PropertyDeclared> getProperties() { return properties; }
+
+    public Map<String, FieldDeclared> getMemberFieldsMap() { return memberFieldsMap; }
+
+    public Map<String, FieldDeclared> getStaticFieldsMap() { return staticFieldsMap; }
+
+    public Map<String, ConstructorDeclared> getConstructorsMap() { return constructorsMap; }
+
+    public Map<String, MethodDeclared> getStaticMethodsMap() { return staticMethodsMap; }
+
+    public Map<String, MethodDeclared> getMemberMethodsMap() { return memberMethodsMap; }
+
     public static ClassDeclared from(Holders holders, TypeElement typeElement) {
         return new ClassHelper(holders, typeElement).doParseTypeDeclared();
     }

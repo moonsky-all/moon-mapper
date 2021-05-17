@@ -9,15 +9,17 @@ import java.util.*;
  */
 public abstract class JavaElemExecutable extends BaseBlockCommentable {
 
+    private final String classname;
     private final JavaElemParametersList parameterList;
 
     private final Map<String, List<String>> docCommentForParams = new LinkedHashMap<>();
     private final List<String> returningComments = new ArrayList<>();
 
     public JavaElemExecutable(
-        Importer importer, JavaElementEnum elementEnum, JavaElemParametersList parameterList
+        Importer importer, String classname, JavaElementEnum elementEnum, JavaElemParametersList parameterList
     ) {
         super(importer, elementEnum);
+        this.classname = classname;
         this.parameterList = parameterList;
         parameterList.withElemExecutable(this);
     }
@@ -40,4 +42,8 @@ public abstract class JavaElemExecutable extends BaseBlockCommentable {
     protected final boolean addDeclareExecutableParametersList(JavaAddr addr) {
         return getParameterList().addDeclareElemParameter(addr);
     }
+
+    public final String getClassname() { return classname; }
+
+    public String getScopedNamespace() { return getClassname(); }
 }

@@ -16,11 +16,13 @@ public abstract class AbstractHolder {
 
     public final Types getTypes() { return getHolders().getTypes(); }
 
-    protected final Holders getHolders() { return holders; }
+    public final Holders getHolders() { return holders; }
 
-    protected final TypeHolder typeHolder() { return holders.typeHolder(); }
+    protected final ClassHolder classHolder() { return holders.classHolder(); }
 
-    protected final CopierHolder copierHolder() { return holders.copierHolder(); }
+    protected final PojoCopierHolder pojoCopierHolder() { return holders.pojoCopierHolder(); }
 
-    protected final MapperHolder mapperHolder() { return holders.mapperHolder(); }
+    protected final PojoMapperHolder pojoMapperHolder() { return holders.pojoMapperHolder(); }
+
+    protected final PojoClassHolder pojoClassHolder() { return holders.pojoClassHolder(); }
 }

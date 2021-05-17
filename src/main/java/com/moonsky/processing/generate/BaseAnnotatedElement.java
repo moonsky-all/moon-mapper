@@ -8,6 +8,7 @@ import com.moonsky.processing.util.Processing2;
 import com.moonsky.processing.util.String2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import javax.annotation.Generated;
@@ -110,7 +111,7 @@ public abstract class BaseAnnotatedElement extends AbstractModifierCapable {
         return false;
     }
 
-    public final int annotationsCount(){
+    public final int annotationsCount() {
         Map<String, Collection<JavaAnnotation>> annotationsMap = this.annotationsMap;
         if (annotationsMap.isEmpty()) {
             return 0;
@@ -185,8 +186,15 @@ public abstract class BaseAnnotatedElement extends AbstractModifierCapable {
     }
 
     public BaseAnnotatedElement annotateMapperImplGenerated() {
-        if (Imported.COPIER_IMPL_GENERATED) {
+        if (Imported.MAPPER_IMPL_GENERATED) {
             annotateOf(MapperImplGenerated.class);
+        }
+        return this;
+    }
+
+    public BaseAnnotatedElement annotateComponent() {
+        if (Imported.COMPONENT) {
+            annotateOf(Component.class);
         }
         return this;
     }

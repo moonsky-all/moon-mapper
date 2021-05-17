@@ -120,9 +120,9 @@ public class Importer {
                     GENERICS_MAP.put(fullName, shortName);
                     return shortName;
                 }
-                importCached.put(shortName, "import " + fullName + ";");
+                importCached.put(shortName, "import " + fullName.trim() + ";");
             } else if (!(fullName.startsWith("java.lang.") && fullName.split("\\.").length == 3)) {
-                importCached.put(shortName, "import " + fullName + ";");
+                importCached.put(shortName, "import " + fullName.trim() + ";");
             }
             shortNameCached.put(fullName, shortName);
             return shortName;

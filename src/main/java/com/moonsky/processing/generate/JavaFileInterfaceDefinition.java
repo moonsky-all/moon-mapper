@@ -15,6 +15,7 @@ public class JavaFileInterfaceDefinition extends BaseBlockCommentable implements
     private final String packageName;
     private final String simpleName;
     private final String classname;
+    private final JavaFileKeywordEnum javaKeyword;
 
     private final JavaGenericsList genericsList;
     private final JavaScopedFields scopedFields;
@@ -22,20 +23,32 @@ public class JavaFileInterfaceDefinition extends BaseBlockCommentable implements
     private final JavaImplementsList implementsList;
 
     public JavaFileInterfaceDefinition(String packageName, String simpleName) {
-        this(packageName, simpleName, JavaElementEnum.INTERFACE, JavaImplementsList.Keyword.EXTENDS);
+        this(packageName,
+            simpleName,
+            JavaFileKeywordEnum.INTERFACE,
+            JavaElementEnum.INTERFACE,
+            JavaImplementsList.Keyword.EXTENDS);
     }
 
     protected JavaFileInterfaceDefinition(
-        String packageName, String simpleName, JavaElementEnum elementEnum, JavaImplementsList.Keyword keyword
+        String packageName,
+        String simpleName,
+        JavaFileKeywordEnum javaKeyword,
+        JavaElementEnum elementEnum,
+        JavaImplementsList.Keyword keyword
     ) {
         super(new Importer(packageName), elementEnum);
         this.packageName = packageName;
         this.simpleName = simpleName;
+        this.javaKeyword = javaKeyword;
         this.classname = String.join(".", packageName, simpleName);
 
         JavaGenericsList genericsList = new JavaGenericsList(getImporter());
-        JavaScopedMethods scopedMethods = new JavaScopedMethods(getImporter(), genericsList, inInterface());
-        JavaScopedFields scopedFields = new JavaScopedFields(getImporter(), genericsList, inInterface(), scopedMethods);
+        JavaScopedMethods scopedMethods = new JavaScopedMethods(getImporter(),
+            this,
+            genericsList,
+            inInterface());
+        JavaScopedFields scopedFields = new JavaScopedFields(getImporter(),this.classname, genericsList, inInterface(), scopedMethods);
         JavaImplementsList implementsList = new JavaImplementsList(getImporter(), keyword);
 
         this.genericsList = genericsList;
@@ -52,7 +65,7 @@ public class JavaFileInterfaceDefinition extends BaseBlockCommentable implements
     @Override
     protected boolean isAllowModifierWith(Modifier modifier) { return modifier == Modifier.PUBLIC; }
 
-    public JavaImplementsList getImplementsList() { return implementsList; }
+    public JavaImplementsList impls() { return implementsList; }
 
     public JavaGenericsList getGenericsList() { return genericsList; }
 
@@ -101,7 +114,7 @@ public class JavaFileInterfaceDefinition extends BaseBlockCommentable implements
         addDeclareImplementsInterfaces(addr);
     }
 
-    protected void addDeclareImplementsInterfaces(JavaAddr addr) { getImplementsList().add(addr); }
+    protected void addDeclareImplementsInterfaces(JavaAddr addr) { impls().add(addr); }
 
     protected void addDeclareSuperclass(JavaAddr addr) { }
 
@@ -111,6 +124,7 @@ public class JavaFileInterfaceDefinition extends BaseBlockCommentable implements
         if (!addr.endWithSpaceChar()) {
             addr.add(SPACE_CHAR);
         }
-        addr.add("interface ").add(simpleName);
+        addr.add(javaKeyword.name().toLowerCase());
+        addr.add(' ').add(simpleName);
     }
 }

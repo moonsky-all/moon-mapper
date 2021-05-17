@@ -11,10 +11,12 @@ public enum Holders {
     /** default instance */
     INSTANCE;
 
-    private final TypeHolder typeHolder = new TypeHolder(this);
-    private final CopierHolder copierHolder = new CopierHolder(this);
-    private final MapperHolder mapperHolder = new MapperHolder(this);
+    private final ClassHolder typeHolder = new ClassHolder(this);
+    private final PojoClassHolder pojoHolder = new PojoClassHolder(this);
+    private final PojoCopierHolder copierHolder = new PojoCopierHolder(this);
+    private final PojoMapperHolder mapperHolder = new PojoMapperHolder(this);
 
+    @SuppressWarnings("all")
     private final ThreadLocal<ProcessingEnvironment> ENV = new ThreadLocal<>();
 
     public void init(ProcessingEnvironment environment) { ENV.set(environment); }
@@ -25,9 +27,11 @@ public enum Holders {
 
     public Types getTypes() { return getEnvironment().getTypeUtils(); }
 
-    public TypeHolder typeHolder() { return typeHolder; }
+    public ClassHolder classHolder() { return typeHolder; }
 
-    public CopierHolder copierHolder() { return copierHolder; }
+    public PojoCopierHolder pojoCopierHolder() { return copierHolder; }
 
-    public MapperHolder mapperHolder() { return mapperHolder; }
+    public PojoMapperHolder pojoMapperHolder() { return mapperHolder; }
+
+    public PojoClassHolder pojoClassHolder() { return pojoHolder; }
 }

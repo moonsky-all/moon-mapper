@@ -3,6 +3,7 @@ package com.moonsky.processing.generate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.util.Collections.emptySet;
 
@@ -11,12 +12,40 @@ import static java.util.Collections.emptySet;
  */
 public class VarHelper {
 
+    private final static Map<String, VarHelper> NAMESPACED_MAP = new ConcurrentHashMap<>();
+    /**
+     * 自定义变量缓存
+     */
     private final Map<Object, String> memberCached = new HashMap<>();
     private final Map<Object, String> staticCached = new HashMap<>();
-    private int member;
-    private int index;
+    /**
+     * 变量命名空间，在同一个块级作用域内只能有一个 VarHelper
+     */
+    private final String namespace;
+    private final String staticPrefix;
+    private final String memberPrefix;
+    private int memberIndex;
+    private int staticIndex;
 
-    public VarHelper() { }
+    private VarHelper(String namespace, String staticPrefix, String memberPrefix) {
+        this.namespace = namespace;
+        this.staticPrefix = staticPrefix;
+        this.memberPrefix = memberPrefix;
+    }
+
+    public static VarHelper of(String namespace, String staticPrefix, String memberPrefix) {
+        String namespaced = String.join(":", namespace, staticPrefix, memberPrefix);
+        VarHelper helper = NAMESPACED_MAP.get(namespaced);
+        if (helper == null) {
+            helper = new VarHelper(namespace, staticPrefix, memberPrefix);
+            NAMESPACED_MAP.put(namespaced, helper);
+        }
+        return helper;
+    }
+
+    public static VarHelper of(String namespace) {
+        return of(namespace, "S", "m");
+    }
 
     public String next() { return next(emptySet()); }
 
@@ -56,15 +85,15 @@ public class VarHelper {
 
     private static String toNext(VarHelper helper, Set<String> excludesVars, boolean wasStatic) {
         String var;
-        final String prefix = wasStatic ? "S" : "v";
-        final int init = wasStatic ? helper.index : helper.member;
+        final String prefix = wasStatic ? helper.staticPrefix : helper.memberPrefix;
+        final int init = wasStatic ? helper.staticIndex : helper.memberIndex;
         for (int i = init; ; i++) {
             var = prefix + i;
             if (!excludesVars.contains(var)) {
                 if (wasStatic) {
-                    helper.index = i + 1;
+                    helper.staticIndex = i + 1;
                 } else {
-                    helper.member = i + 1;
+                    helper.memberIndex = i + 1;
                 }
                 return var;
             }

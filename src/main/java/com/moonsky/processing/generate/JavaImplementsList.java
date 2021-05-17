@@ -22,10 +22,15 @@ public class JavaImplementsList extends AbstractImportable implements Addable {
         this.interfaceKeyword = keyword;
     }
 
-    public void implement(String typeTemplate, Object... types) {
+    public JavaImplementsList implement(Class<?> interfaceClass) {
+        return implement(interfaceClass.getCanonicalName());
+    }
+
+    public JavaImplementsList implement(String typeTemplate, Object... types) {
         String interfaceName = TypeFormatter2.with(typeTemplate, types);
         String typeSimplify = Generic2.typeSimplify(interfaceName);
         getInterfacesMap().put(typeSimplify, interfaceName);
+        return this;
     }
 
     public Map<String, String> getInterfacesMap() { return interfacesMap; }

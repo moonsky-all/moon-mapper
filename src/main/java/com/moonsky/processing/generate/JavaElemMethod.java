@@ -17,24 +17,30 @@ public class JavaElemMethod extends JavaElemExecutable {
     private final boolean inInterface;
     private final JavaGenericsList genericsList;
     private final String methodName, signature;
-    private final JavaScopedScripts<JavaElemMethod> scopedScripts;
+    private final JavaCodeBlockAddr<JavaElemMethod> scopedScripts;
     private String returnType;
 
     public JavaElemMethod(
         Importer importer,
+        String classname,
         JavaGenericsList genericsList,
         String methodName,
         JavaElemParametersList parameterList,
         boolean inInterface
     ) {
-        super(importer, JavaElementEnum.METHOD, parameterList);
-        this.scopedScripts = new JavaScopedScripts(importer, this, true);
+        super(importer, classname, JavaElementEnum.METHOD, parameterList);
+        this.scopedScripts = new JavaCodeBlockAddr(importer, this, true);
         this.genericsList = genericsList;
         this.methodName = methodName;
         this.inInterface = inInterface;
         this.returnType = "void";
         this.signature = String.join("#", methodName, parameterList.getSignature());
         Log2.warn(this.signature);
+    }
+
+    @Override
+    public String getScopedNamespace() {
+        return String.join(":", getClassname(), getSignature());
     }
 
     public String getReturnType() { return returnType; }
@@ -45,7 +51,7 @@ public class JavaElemMethod extends JavaElemExecutable {
 
     public JavaElemMethod typeOf(String returnTypeTemplate, Object... types) {
         String type = TypeFormatter2.with(returnTypeTemplate, types);
-        JavaScopedScripts<JavaElemMethod> scripts = scripts();
+        JavaCodeBlockAddr<JavaElemMethod> scripts = scripts();
         if (Test2.isVoid(type)) {
             scripts.returnNone();
         } else if (scripts.getReturning() == null) {
@@ -61,11 +67,11 @@ public class JavaElemMethod extends JavaElemExecutable {
 
     public String getSignature() { return signature; }
 
-    public JavaScopedScripts<JavaElemMethod> scripts() { return scopedScripts; }
+    public JavaCodeBlockAddr<JavaElemMethod> scripts() { return scopedScripts; }
 
     public JavaGenericsList getGenericsList() { return genericsList; }
 
-    private JavaScopedScripts getScopedScripts() { return scopedScripts; }
+    private JavaCodeBlockAddr getScopedScripts() { return scopedScripts; }
 
     @Override
     protected boolean isAllowModifierWith(Modifier modifier) {
@@ -91,7 +97,10 @@ public class JavaElemMethod extends JavaElemExecutable {
         } else if (has(Modifier.ABSTRACT)) {
             addr.end();
         } else {
-            getScopedScripts().addDeclaredMethodScripts(addr.add(' '));
+            addr.add(" {").open();
+            getScopedScripts().add(addr);
+            addr.close();
+            addr.newLine("}");
         }
     }
 }

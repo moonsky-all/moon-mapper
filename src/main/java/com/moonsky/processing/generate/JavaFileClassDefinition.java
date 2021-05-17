@@ -11,8 +11,8 @@ public class JavaFileClassDefinition extends JavaFileImplementation {
 
     private String superclass;
 
-    protected JavaFileClassDefinition(String packageName, String simpleName) {
-        super(packageName, simpleName, JavaElementEnum.CLASS);
+    public JavaFileClassDefinition(String packageName, String simpleName) {
+        super(packageName, simpleName, JavaFileKeywordEnum.CLASS, JavaElementEnum.CLASS);
     }
 
     public JavaFileClassDefinition extendsOf(String superclassTemplate, Object... types) {

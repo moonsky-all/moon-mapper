@@ -10,15 +10,21 @@ import java.util.Map;
  */
 public abstract class JavaScopedMembers<M> extends AbstractImportable {
 
+    private final String classname;
     private final JavaGenericsList enclosingGenericsList;
     private final boolean inInterface;
     private final Map<String, M> memberMap = new LinkedHashMap<>();
 
-    public JavaScopedMembers(Importer importer, JavaGenericsList enclosingGenericsList, boolean inInterface) {
+    public JavaScopedMembers(
+        Importer importer, String classname, JavaGenericsList enclosingGenericsList, boolean inInterface
+    ) {
         super(importer);
+        this.classname = classname;
         this.inInterface = inInterface;
         this.enclosingGenericsList = enclosingGenericsList;
     }
+
+    public final String getClassname() { return classname; }
 
     protected final Map<String, M> getMemberMap() { return memberMap; }
 

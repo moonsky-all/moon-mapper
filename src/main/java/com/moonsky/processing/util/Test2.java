@@ -1,5 +1,10 @@
 package com.moonsky.processing.util;
 
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -22,7 +27,8 @@ public enum Test2 {
 
     static {
         Class<?>[] primitives = {byte.class, short.class, int.class, long.class, float.class, double.class};
-        @SuppressWarnings("all") Class<?>[] basicTypes = {
+        @SuppressWarnings("all")
+        Class<?>[] basicTypes = {
             Object.class, String.class, StringBuilder.class, StringBuffer.class, CharSequence.class,//
             Byte.class, Short.class, Integer.class, Long.class, Float.class, Double.class,//
             void.class, char.class, boolean.class, Character.class, Boolean.class, Number.class
@@ -248,4 +254,36 @@ public enum Test2 {
     }
 
     public static boolean isConstructor(Element elem) { return isElemKind(elem, CONSTRUCTOR); }
+
+    public static boolean hasLombokGetter(VariableElement field) {
+        if (Imported.LOMBOK) {
+            if (field == null) {
+                return false;
+            }
+            Getter getter = field.getAnnotation(Getter.class);
+            if (getter != null) {
+                return getter.value() == AccessLevel.PUBLIC;
+            } else {
+                Element element = field.getEnclosingElement();
+                return element.getAnnotation(Data.class) != null;
+            }
+        }
+        return false;
+    }
+
+    public static boolean hasLombokSetter(VariableElement field) {
+        if (Imported.LOMBOK) {
+            if (field == null) {
+                return false;
+            }
+            Setter setter = field.getAnnotation(Setter.class);
+            if (setter != null) {
+                return setter.value() == AccessLevel.PUBLIC;
+            } else {
+                Element element = field.getEnclosingElement();
+                return element.getAnnotation(Data.class) != null;
+            }
+        }
+        return false;
+    }
 }

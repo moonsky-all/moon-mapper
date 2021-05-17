@@ -37,6 +37,10 @@ public class JavaElemField extends BaseBlockCommentable {
 
     protected JavaElemFieldValue getValue() { return value; }
 
+    public JavaElemFieldValue assign() {
+        return value == null ? (value = new JavaElemFieldValue(this, fieldType)) : value;
+    }
+
     public boolean inInterface() { return inInterface; }
 
     @Override
