@@ -16,6 +16,8 @@ import com.moonsky.processing.util.Test2;
 import com.moonsky.processing.wrapper.Import;
 
 import javax.lang.model.element.Modifier;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.Map;
 import java.util.Objects;
 
@@ -23,6 +25,17 @@ import java.util.Objects;
  * @author benshaoye
  */
 public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupplier {
+
+    private static final String INT_PRIMITIVE_CLASS = int.class.getCanonicalName();
+    private static final String STRING_CLASS = String.class.getCanonicalName();
+    private static final String INT_CAPITALIZED = String2.capitalize(int.class.getCanonicalName());
+    private static final String JAVA_DOT_LANG_DOT = "java.lang.";
+    private static final String BIG_DECIMAL_CLASS = BigDecimal.class.getCanonicalName();
+    private static final String BIG_INTEGER_CLASS = BigInteger.class.getCanonicalName();
+
+    private static boolean isMathNumber(String fullClassname) {
+        return BIG_DECIMAL_CLASS.equals(fullClassname) || BIG_INTEGER_CLASS.equals(fullClassname);
+    }
 
     private final String simpleName;
     private final String classname;
@@ -113,20 +126,96 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
     ) {
         String setterActualType = setter.getParameterAt(0).getActualType();
         if (STRING_CLASS.equals(setterActualType)) {
-            doMappingToString(scripts, setter, getter);
+            doMapping2String(scripts, setter, getter);
         } else if (Test2.isPrimitiveNumberClass(setterActualType)) {
-            doMapping4PrimitiveNumber(scripts, setter, getter, setterActualType);
+            doMapping2PrimitiveNumber(scripts, setter, getter, setterActualType);
         } else if (Test2.isWrappedNumberClass(setterActualType)) {
             String setterSimpleType = String2.replaceAll(setterActualType, JAVA_DOT_LANG_DOT, "");
-            doMapping4WrappedNumber(scripts, setter, getter, setterSimpleType.toLowerCase());
+            doMapping2WrappedNumber(scripts, setter, getter, setterSimpleType.toLowerCase());
         } else if (Test2.isEnumClass(setterActualType)) {
             doMappingToEnum(scripts, setter, getter);
+        } else if (BIG_DECIMAL_CLASS.equals(setterActualType)) {
+            doMapping2BigDecimal(scripts, setter, getter);
+        } else if (BIG_INTEGER_CLASS.equals(setterActualType)) {
+            doMapping2BigInteger(scripts, setter, getter);
         } else {
             doMapping4Default(scripts, setter, getter);
         }
     }
 
-    private void doMapping4PrimitiveNumber(
+    private void doMapping2BigInteger(
+        JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
+    ) {
+        final String longPrimitiveClass = "long";
+        String getterActualType = getter.getPropertyActualType();
+        if (Test2.isPrimitiveNumberClass(getterActualType)) {
+            if (Test2.isPrimitiveNumberSubtypeOf(getterActualType, longPrimitiveClass) ||
+                longPrimitiveClass.equals(getterActualType)) {
+                scripts.scriptOf("{}.{}({}.valueOf({}.{}()))", THAT, setter.getMethodName(),
+
+                    Import.of(BigInteger.class), THIS, getter.getMethodName());
+            } else {
+                scripts.scriptOf("{}.{}({}.valueOf((long) {}.{}()))", THAT, setter.getMethodName(),
+
+                    Import.of(BigInteger.class), THIS, getter.getMethodName());
+            }
+        } else if (Test2.isSubtypeOf(getterActualType, Number.class)) {
+            String var = defineGetterValueVar(scripts, getter);
+            scripts.scriptOf("{}.{}({} == null ? null : {}.valueOf({}.longValue()))", THAT,
+
+                setter.getMethodName(), var, Import.of(BigInteger.class), var);
+        } else if (STRING_CLASS.equals(getterActualType)) {
+            String var = defineGetterValueVar(scripts, getter);
+            scripts.onStringIfNotEmpty(var).scriptOf("{}.{}(new {}({}))",
+
+                THAT, setter.getMethodName(), Import.of(BigInteger.class), var);
+            scripts.onElse().scriptOf("{}.{}(null)", THAT, setter.getMethodName());
+        }
+    }
+
+    /**
+     * 支持类型: {@link BigDecimal}{@link BigInteger}
+     *
+     * @param scripts
+     * @param setter
+     * @param getter
+     */
+    private void doMapping2BigDecimal(
+        JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
+    ) {
+        String setterActualType = setter.getPropertyActualType();
+        String getterActualType = getter.getPropertyActualType();
+        if (Test2.isPrimitiveNumberClass(getterActualType)) {
+            scripts.scriptOf("{}.{}({}.valueOf({}.{}()))", THAT, setter.getMethodName(),
+
+                Import.of(BigDecimal.class), THIS, getter.getMethodName());
+        } else if (Test2.isWrappedNumberClass(getterActualType)) {
+            String var = defineGetterValueVar(scripts, getter);
+            scripts.scriptOf("{}.{}({} == null ? null : {}.valueOf({}))", THAT,
+
+                setter.getMethodName(), var, Import.nameOf(setterActualType), var);
+        } else if (STRING_CLASS.equals(getterActualType)) {
+            String var = defineGetterValueVar(scripts, getter);
+            scripts.onStringIfNotEmpty(var).scriptOf("{}.{}(new {}({}))",
+
+                THAT, setter.getMethodName(), Import.of(BigDecimal.class), var);
+            scripts.onElse().scriptOf("{}.{}(null)", THAT, setter.getMethodName());
+        } else if (BIG_INTEGER_CLASS.equals(getterActualType)
+
+            || Objects.equals(getterActualType, "char[]")) {
+            String var = defineGetterValueVar(scripts, getter);
+            scripts.scriptOf("{}.{}({} == null ? null : new {}({}))", THAT,
+
+                setter.getMethodName(), var, Import.of(BigDecimal.class), var);
+        } else if (Test2.isSubtypeOf(getterActualType, Number.class)) {
+            String var = defineGetterValueVar(scripts, getter);
+            scripts.scriptOf("{}.{}({} == null ? null : {}.valueOf({}.doubleValue()))", THAT,
+
+                setter.getMethodName(), var, Import.of(BigDecimal.class), var);
+        }
+    }
+
+    private void doMapping2PrimitiveNumber(
         JavaCodeBlockAddr<JavaElemMethod> scripts,
         PropertyMethodDeclared setter,
         PropertyMethodDeclared getter,
@@ -141,8 +230,9 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
                 setterPrimitiveType, THIS, getter.getMethodName());
         } else if (Test2.isSubtypeOf(getterActualType, Number.class)) {
             String var = defineGetterValueVar(scripts, getter);
-            scripts.onIfNotNull(var)
-                .scriptOf("{}.{}({}.{}Value())", var, THAT, setter.getMethodName(), var, setterPrimitiveType);
+            scripts.onIfNotNull(var).scriptOf("{}.{}({}.{}Value())",
+
+                THAT, setter.getMethodName(), var, setterPrimitiveType);
         } else if (STRING_CLASS.equals(getterActualType)) {
             final String capitalizedSetterPrimitiveType = String2.capitalize(setterPrimitiveType);
             String setterWrappedClass = JAVA_DOT_LANG_DOT +
@@ -159,10 +249,15 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
             } else {
                 scripts.onIfNotNull(var).scriptOf("{}.{}({}.ordinal())", THAT, setter.getMethodName(), var);
             }
+        } else if (isMathNumber(getterActualType)) {
+            String var = defineGetterValueVar(scripts, getter);
+            scripts.onIfNotNull(var).scriptOf("{}.{}({}.{}Value())",
+
+                THAT, setter.getMethodName(), var, setterPrimitiveType);
         }
     }
 
-    private void doMapping4WrappedNumber(
+    private void doMapping2WrappedNumber(
         JavaCodeBlockAddr<JavaElemMethod> scripts,
         PropertyMethodDeclared setter,
         PropertyMethodDeclared getter,
@@ -201,6 +296,11 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
 
                     setter.getMethodName(), var, Import.nameOf(setterActualType), var);
             }
+        } else if (isMathNumber(getterActualType)) {
+            String var = defineGetterValueVar(scripts, getter);
+            scripts.scriptOf("{}.{}({} == null ? null : {}.{}Value())", THAT,
+
+                setter.getMethodName(), var, var, setterPrimitiveType);
         }
     }
 
@@ -301,7 +401,7 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
         }
     }
 
-    private void doMappingToString(
+    private void doMapping2String(
         JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
     ) {
         String getterActualType = getter.getPropertyActualType();
@@ -337,9 +437,4 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
             .modifierWithAll(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
         return constVar;
     }
-
-    private static final String INT_PRIMITIVE_CLASS = int.class.getCanonicalName();
-    private static final String STRING_CLASS = String.class.getCanonicalName();
-    private static final String INT_CAPITALIZED = String2.capitalize(int.class.getCanonicalName());
-    private static final String JAVA_DOT_LANG_DOT = "java.lang.";
 }

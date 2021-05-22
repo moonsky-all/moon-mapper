@@ -73,8 +73,8 @@ public class JavaCodeBlockAddr<T> extends AbstractEndingImportable<T> implements
         return onKeyword(ELSE_IF, elseIfTemplate, values);
     }
 
-    public JavaCodeBlockAddr<JavaCodeBlockAddr<T>> onElse(String elseTemplate, Object... values) {
-        return onKeyword(ELSE, elseTemplate, values);
+    public JavaCodeBlockAddr<JavaCodeBlockAddr<T>> onElse() {
+        return onKeyword(ELSE, null);
     }
 
     public JavaCodeBlockAddr<JavaCodeBlockAddr<T>> onFor(String forTemplate, Object... values) {
