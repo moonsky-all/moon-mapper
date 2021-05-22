@@ -1,5 +1,6 @@
 package com.moonsky.processing.holder;
 
+import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -19,13 +20,19 @@ public enum Holders {
     @SuppressWarnings("all")
     private final ThreadLocal<ProcessingEnvironment> ENV = new ThreadLocal<>();
 
+    private final LazyHolder<Elements> elementsHolder = LazyHolder.of(() -> ENV.get().getElementUtils());
+    private final LazyHolder<Types> typesHolder = LazyHolder.of(() -> ENV.get().getTypeUtils());
+    private final LazyHolder<Messager> messageHolder = LazyHolder.of(() -> ENV.get().getMessager());
+
     public void init(ProcessingEnvironment environment) { ENV.set(environment); }
 
     public ProcessingEnvironment getEnvironment() { return ENV.get(); }
 
-    public Elements getUtils() { return getEnvironment().getElementUtils(); }
+    public Messager getMessager() { return messageHolder.get(); }
 
-    public Types getTypes() { return getEnvironment().getTypeUtils(); }
+    public Elements getUtils() { return elementsHolder.get(); }
+
+    public Types getTypes() { return typesHolder.get(); }
 
     public ClassHolder classHolder() { return typeHolder; }
 

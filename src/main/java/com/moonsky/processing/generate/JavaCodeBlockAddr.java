@@ -6,6 +6,7 @@ import com.moonsky.processing.util.String2;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 import static com.moonsky.processing.generate.JavaCodeKeyword.*;
 
@@ -16,26 +17,52 @@ public class JavaCodeBlockAddr<T> extends AbstractEndingImportable<T> implements
 
     private final static String RETURN = "return ";
 
+    /** 方法签名 */
+    private final String signature;
+    /** 方法级别局部变量 */
+    private final VarHelper vars;
+    /** 方法所在类的字段管理器 */
+    private final Supplier<VarSupplier<JavaElemField>> fieldsVarSupplier;
+    /** 语句 key，存入{@link #codesMap}的 key */
     private final String key;
-    private final JavaCodeKeyword keyword;
+    private final JavaCodeKeyword thisKeyword;
     /** 支持 if(), for(), while() */
     private final String condition;
+    /** 是否可返回 */
     private final boolean returnable;
     private final Map<String, JavaCodeAddr> codesMap = new LinkedHashMap<>();
     private JavaCodeAddr returning;
 
     public JavaCodeBlockAddr(
-        Importer importer, T value, boolean returnable
-    ) { this(importer, value, null, JavaCodeKeyword.NONE, null, returnable); }
+        Importer importer, String signature, Supplier<VarSupplier<JavaElemField>> fieldsVarSupplier, T ending, boolean returnable
+    ) { this(importer, signature, fieldsVarSupplier, ending, null, JavaCodeKeyword.NONE, null, returnable); }
 
     private JavaCodeBlockAddr(
-        Importer importer, T value, String key, JavaCodeKeyword keyword, String condition, boolean returnable
+        Importer importer,
+        String signature,
+        Supplier<VarSupplier<JavaElemField>> fieldsVarSupplier,
+        T value,
+        String key,
+        JavaCodeKeyword keyword,
+        String condition,
+        boolean returnable
     ) {
         super(importer, value);
         this.returnable = returnable;
+        this.signature = signature;
         this.condition = condition;
-        this.keyword = keyword;
+        this.thisKeyword = keyword;
         this.key = key;
+        this.fieldsVarSupplier = fieldsVarSupplier;
+        this.vars = VarHelper.of(signature, "val", "var");
+    }
+
+    public JavaCodeBlockAddr<JavaCodeBlockAddr<T>> onIfNotNull(String varName) {
+        return onIf("{} != null", varName);
+    }
+
+    public JavaCodeBlockAddr<JavaCodeBlockAddr<T>> onStringIfNotEmpty(String varName) {
+        return onIf("{} != null && {}.length() > 0", varName, varName);
     }
 
     public JavaCodeBlockAddr<JavaCodeBlockAddr<T>> onIf(String ifTemplate, Object... values) {
@@ -72,16 +99,22 @@ public class JavaCodeBlockAddr<T> extends AbstractEndingImportable<T> implements
         return onKeyword(FINALLY, null);
     }
 
+    public VarHelper varsHelper() { return vars; }
+
+    public VarSupplier<JavaElemField> fieldsHelper() { return fieldsVarSupplier.get(); }
+
     public JavaCodeBlockAddr<T> scriptOf(String scriptTemplate, Object... values) {
-        return scriptOf(UUID.randomUUID().toString(), scriptTemplate, values);
+        return keyScriptOf(UUID.randomUUID().toString(), scriptTemplate, values);
     }
 
-    public JavaCodeBlockAddr<T> scriptOf(String key, String scriptTemplate, Object... values) {
+    public JavaCodeBlockAddr<T> keyScriptOf(String key, String scriptTemplate, Object... values) {
         codesMap.put(key, new JavaCodeLineAddr<>(getImporter(), end(), key, scriptTemplate, values));
         return this;
     }
 
-    public JavaCodeBlockAddr<T> returnNone() { return returning(""); }
+    public void returnNone() { this.returning = null; }
+
+    public JavaCodeBlockAddr<T> returnEnd() { return returning(""); }
 
     public JavaCodeBlockAddr<T> returning(String returningTemplate, Object... values) {
         if (isReturnable()) {
@@ -92,6 +125,8 @@ public class JavaCodeBlockAddr<T> extends AbstractEndingImportable<T> implements
                     : (RETURN + returningTemplate);
                 this.returning = new JavaCodeLineAddr<>(getImporter(), end(), null, template, values);
             }
+        } else {
+            this.returning = new JavaCodeLineAddr<>(getImporter(), end(), null, "return");
         }
         return this;
     }
@@ -110,8 +145,11 @@ public class JavaCodeBlockAddr<T> extends AbstractEndingImportable<T> implements
     public void add(JavaAddr addr) {
         codesMap.forEach((key, codeAddr) -> {
             if (codeAddr.isMultiply()) {
-                if (keyword != null) {
-                    keyword.add(addr, condition);
+                if (codeAddr instanceof JavaCodeBlockAddr<?>) {
+                    JavaCodeKeyword codeKeyword = ((JavaCodeBlockAddr<?>) codeAddr).thisKeyword;
+                    if (codeKeyword != null) {
+                        codeKeyword.add(addr, ((JavaCodeBlockAddr<?>) codeAddr).condition);
+                    }
                 }
                 addr.add("{");
                 addr.open();
@@ -122,7 +160,7 @@ public class JavaCodeBlockAddr<T> extends AbstractEndingImportable<T> implements
                 codeAddr.add(addr);
             }
         });
-        if (isReturnable()) {
+        if (isReturnable() && getReturning() != null) {
             returning.add(addr);
         }
     }
@@ -140,6 +178,8 @@ public class JavaCodeBlockAddr<T> extends AbstractEndingImportable<T> implements
         JavaCodeKeyword keyword, String condition, boolean returnable
     ) {
         return new JavaCodeBlockAddr<>(getImporter(),
+            signature,
+            fieldsVarSupplier,
             this,
             UUID.randomUUID().toString(),
             keyword,

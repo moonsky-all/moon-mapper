@@ -8,6 +8,8 @@ import lombok.Setter;
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -23,17 +25,20 @@ public enum Test2 {
     ;
 
     private final static Set<String> PRIMITIVE_NUMS = new HashSet<>();
+    private final static Set<String> WRAPPED_NUMS_TYPE = new HashSet<>();
     private final static Set<String> BASIC_TYPES = new HashSet<>();
 
     static {
         Class<?>[] primitives = {byte.class, short.class, int.class, long.class, float.class, double.class};
+        Class<?>[] wrappedTypes = {Byte.class, Short.class, Integer.class, Long.class, Float.class, Double.class};
         @SuppressWarnings("all")
         Class<?>[] basicTypes = {
             Object.class, String.class, StringBuilder.class, StringBuffer.class, CharSequence.class,//
-            Byte.class, Short.class, Integer.class, Long.class, Float.class, Double.class,//
             void.class, char.class, boolean.class, Character.class, Boolean.class, Number.class
         };
         Collect2.addAll(Class::getCanonicalName, PRIMITIVE_NUMS, primitives);
+        Collect2.addAll(Class::getCanonicalName, WRAPPED_NUMS_TYPE, wrappedTypes);
+        Collect2.addAll(Class::getCanonicalName, BASIC_TYPES, wrappedTypes);
         Collect2.addAll(Class::getCanonicalName, BASIC_TYPES, basicTypes);
     }
 
@@ -135,6 +140,10 @@ public enum Test2 {
         return expected.equals(actual);
     }
 
+    public static boolean hasGeneric(String fulledClassname) {
+        return fulledClassname.contains("<");
+    }
+
     public static boolean isIntValue(String value) {
         return isValidOnTrimmed(value, Integer::parseInt);
     }
@@ -173,48 +182,63 @@ public enum Test2 {
         }
     }
 
-    public static boolean isBasicType(Class<?> type) {
-        return isBasicType(getName(type));
+    public static boolean isWrappedNumberClass(Class<?> klass) {
+        return klass != null && isWrappedNumberClass(klass.getCanonicalName());
     }
 
-    public static boolean isBasicType(String type) {
-        return BASIC_TYPES.contains(type) || isPrimitive(type);
+    public static boolean isWrappedNumberClass(String classname) {
+        return WRAPPED_NUMS_TYPE.contains(classname);
     }
 
-    public static boolean isPrimitive(Class<?> type) {
-        return isPrimitive(getName(type));
+    public static boolean isBasicTypeClass(Class<?> type) {
+        return isBasicTypeClass(getName(type));
     }
 
-    public static boolean isPrimitive(String type) {
-        return isPrimitiveNumber(type) || isPrimitiveBool(type) || isPrimitiveChar(type);
+    public static boolean isBasicTypeClass(String type) {
+        return BASIC_TYPES.contains(type) || isPrimitiveClass(type);
     }
 
-    public static boolean isPrimitiveNumber(Class<?> type) {
-        return isPrimitiveNumber(getName(type));
+    public static boolean isPrimitiveClass(Class<?> type) {
+        return isPrimitiveClass(getName(type));
     }
 
-    public static boolean isPrimitiveNumber(String type) {
+    public static boolean isPrimitiveClass(String type) {
+        return isPrimitiveNumberClass(type) || isPrimitiveBoolClass(type) || isPrimitiveCharClass(type);
+    }
+
+    public static boolean isPrimitiveNumberClass(Class<?> type) {
+        return isPrimitiveNumberClass(getName(type));
+    }
+
+    public static boolean isPrimitiveNumberClass(String type) {
         return PRIMITIVE_NUMS.contains(type);
     }
 
-    public static boolean isPrimitiveBool(TypeMirror type) {
+    public static boolean isPrimitiveBoolClass(TypeMirror type) {
         return isTypeKind(type, TypeKind.BOOLEAN);
     }
 
-    public static boolean isPrimitiveBool(Class<?> type) {
-        return isPrimitiveBool(getName(type));
+    public static boolean isPrimitiveBoolClass(Class<?> type) {
+        return isPrimitiveBoolClass(getName(type));
     }
 
-    public static boolean isPrimitiveBool(String type) {
+    public static boolean isPrimitiveBoolClass(String type) {
         return "boolean".contains(type);
     }
 
-    public static boolean isPrimitiveChar(Class<?> type) {
-        return isPrimitiveChar(getName(type));
+    public static boolean isPrimitiveCharClass(Class<?> type) {
+        return isPrimitiveCharClass(getName(type));
     }
 
-    public static boolean isPrimitiveChar(String type) {
+    public static boolean isPrimitiveCharClass(String type) {
         return "char".contains(type);
+    }
+
+    public static boolean isPrimitiveNumberSubtypeOf(String thisType, String thatType) {
+        String primitives = ",byte,short,int,long,float,double";
+        int thisIdx = primitives.indexOf(thisType);
+        int thatIdx = primitives.indexOf(thatType);
+        return thisIdx > 0 && thisIdx < thatIdx;
     }
 
     private static String getName(Class<?> cls) { return cls.getCanonicalName(); }
@@ -285,5 +309,22 @@ public enum Test2 {
             }
         }
         return false;
+    }
+
+    public static boolean isSubtypeOf(String actualType, Class<?> superclass) {
+        return isSubtypeOf(actualType, superclass.getCanonicalName());
+    }
+
+    public static boolean isSubtypeOf(String actualType, String superClass) {
+        if (actualType == null || superClass == null) {
+            return false;
+        }
+        Elements utils = Processing2.getUtils();
+        return isSubtypeOf(utils.getTypeElement(actualType), utils.getTypeElement(superClass));
+    }
+
+    public static boolean isSubtypeOf(TypeElement thisElem, TypeElement superElem) {
+        Types types = Processing2.getTypes();
+        return thisElem != null && superElem != null && types.isSubtype(thisElem.asType(), superElem.asType());
     }
 }

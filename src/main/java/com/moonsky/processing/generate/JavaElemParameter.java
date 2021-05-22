@@ -57,7 +57,7 @@ public class JavaElemParameter extends BaseBlockCommentable {
         if (parameterType.contains(".")) {
             return Generic2.typeSimplify(parameterType);
         }
-        if (Test2.isPrimitive(parameterType)) {
+        if (Test2.isPrimitiveClass(parameterType)) {
             return parameterType;
         }
         if (maybeGenericType) {

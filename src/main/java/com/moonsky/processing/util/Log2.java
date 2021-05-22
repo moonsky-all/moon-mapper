@@ -21,9 +21,20 @@ public enum Log2 {
     public static void warn(Object message) { messageOf(WARNING, String.valueOf(message)); }
 
     public static void warn(String message, Object... values) {
-        messageOf(WARNING, String2.format(message, values)); }
+        messageOf(WARNING, String2.format(message, values));
+    }
 
     public static void println(String message, Object... values) {
         messageOf(MANDATORY_WARNING, String2.format(message, values));
+    }
+
+    public static void printlnStackTrace() { printlnStackTrace(5); }
+
+    public static void printlnStackTrace(int deep) {
+        StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+        for (int i = 2; i < elements.length && i < deep; i++) {
+            StackTraceElement trace = elements[i];
+            Log2.warn("{} # {}", trace.getClassName(), trace.getMethodName(), trace.getLineNumber());
+        }
     }
 }

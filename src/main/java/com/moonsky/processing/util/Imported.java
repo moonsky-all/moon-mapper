@@ -4,6 +4,7 @@ import com.moonsky.mapper.annotation.CopierImplGenerated;
 import com.moonsky.mapper.annotation.MapperImplGenerated;
 import lombok.Data;
 import org.joda.time.ReadablePeriod;
+import org.joda.time.YearMonth;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -28,7 +29,8 @@ public enum Imported {
     public final static boolean AUTOWIRED;
     public final static boolean QUALIFIER;
     public final static boolean GENERATED;
-    public final static boolean JODA_TIME;
+    public final static boolean JODA_TIME_1X;
+    public final static boolean JODA_TIME_2X;
     public final static boolean SERVICE;
     public final static boolean COMPONENT;
     public final static boolean REPOSITORY;
@@ -44,7 +46,8 @@ public enum Imported {
         CONDITIONAL_ON_MISSING_BEAN = nonException(() -> ConditionalOnMissingBean.class.toString());
         BEAN = nonException(() -> Bean.class.toString());
         GENERATED = nonException(() -> Generated.class.toString());
-        JODA_TIME = nonException(() -> ReadablePeriod.class.toString());
+        JODA_TIME_1X = nonException(() -> ReadablePeriod.class.toString());
+        JODA_TIME_2X = nonException(() -> YearMonth.class.toString());
         AUTOWIRED = nonException(() -> Autowired.class.toString());
         QUALIFIER = nonException(() -> Qualifier.class.toString());
         SERVICE = nonException(() -> Service.class.toString());

@@ -1,9 +1,6 @@
 package com.moonsky.processing.util;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.QualifiedNameable;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.element.*;
 import javax.lang.model.type.MirroredTypeException;
 import java.util.*;
 import java.util.function.Function;
@@ -19,6 +16,10 @@ public enum Element2 {
     public static <T> T cast(Object obj) { return (T) obj; }
 
     private final static Map<QualifiedNameable, String> QUALIFIED_NAME_CACHED = new IdentityHashMap<>();
+
+    public static TypeElement getTypeElement(String classname) {
+        return Processing2.getUtils().getTypeElement(classname);
+    }
 
     @SuppressWarnings("all")
     public static String getSimpleName(String fullName) {
@@ -67,6 +68,23 @@ public enum Element2 {
             return classGetter.apply(t).getCanonicalName();
         } catch (MirroredTypeException mirrored) {
             return mirrored.getTypeMirror().toString();
+        }
+    }
+
+    /**
+     * 获取注解上使用到的 class，若不存在则返回{@link javax.lang.model.type.TypeMirror}
+     *
+     * @param t           注解
+     * @param classGetter 方法引用
+     * @param <T>         注解类
+     *
+     * @return class/TypeMirror
+     */
+    public static <T> Object getClass(T t, Function<T, Class<?>> classGetter) {
+        try {
+            return classGetter.apply(t);
+        } catch (MirroredTypeException mirrored) {
+            return mirrored.getTypeMirror();
         }
     }
 

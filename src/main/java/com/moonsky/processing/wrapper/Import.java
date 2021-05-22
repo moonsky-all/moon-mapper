@@ -11,6 +11,8 @@ import java.util.Objects;
  */
 public class Import<T> {
 
+    public static final Import<Class<?>> STRING = Import.of(String.class);
+
     private final T value;
     private final boolean classname;
 

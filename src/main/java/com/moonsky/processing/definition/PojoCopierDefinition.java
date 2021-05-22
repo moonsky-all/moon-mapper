@@ -6,18 +6,18 @@ import com.moonsky.mapper.util.Keyword;
 import com.moonsky.processing.declared.PojoDeclared;
 import com.moonsky.processing.declared.PropertyDeclared;
 import com.moonsky.processing.declared.PropertyMethodDeclared;
-import com.moonsky.processing.generate.JavaCodeBlockAddr;
-import com.moonsky.processing.generate.JavaElemMethod;
-import com.moonsky.processing.generate.JavaFileClassDefinition;
+import com.moonsky.processing.generate.*;
 import com.moonsky.processing.holder.Holders;
 import com.moonsky.processing.processor.JavaDefinition;
 import com.moonsky.processing.processor.JavaSupplier;
 import com.moonsky.processing.util.Const2;
 import com.moonsky.processing.util.String2;
+import com.moonsky.processing.util.Test2;
 import com.moonsky.processing.wrapper.Import;
 
 import javax.lang.model.element.Modifier;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @author benshaoye
@@ -96,11 +96,306 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
                 scripts.scriptOf(setterScript);
             } else {
                 PropertyMethodDeclared setter = thatProperty.getOnlySetterMethod();
-                if (setter != null) {
-                    String actualType = setter.getPropertyActualType();
+                PropertyMethodDeclared getter = thisProperty.getOriginGetterDeclared();
+                if (setter != null && !doMappingOnConversion(scripts, setter, getter)) {
+                    doMapping(scripts, setter, getter);
                 }
             }
         }
         return scripts.end();
     }
+
+    private void doMapping(
+        JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
+    ) {
+        String setterActualType = setter.getParameterAt(0).getActualType();
+        String setterSimpleType = String2.replaceAll(setterActualType, JAVA_DOT_LANG_DOT, "");
+
+        switch (setterSimpleType) {
+            case "String": {
+                doMappingToString(scripts, setter, getter);
+                break;
+            }
+            case "double":
+            case "float":
+            case "long":
+            case "int":
+            case "short":
+            case "byte": {
+                doMapping4PrimitiveNumber(scripts, setter, getter, setterSimpleType);
+                break;
+            }
+            case "Double":
+            case "Float":
+            case "Long":
+            case "Integer":
+            case "Short":
+            case "Byte": {
+                doMapping4WrappedNumber(scripts, setter, getter, setterSimpleType.toLowerCase());
+                break;
+            }
+            default: {
+                if (Test2.isEnumClass(setterActualType)) {
+                    doMappingToEnum(scripts, setter, getter);
+                } else {
+                    doMapping4Default(scripts, setter, getter);
+                }
+                break;
+            }
+        }
+    }
+
+    private void doMapping4PrimitiveNumber(
+        JavaCodeBlockAddr<JavaElemMethod> scripts,
+        PropertyMethodDeclared setter,
+        PropertyMethodDeclared getter,
+        String setterPrimitiveType
+    ) {
+        String getterActualType = getter.getPropertyActualType();
+        if (Test2.isPrimitiveNumberSubtypeOf(getterActualType, setterPrimitiveType)) {
+            scripts.scriptOf("{}.{}({}.{}())", THAT, setter.getMethodName(), THIS, getter.getMethodName());
+            return;
+        }
+        if (Test2.isPrimitiveNumberSubtypeOf(setterPrimitiveType, getterActualType)) {
+            scripts.scriptOf("{}.{}(({}) {}.{}())",
+                THAT,
+                setter.getMethodName(),
+                setterPrimitiveType,
+                THIS,
+                getter.getMethodName());
+            return;
+        }
+        if (Test2.isSubtypeOf(getterActualType, Number.class)) {
+            String var = defineGetterValueVar(scripts, getter);
+            scripts.onIfNotNull(var)
+                .scriptOf("{}.{}({}.{}Value())", var, THAT, setter.getMethodName(), var, setterPrimitiveType);
+            return;
+        }
+        if (STRING_CLASS.equals(getterActualType)) {
+            final String capitalizedSetterPrimitiveType = String2.capitalize(setterPrimitiveType);
+            String setterWrappedClass = JAVA_DOT_LANG_DOT +
+                (capitalizedSetterPrimitiveType.equals(INT_CAPITALIZED) ? "Integer" : capitalizedSetterPrimitiveType);
+            String var = defineGetterValueVar(scripts, getter);
+            scripts.onStringIfNotEmpty(var)
+                .scriptOf("{}.{}({}.parse{}({}))",
+                    THAT,
+                    setter.getMethodName(),
+                    Import.nameOf(setterWrappedClass),
+                    capitalizedSetterPrimitiveType,
+                    var);
+            return;
+        }
+        if (Test2.isEnumClass(getterActualType)) {
+            String var = defineGetterValueVar(scripts, getter);
+            if (Test2.isPrimitiveNumberSubtypeOf(setterPrimitiveType, INT_PRIMITIVE_CLASS)) {
+                scripts.onIfNotNull(var)
+                    .scriptOf("{}.{}(({}) {}.ordinal())", THAT, setter.getMethodName(), setterPrimitiveType, var);
+            } else {
+                scripts.onIfNotNull(var).scriptOf("{}.{}({}.ordinal())", THAT, setter.getMethodName(), var);
+            }
+            return;
+        }
+    }
+
+    private void doMapping4WrappedNumber(
+        JavaCodeBlockAddr<JavaElemMethod> scripts,
+        PropertyMethodDeclared setter,
+        PropertyMethodDeclared getter,
+        String lowerCasedSetterSimpleType
+    ) {
+        String setterPrimitiveType = Objects.equals(lowerCasedSetterSimpleType, "integer") ? "int"
+            : lowerCasedSetterSimpleType;
+        String setterActualType = setter.getPropertyActualType();
+        String getterActualType = getter.getPropertyActualType();
+        if (Test2.isPrimitiveNumberSubtypeOf(getterActualType, setterPrimitiveType)) {
+            scripts.scriptOf("{}.{}({}.valueOf({}.{}()))", THAT, setter.getMethodName(),
+
+                Import.nameOf(setterActualType), THIS, getter.getMethodName());
+            return;
+        }
+        if (Test2.isPrimitiveNumberSubtypeOf(setterPrimitiveType, getterActualType)) {
+            scripts.scriptOf("{}.{}(({}) {}.{}())", THAT, setter.getMethodName(),
+
+                setterPrimitiveType, THIS, getter.getMethodName());
+            return;
+        }
+        if (Test2.isWrappedNumberClass(getterActualType) || Test2.isSubtypeOf(getterActualType, Number.class)) {
+            String var = defineGetterValueVar(scripts, getter);
+            scripts.scriptOf("{}.{}({} == null ? null : {}.{}Value())", THAT,
+
+                setter.getMethodName(), var, var, setterPrimitiveType);
+            return;
+        }
+        if (STRING_CLASS.equals(getterActualType)) {
+            String var = defineGetterValueVar(scripts, getter);
+            scripts.scriptOf("{}.{}({} == null || {}.length() == 0 ? null : {}.valueOf({}))", THAT,
+
+                setter.getMethodName(), var, var, Import.nameOf(setterActualType), var);
+            return;
+        }
+        if (Test2.isEnumClass(getterActualType)) {
+            String var = defineGetterValueVar(scripts, getter);
+            if (Test2.isPrimitiveNumberSubtypeOf(setterPrimitiveType, INT_PRIMITIVE_CLASS)) {
+                scripts.scriptOf("{}.{}({} == null ? null : {}.valueOf(({}) {}.ordinal()))", THAT,
+
+                    setter.getMethodName(), var, Import.nameOf(setterActualType), setterPrimitiveType, var);
+            } else {
+                scripts.scriptOf("{}.{}({} == null ? null : {}.valueOf({}.ordinal()))", THAT,
+
+                    setter.getMethodName(), var, Import.nameOf(setterActualType), var);
+            }
+            return;
+        }
+    }
+
+    private void doMapping4Default(
+        JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
+    ) {
+        String setterActualType = setter.getPropertyActualType();
+        String getterActualType = getter.getPropertyActualType();
+
+        if (Test2.hasGeneric(setterActualType) || Test2.hasGeneric(getterActualType)) {
+            // 有泛型又不存在完全对应的情况不做处理
+            return;
+        }
+        if (Test2.isSubtypeOf(getterActualType, setterActualType)) {
+            scripts.scriptOf("{}.{}({}.{}())", THAT, setter.getMethodName(), THIS, getter.getMethodName());
+            return;
+        }
+        if (Test2.isPrimitiveNumberSubtypeOf(getterActualType, setterActualType)) {
+            scripts.scriptOf("{}.{}({}.{}())", THAT, setter.getMethodName(), THIS, getter.getMethodName());
+            return;
+        }
+        if (Test2.isPrimitiveNumberSubtypeOf(setterActualType, getterActualType)) {
+            scripts.scriptOf("{}.{}(({}) {}.{}())", THAT, setter.getMethodName(),
+
+                setterActualType, THIS, getter.getMethodName());
+            return;
+        }
+    }
+
+    private boolean doMappingOnConversion(
+        JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
+    ) {
+        String setterActualType = setter.getPropertyActualType();
+        String getterActualType = getter.getPropertyActualType();
+        Conversion conversion = Conversion.findMatchedConversion(getterActualType, setterActualType);
+        if (conversion != null) {
+            if (Test2.isPrimitiveClass(getterActualType)) {
+                scripts.scriptOf("{}.{}({}.{}({}.{}()))",
+                    THAT,
+                    setter.getMethodName(),
+                    Import.nameOf(conversion.getConvertClass()),
+                    conversion.getConvertMethodName(),
+                    THIS,
+                    getter.getMethodName());
+            } else if (Test2.isPrimitiveClass(setterActualType)) {
+                String var = defineGetterValueVar(scripts, getter);
+                scripts.onIfNotNull(var).scriptOf("{}.{}({}.{}({}))", THAT, setter.getMethodName(),
+
+                    Import.nameOf(conversion.getConvertClass()), conversion.getConvertMethodName(), var);
+            } else {
+                String var = defineGetterValueVar(scripts, getter);
+                scripts.scriptOf("{}.{}({} == null ? null : {}.{}({}))", THAT, setter.getMethodName(), var,
+
+                    Import.nameOf(conversion.getConvertClass()), conversion.getConvertMethodName(), var);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private void doMappingToEnum(
+        JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
+    ) {
+        String setterActualType = setter.getPropertyActualType();
+        String getterActualType = getter.getPropertyActualType();
+
+        if (Test2.isSubtypeOf(getterActualType, String.class)) {
+            String var = defineGetterValueVar(scripts, getter);
+            scripts.scriptOf("{}.{}({} == null ? null : {}.valueOf({}))", THAT,
+
+                setter.getMethodName(), var, Import.nameOf(setterActualType), var);
+            return;
+        }
+        if (Test2.isPrimitiveNumberClass(getterActualType)) {
+            String constVar = defineEnumValues(scripts, setterActualType);
+            if (Test2.isPrimitiveNumberSubtypeOf(getterActualType, "long")) {
+                scripts.scriptOf("{}.{}({}[{}.{}()])", THAT,
+
+                    setter.getMethodName(), constVar, THIS, getter.getMethodName());
+            } else {
+                scripts.scriptOf("{}.{}({}[(int) {}.{}()])", THAT,
+
+                    setter.getMethodName(), constVar, THIS, getter.getMethodName());
+            }
+            return;
+        }
+        if (Test2.isSubtypeOf(getterActualType, Number.class)) {
+            String getterVar = defineGetterValueVar(scripts, getter);
+            String constVar = defineEnumValues(scripts, setterActualType);
+            String getterSimpleClass = getterActualType.replaceFirst(JAVA_DOT_LANG_DOT, "");
+            String getterPrimitiveClass = "Integer".equals(getterSimpleClass) ? INT_PRIMITIVE_CLASS
+                : getterSimpleClass.toLowerCase();
+            if (Test2.isPrimitiveNumberSubtypeOf(getterPrimitiveClass, "long")) {
+                scripts.scriptOf("{}.{}({} == null ? null : {}[{}])", THAT,
+
+                    setter.getMethodName(), getterVar, constVar, getterVar);
+            } else {
+                scripts.scriptOf("{}.{}({} == null ? null : {}[{}.intValue()])", THAT,
+
+                    setter.getMethodName(), getterVar, constVar, getterVar);
+            }
+            return;
+        }
+        if (Test2.isSubtypeOf(getterActualType, CharSequence.class)) {
+            String var = defineGetterValueVar(scripts, getter);
+            scripts.scriptOf("{}.{}({} == null ? null : {}.valueOf({}.toString()))", THAT,
+
+                setter.getMethodName(), var, Import.nameOf(setterActualType), var);
+            return;
+        }
+    }
+
+    private void doMappingToString(
+        JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
+    ) {
+        String getterActualType = getter.getPropertyActualType();
+        if (STRING_CLASS.equals(getterActualType)) {
+            scripts.scriptOf("{}.{}({}.{}())", THAT, setter.getMethodName(), THIS, getter.getMethodName());
+        } else if (Test2.isPrimitiveClass(getterActualType)) {
+            scripts.scriptOf("{}.{}({}.valueOf({}.{}()))", THAT,
+
+                setter.getMethodName(), Import.STRING, THIS, getter.getMethodName());
+        } else if (Test2.isEnumClass(getterActualType)) {
+            String var = defineGetterValueVar(scripts, getter);
+            scripts.scriptOf("{}.{}({} == null ? null : {}.name())", THAT, setter.getMethodName(), var, var);
+        } else {
+            String var = defineGetterValueVar(scripts, getter);
+            scripts.scriptOf("{}.{}({} == null ? null : {}.toString())", THAT, setter.getMethodName(), var, var);
+        }
+    }
+
+    private String defineGetterValueVar(JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared getter) {
+        String var = scripts.varsHelper().next();
+        String getterActualType = getter.getPropertyActualType();
+        scripts.scriptOf("{} {} = {}.{}()", Import.nameOf(getterActualType), var, THIS, getter.getMethodName());
+        return var;
+    }
+
+    private String defineEnumValues(JavaCodeBlockAddr<JavaElemMethod> scripts, String enumClassname) {
+        VarSupplier<JavaElemField> fieldsSupplier = scripts.fieldsHelper();
+        String constVar = fieldsSupplier.nextConstVar(enumClassname);
+        fieldsSupplier.declareField(constVar, "{}[]", enumClassname)
+            .assign()
+            .valueOfFormatted("{}.values()", Import.nameOf(enumClassname))
+            .end()
+            .modifierWithAll(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
+        return constVar;
+    }
+
+    private static final String INT_PRIMITIVE_CLASS = int.class.getCanonicalName();
+    private static final String STRING_CLASS = String.class.getCanonicalName();
+    private static final String INT_CAPITALIZED = String2.capitalize(int.class.getCanonicalName());
+    private static final String JAVA_DOT_LANG_DOT = "java.lang.";
 }

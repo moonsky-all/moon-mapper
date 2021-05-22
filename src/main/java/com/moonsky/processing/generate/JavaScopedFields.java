@@ -5,7 +5,7 @@ import com.moonsky.processing.util.Importer;
 /**
  * @author benshaoye
  */
-public class JavaScopedFields extends JavaScopedMembers<JavaElemField> {
+public class JavaScopedFields extends JavaScopedMembers<JavaElemField> implements VarSupplier<JavaElemField> {
 
     private final JavaScopedMethods scopedMethods;
     private final VarHelper vars;
@@ -22,10 +22,19 @@ public class JavaScopedFields extends JavaScopedMembers<JavaElemField> {
         this.vars = VarHelper.of(classname);
     }
 
+    @Override
     public String nextVar() { return vars.next(getMemberMap().keySet()); }
 
+    @Override
     public String nextConstVar() { return vars.nextConst(getMemberMap().keySet()); }
 
+    @Override
+    public String nextVar(Object key) { return vars.next(key, getMemberMap().keySet()); }
+
+    @Override
+    public String nextConstVar(Object key) { return vars.nextConst(key, getMemberMap().keySet()); }
+
+    @Override
     public JavaElemField declareField(String fieldName, String fieldTypeTemplate, Object... types) {
         JavaElemField field = newUsingField(fieldName, fieldTypeTemplate, types);
         getMemberMap().put(fieldName, field);

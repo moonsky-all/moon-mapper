@@ -1,10 +1,10 @@
 package com.moonsky.processing.generate;
 
 import com.moonsky.processing.util.Importer;
-import com.moonsky.processing.util.Log2;
 import com.moonsky.processing.util.Test2;
 
 import javax.lang.model.element.Modifier;
+import java.util.function.Supplier;
 
 import static com.moonsky.processing.generate.Modifier2.INTERFACE_METHODS_MODIFIERS;
 import static com.moonsky.processing.generate.Modifier2.METHODS_MODIFIERS;
@@ -23,19 +23,19 @@ public class JavaElemMethod extends JavaElemExecutable {
     public JavaElemMethod(
         Importer importer,
         String classname,
+        Supplier<VarSupplier<JavaElemField>> varsSupplier,
         JavaGenericsList genericsList,
         String methodName,
         JavaElemParametersList parameterList,
         boolean inInterface
     ) {
         super(importer, classname, JavaElementEnum.METHOD, parameterList);
-        this.scopedScripts = new JavaCodeBlockAddr(importer, this, true);
-        this.genericsList = genericsList;
-        this.methodName = methodName;
-        this.inInterface = inInterface;
-        this.returnType = "void";
         this.signature = String.join("#", methodName, parameterList.getSignature());
-        Log2.warn(this.signature);
+        this.scopedScripts = new JavaCodeBlockAddr<>(importer, signature, varsSupplier, this, true);
+        this.genericsList = genericsList;
+        this.inInterface = inInterface;
+        this.methodName = methodName;
+        typeOf(void.class);
     }
 
     @Override

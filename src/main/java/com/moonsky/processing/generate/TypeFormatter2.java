@@ -14,9 +14,9 @@ enum TypeFormatter2 {
     }
 
     public static String defaultVal(String type) {
-        if (Test2.isPrimitiveBool(type)) {
+        if (Test2.isPrimitiveBoolClass(type)) {
             return Boolean.FALSE.toString();
-        } else if (Test2.isPrimitive(type)) {
+        } else if (Test2.isPrimitiveClass(type)) {
             return "0";
         } else {
             return "null";

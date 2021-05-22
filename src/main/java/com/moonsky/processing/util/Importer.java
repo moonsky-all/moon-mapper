@@ -108,7 +108,7 @@ public class Importer {
         }
         if (importCached.containsKey(shortName)) {
             return fullName;
-        } else if (Test2.isPrimitive(fullName) || "void".equals(fullName)) {
+        } else if (Test2.isPrimitiveClass(fullName) || "void".equals(fullName)) {
             shortNameCached.put(fullName, fullName);
             return fullName;
         } else {

@@ -17,6 +17,6 @@ public enum Processing2 {
     public static Types getTypes() { return Holders.INSTANCE.getTypes(); }
 
     public static Messager getMessager() {
-        return Holders.INSTANCE.getEnvironment().getMessager();
+        return Holders.INSTANCE.getMessager();
     }
 }
