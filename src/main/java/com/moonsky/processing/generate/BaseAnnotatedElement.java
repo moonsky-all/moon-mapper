@@ -1,7 +1,7 @@
 package com.moonsky.processing.generate;
 
-import com.moonsky.mapper.annotation.CopierImplGenerated;
-import com.moonsky.mapper.annotation.MapperImplGenerated;
+import com.moonsky.mapper.annotation.Copier;
+import com.moonsky.mapper.annotation.Mapper;
 import com.moonsky.processing.util.Imported;
 import com.moonsky.processing.util.Importer;
 import com.moonsky.processing.util.Processing2;
@@ -180,14 +180,14 @@ public abstract class BaseAnnotatedElement extends AbstractModifierCapable {
 
     public BaseAnnotatedElement annotateCopierImplGenerated() {
         if (Imported.COPIER_IMPL_GENERATED) {
-            annotateOf(CopierImplGenerated.class);
+            annotateOf(Copier.class);
         }
         return this;
     }
 
     public BaseAnnotatedElement annotateMapperImplGenerated() {
         if (Imported.MAPPER_IMPL_GENERATED) {
-            annotateOf(MapperImplGenerated.class);
+            annotateOf(Mapper.class);
         }
         return this;
     }

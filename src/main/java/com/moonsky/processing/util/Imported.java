@@ -1,7 +1,7 @@
 package com.moonsky.processing.util;
 
-import com.moonsky.mapper.annotation.CopierImplGenerated;
-import com.moonsky.mapper.annotation.MapperImplGenerated;
+import com.moonsky.mapper.annotation.Copier;
+import com.moonsky.mapper.annotation.Mapper;
 import lombok.Data;
 import org.joda.time.ReadablePeriod;
 import org.joda.time.YearMonth;
@@ -54,8 +54,8 @@ public enum Imported {
         COMPONENT = nonException(() -> Component.class.toString());
         REPOSITORY = nonException(() -> Repository.class.toString());
         SAFE_VARARGS = nonException(() -> SafeVarargs.class.toString());
-        COPIER_IMPL_GENERATED = nonException(() -> CopierImplGenerated.class.toString());
-        MAPPER_IMPL_GENERATED = nonException(() -> MapperImplGenerated.class.toString());
+        COPIER_IMPL_GENERATED = nonException(() -> Copier.class.toString());
+        MAPPER_IMPL_GENERATED = nonException(() -> Mapper.class.toString());
     }
 
     public static boolean isImportedComponent() { return COMPONENT || REPOSITORY || SERVICE; }
