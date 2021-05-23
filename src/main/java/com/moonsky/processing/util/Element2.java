@@ -13,6 +13,7 @@ import static com.moonsky.processing.util.Processing2.getUtils;
 public enum Element2 {
     ;
 
+    @SuppressWarnings("all")
     public static <T> T cast(Object obj) { return (T) obj; }
 
     private final static Map<QualifiedNameable, String> QUALIFIED_NAME_CACHED = new IdentityHashMap<>();

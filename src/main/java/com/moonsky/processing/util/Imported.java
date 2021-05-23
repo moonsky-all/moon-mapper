@@ -24,59 +24,55 @@ import java.util.function.Supplier;
 public enum Imported {
     ;
 
-    public final static boolean BEAN;
     public final static boolean LOMBOK;
-    public final static boolean AUTOWIRED;
-    public final static boolean QUALIFIER;
-    public final static boolean GENERATED;
     public final static boolean JODA_TIME_1X;
     public final static boolean JODA_TIME_2X;
-    public final static boolean SERVICE;
-    public final static boolean COMPONENT;
-    public final static boolean REPOSITORY;
+    public final static boolean SPRING_BEAN;
+    public final static boolean SPRING_AUTOWIRED;
+    public final static boolean SPRING_QUALIFIER;
+    public final static boolean SPRING_SERVICE;
+    public final static boolean SPRING_COMPONENT;
+    public final static boolean SPRING_REPOSITORY;
+    public final static boolean SPRING_CONFIGURATION;
+    public final static boolean SPRING_CONDITIONAL_ON_MISSING_BEAN;
+    public final static boolean GENERATED;
     public final static boolean SAFE_VARARGS;
-    public final static boolean CONFIGURATION;
-    public final static boolean CONDITIONAL_ON_MISSING_BEAN;
     public final static boolean COPIER_IMPL_GENERATED;
     public final static boolean MAPPER_IMPL_GENERATED;
 
     static {
-        LOMBOK = nonException(() -> Data.class.toString());
-        CONFIGURATION = nonException(() -> Configuration.class.toString());
-        CONDITIONAL_ON_MISSING_BEAN = nonException(() -> ConditionalOnMissingBean.class.toString());
-        BEAN = nonException(() -> Bean.class.toString());
-        GENERATED = nonException(() -> Generated.class.toString());
-        JODA_TIME_1X = nonException(() -> ReadablePeriod.class.toString());
-        JODA_TIME_2X = nonException(() -> YearMonth.class.toString());
-        AUTOWIRED = nonException(() -> Autowired.class.toString());
-        QUALIFIER = nonException(() -> Qualifier.class.toString());
-        SERVICE = nonException(() -> Service.class.toString());
-        COMPONENT = nonException(() -> Component.class.toString());
-        REPOSITORY = nonException(() -> Repository.class.toString());
-        SAFE_VARARGS = nonException(() -> SafeVarargs.class.toString());
-        COPIER_IMPL_GENERATED = nonException(() -> Copier.class.toString());
-        MAPPER_IMPL_GENERATED = nonException(() -> Mapper.class.toString());
+        LOMBOK = isImported(() -> Data.class);
+        JODA_TIME_1X = isImported(() -> ReadablePeriod.class);
+        JODA_TIME_2X = isImported(() -> YearMonth.class);
+        SPRING_BEAN = isImported(() -> Bean.class);
+        SPRING_SERVICE = isImported(() -> Service.class);
+        SPRING_AUTOWIRED = isImported(() -> Autowired.class);
+        SPRING_QUALIFIER = isImported(() -> Qualifier.class);
+        SPRING_COMPONENT = isImported(() -> Component.class);
+        SPRING_REPOSITORY = isImported(() -> Repository.class);
+        SPRING_CONFIGURATION = isImported(() -> Configuration.class);
+        SPRING_CONDITIONAL_ON_MISSING_BEAN = isImported(() -> ConditionalOnMissingBean.class);
+        GENERATED = isImported(() -> Generated.class);
+        SAFE_VARARGS = isImported(() -> SafeVarargs.class);
+        COPIER_IMPL_GENERATED = isImported(() -> Copier.class);
+        MAPPER_IMPL_GENERATED = isImported(() -> Mapper.class);
     }
 
-    public static boolean isImportedComponent() { return COMPONENT || REPOSITORY || SERVICE; }
+    public static boolean isImportedComponent() { return SPRING_COMPONENT || SPRING_REPOSITORY || SPRING_SERVICE; }
 
     public static boolean isComponent(TypeElement element) {
-        if (COMPONENT && element.getAnnotation(Component.class) != null) {
+        if (SPRING_COMPONENT && element.getAnnotation(Component.class) != null) {
             return true;
         }
-        if (REPOSITORY && element.getAnnotation(Repository.class) != null) {
+        if (SPRING_REPOSITORY && element.getAnnotation(Repository.class) != null) {
             return true;
         }
-        if (SERVICE && element.getAnnotation(Service.class) != null) {
-            return true;
-        }
-        return false;
+        return SPRING_SERVICE && element.getAnnotation(Service.class) != null;
     }
 
-    private static boolean nonException(Supplier<String> runner) {
+    private static boolean isImported(Supplier<Class<?>> runner) {
         try {
-            runner.get();
-            return true;
+            return runner.get() != null;
         } catch (Throwable ignored) {
             return false;
         }

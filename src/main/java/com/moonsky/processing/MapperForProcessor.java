@@ -1,4 +1,4 @@
-package com.moonsky.processing.processor;
+package com.moonsky.processing;
 
 import com.google.auto.service.AutoService;
 import com.moonsky.mapper.annotation.MapperFor;
@@ -19,6 +19,10 @@ import static com.moonsky.processing.util.Extract2.getValueClasses;
 import static javax.lang.model.SourceVersion.latestSupported;
 
 /**
+ * 不建议在程序中使用包{@code com.moonsky.processing}以及子包中的任何内容
+ *
+ * 以后很可能将{@code com.moonsky.processing}剥离出去，作为一个单独的模块
+ *
  * @author benshaoye
  */
 @AutoService(Processor.class)

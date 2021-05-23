@@ -322,6 +322,45 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
             scripts.scriptOf("{}.{}(({}) {}.{}())", THAT, setter.getMethodName(),
 
                 setterActualType, THIS, getter.getMethodName());
+        } else if (Test2.isPrimitiveBoolClass(setterActualType)) {
+            if (Test2.isTypeof(getterActualType, Boolean.class)) {
+                String var = defineGetterValueVar(scripts, getter);
+                scripts.onIfNotNull(var).scriptOf("{}.{}({} != null && {})", THAT, setter.getMethodName(), var, var);
+            } else {
+                doMappingOnConversion(scripts, setter, getter);
+            }
+        } else if (Test2.isTypeof(setterActualType, Boolean.class)) {
+            if (Test2.isTypeof(getterActualType, boolean.class)) {
+                scripts.scriptOf("{}.{}({}.{}())", THAT, setter.getMethodName(), THIS, getter.getMethodName());
+            } else {
+                doMappingOnConversion(scripts, setter, getter);
+            }
+        } else if (Test2.isPrimitiveCharClass(setterActualType)) {
+            if (Test2.isTypeof(getterActualType, Character.class)) {
+                String var = defineGetterValueVar(scripts, getter);
+                scripts.onIfNotNull(var).scriptOf("{}.{}({})", THAT, setter.getMethodName(), var);
+            }
+        } else if (Test2.isTypeof(setterActualType, Character.class)) {
+            if (Test2.isPrimitiveCharClass(getterActualType)) {
+                scripts.scriptOf("{}.{}({}.{}())", THAT, setter.getMethodName(), THIS, getter.getMethodName());
+            }
+        }
+    }
+
+    private void doMappingString2Boolean(
+        JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
+    ){
+        String setterActualType = setter.getPropertyActualType();
+        String getterActualType = getter.getPropertyActualType();
+        if (Test2.isTypeof(getterActualType, String.class)) {
+            scripts.scriptOf("{}.{}({}.parseBoolean({}.{}()))", THAT,
+
+                setter.getMethodName(), Import.of(Boolean.class), THIS, getter.getMethodName());
+        } else if (Test2.isSubtypeOf(getterActualType, CharSequence.class)) {
+            String var = defineGetterValueVar(scripts, getter);
+            scripts.scriptOf("{}.{}({} != null && {}.parseBoolean({}.toString()))",
+
+                THAT, setter.getMethodName(), var, Import.of(Boolean.class), var);
         }
     }
 
@@ -330,26 +369,23 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
     ) {
         String setterActualType = setter.getPropertyActualType();
         String getterActualType = getter.getPropertyActualType();
-        Conversion conversion = Conversion.findMatchedConversion(getterActualType, setterActualType);
+        Conversion conversion = Conversion.findAssignedConversion(getterActualType, setterActualType);
         if (conversion != null) {
+            Import<String> convertClass = Import.nameOf(conversion.getConvertClass());
             if (Test2.isPrimitiveClass(getterActualType)) {
-                scripts.scriptOf("{}.{}({}.{}({}.{}()))",
-                    THAT,
-                    setter.getMethodName(),
-                    Import.nameOf(conversion.getConvertClass()),
-                    conversion.getConvertMethodName(),
-                    THIS,
-                    getter.getMethodName());
+                scripts.scriptOf("{}.{}({}.{}({}.{}()))", THAT, setter.getMethodName(),
+
+                    convertClass, conversion.getConvertMethodName(), THIS, getter.getMethodName());
             } else if (Test2.isPrimitiveClass(setterActualType)) {
                 String var = defineGetterValueVar(scripts, getter);
                 scripts.onIfNotNull(var).scriptOf("{}.{}({}.{}({}))", THAT, setter.getMethodName(),
 
-                    Import.nameOf(conversion.getConvertClass()), conversion.getConvertMethodName(), var);
+                    convertClass, conversion.getConvertMethodName(), var);
             } else {
                 String var = defineGetterValueVar(scripts, getter);
-                scripts.scriptOf("{}.{}({} == null ? null : {}.{}({}))", THAT, setter.getMethodName(), var,
+                scripts.scriptOf("{}.{}({} == null ? null : {}.{}({}))", THAT, setter.getMethodName(),
 
-                    Import.nameOf(conversion.getConvertClass()), conversion.getConvertMethodName(), var);
+                    var, convertClass, conversion.getConvertMethodName(), var);
             }
             return true;
         }

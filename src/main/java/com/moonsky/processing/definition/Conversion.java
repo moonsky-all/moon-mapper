@@ -58,12 +58,15 @@ public class Conversion {
                 continue;
             }
             ExecutableElement method = (ExecutableElement) element;
+            TypeMirror toMirror = method.getReturnType();
+            if (Test2.isTypeof(toMirror.toString(), void.class)) {
+                continue;
+            }
             List<? extends VariableElement> parameters = method.getParameters();
             if (parameters == null || parameters.size() != 1) {
                 continue;
             }
             TypeMirror fromMirror = parameters.get(0).asType();
-            TypeMirror toMirror = method.getReturnType();
             Conversion conversion = new Conversion(convertClass, method, fromMirror, toMirror);
             if (conversion.isUsable()) {
                 conversions.putIfAbsent(conversion.getUniqueKey(), conversion);
@@ -84,7 +87,7 @@ public class Conversion {
      *
      * @return
      */
-    public static Conversion findMatchedConversion(String fromClassname, String toClassname) {
+    public static Conversion findAssignedConversion(String fromClassname, String toClassname) {
         return loadConversions().get(forConversionKey(fromClassname, toClassname));
     }
 

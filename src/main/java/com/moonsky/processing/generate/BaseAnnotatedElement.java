@@ -140,14 +140,14 @@ public abstract class BaseAnnotatedElement extends AbstractModifierCapable {
     }
 
     public BaseAnnotatedElement annotateRepository() {
-        if (Imported.REPOSITORY) {
+        if (Imported.SPRING_REPOSITORY) {
             annotateOf(Repository.class);
         }
         return this;
     }
 
     public BaseAnnotatedElement annotateQualifier(String qualifierName) {
-        if (Imported.QUALIFIER) {
+        if (Imported.SPRING_QUALIFIER) {
             annotateOf(Qualifier.class, a -> a.stringOf("value", qualifierName));
         }
         return this;
@@ -163,7 +163,7 @@ public abstract class BaseAnnotatedElement extends AbstractModifierCapable {
     public BaseAnnotatedElement annotateAutowired() { return annotateAutowired(true); }
 
     public BaseAnnotatedElement annotateAutowired(boolean required) {
-        if (Imported.AUTOWIRED) {
+        if (Imported.SPRING_AUTOWIRED) {
             annotateOf(Autowired.class, annotation -> {
                 if (!required) {
                     annotation.falseOf("required");
@@ -193,7 +193,7 @@ public abstract class BaseAnnotatedElement extends AbstractModifierCapable {
     }
 
     public BaseAnnotatedElement annotateComponent() {
-        if (Imported.COMPONENT) {
+        if (Imported.SPRING_COMPONENT) {
             annotateOf(Component.class);
         }
         return this;

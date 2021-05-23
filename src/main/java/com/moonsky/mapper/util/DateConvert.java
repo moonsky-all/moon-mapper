@@ -15,7 +15,7 @@ import static java.time.ZoneId.systemDefault;
  */
 public abstract class DateConvert {
 
-    DateConvert() { throw new IllegalStateException(); }
+    DateConvert() { super(); }
 
     public static LocalDate toJdk8LocalDate(YearMonth value) {
         return LocalDate.of(value.getYear(), value.getMonthValue(), 1);
@@ -204,9 +204,6 @@ public abstract class DateConvert {
     public static Calendar toUtilCalendar(Timestamp value) { return toUtilCalendar(value.getTime()); }
 
     public static Calendar toUtilCalendar(Long value) {
-        if (value == null) {
-            return null;
-        }
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(value);
         return calendar;
