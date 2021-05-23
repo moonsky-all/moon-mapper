@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>com.github.moonsky-all</groupId>
+  <groupId>io.github.moonsky-all</groupId>
   <artifactId>moon-mapper</artifactId>
   <packaging>jar</packaging>
   <version>0.1</version>
@@ -77,7 +77,7 @@
             </executions>
             <configuration>
               <encoding>UTF-8</encoding>
-              <additionalparam>-Xdoclint:none</additionalparam>
+              <doclint>none</doclint>
             </configuration>
           </plugin>
 
@@ -158,6 +158,4 @@
       </plugin>
     </plugins>
   </build>
-
-
 </project>

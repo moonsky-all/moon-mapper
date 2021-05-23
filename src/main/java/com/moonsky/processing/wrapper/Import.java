@@ -4,6 +4,7 @@ import com.moonsky.processing.util.Importer;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
+import java.math.BigDecimal;
 import java.util.Objects;
 
 /**
@@ -12,6 +13,7 @@ import java.util.Objects;
 public class Import<T> {
 
     public static final Import<Class<?>> STRING = Import.of(String.class);
+    public static final Import<Class<?>> BIG_DECIMAL = Import.of(BigDecimal.class);
 
     private final T value;
     private final boolean classname;

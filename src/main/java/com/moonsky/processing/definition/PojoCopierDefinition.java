@@ -183,22 +183,21 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
     private void doMapping2BigDecimal(
         JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
     ) {
-        String setterActualType = setter.getPropertyActualType();
         String getterActualType = getter.getPropertyActualType();
         if (Test2.isPrimitiveNumberClass(getterActualType)) {
             scripts.scriptOf("{}.{}({}.valueOf({}.{}()))", THAT, setter.getMethodName(),
 
-                Import.of(BigDecimal.class), THIS, getter.getMethodName());
+                Import.BIG_DECIMAL, THIS, getter.getMethodName());
         } else if (Test2.isWrappedNumberClass(getterActualType)) {
             String var = defineGetterValueVar(scripts, getter);
             scripts.scriptOf("{}.{}({} == null ? null : {}.valueOf({}))", THAT,
 
-                setter.getMethodName(), var, Import.nameOf(setterActualType), var);
+                setter.getMethodName(), var, Import.BIG_DECIMAL, var);
         } else if (STRING_CLASS.equals(getterActualType)) {
             String var = defineGetterValueVar(scripts, getter);
             scripts.onStringIfNotEmpty(var).scriptOf("{}.{}(new {}({}))",
 
-                THAT, setter.getMethodName(), Import.of(BigDecimal.class), var);
+                THAT, setter.getMethodName(), Import.BIG_DECIMAL, var);
             scripts.onElse().scriptOf("{}.{}(null)", THAT, setter.getMethodName());
         } else if (BIG_INTEGER_CLASS.equals(getterActualType)
 
@@ -206,12 +205,12 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
             String var = defineGetterValueVar(scripts, getter);
             scripts.scriptOf("{}.{}({} == null ? null : new {}({}))", THAT,
 
-                setter.getMethodName(), var, Import.of(BigDecimal.class), var);
+                setter.getMethodName(), var, Import.BIG_DECIMAL, var);
         } else if (Test2.isSubtypeOf(getterActualType, Number.class)) {
             String var = defineGetterValueVar(scripts, getter);
             scripts.scriptOf("{}.{}({} == null ? null : {}.valueOf({}.doubleValue()))", THAT,
 
-                setter.getMethodName(), var, Import.of(BigDecimal.class), var);
+                setter.getMethodName(), var, Import.BIG_DECIMAL, var);
         }
     }
 
@@ -325,15 +324,15 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
         } else if (Test2.isPrimitiveBoolClass(setterActualType)) {
             if (Test2.isTypeof(getterActualType, Boolean.class)) {
                 String var = defineGetterValueVar(scripts, getter);
-                scripts.onIfNotNull(var).scriptOf("{}.{}({} != null && {})", THAT, setter.getMethodName(), var, var);
+                scripts.scriptOf("{}.{}({} != null && {})", THAT, setter.getMethodName(), var, var);
             } else {
-                doMappingOnConversion(scripts, setter, getter);
+                doMappingString2Boolean(scripts, setter, getter);
             }
         } else if (Test2.isTypeof(setterActualType, Boolean.class)) {
             if (Test2.isTypeof(getterActualType, boolean.class)) {
                 scripts.scriptOf("{}.{}({}.{}())", THAT, setter.getMethodName(), THIS, getter.getMethodName());
             } else {
-                doMappingOnConversion(scripts, setter, getter);
+                doMappingString2Boolean(scripts, setter, getter);
             }
         } else if (Test2.isPrimitiveCharClass(setterActualType)) {
             if (Test2.isTypeof(getterActualType, Character.class)) {
@@ -349,8 +348,7 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
 
     private void doMappingString2Boolean(
         JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
-    ){
-        String setterActualType = setter.getPropertyActualType();
+    ) {
         String getterActualType = getter.getPropertyActualType();
         if (Test2.isTypeof(getterActualType, String.class)) {
             scripts.scriptOf("{}.{}({}.parseBoolean({}.{}()))", THAT,
@@ -369,7 +367,7 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
     ) {
         String setterActualType = setter.getPropertyActualType();
         String getterActualType = getter.getPropertyActualType();
-        Conversion conversion = Conversion.findAssignedConversion(getterActualType, setterActualType);
+        Conversion conversion = Conversions.findAssignedConversion(getterActualType, setterActualType);
         if (conversion != null) {
             Import<String> convertClass = Import.nameOf(conversion.getConvertClass());
             if (Test2.isPrimitiveClass(getterActualType)) {
