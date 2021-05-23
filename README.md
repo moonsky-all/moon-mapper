@@ -27,7 +27,7 @@ public class CompanyDetail {
 public class EnterpriseDetail {
 
     // 获取映射器，这是一个简便方式
-    private static final BeanMapper MAPPER = MapperUtil.thisPrimary();
+    private static final BeanMapper MAPPER = Mapper2.thisPrimary();
 
     private String name;
 
@@ -60,7 +60,7 @@ public class EnterpriseDetail {
 public class UserEntity {
 
     // 取得映射器
-    private static final BeanMapper MAPPER = MapperUtil.get(UserVO.class, UserEntity.class);
+    private static final BeanMapper MAPPER = Mapper2.get(UserVO.class, UserEntity.class);
 
     private Date birthday;
 
@@ -85,7 +85,7 @@ public class UserEntity {
 public class UserVO {
 
     // 取得映射器，这种简单方式只能在注解有 MapperFor 的类使用
-    private static final BeanMapper MAPPER = MapperUtil.thisPrimary();
+    private static final BeanMapper MAPPER = Mapper2.thisPrimary();
 
     private String birthday;
 

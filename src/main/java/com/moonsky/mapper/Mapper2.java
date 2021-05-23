@@ -7,7 +7,7 @@ import static java.lang.Thread.currentThread;
 /**
  * @author benshaoye
  */
-public enum MapperUtil {
+public enum Mapper2 {
     ;
 
     private final static String MAPPER_FOR_NAME = MapperFor.class.getCanonicalName();
