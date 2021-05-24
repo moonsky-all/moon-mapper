@@ -3,6 +3,10 @@ A java bean properties mapper
 
 这是一个 Java Bean 属性复制器
 
+**Github**: [https://github.com/moonsky-all/moon-mapper](https://github.com/moonsky-all/moon-mapper)
+
+**Gitee**: [https://gitee.com/moonsky-all/moon-mapper](https://gitee.com/moonsky-all/moon-mapper)
+
 ### 一、 安装
 ``` xml
 <dependency>
