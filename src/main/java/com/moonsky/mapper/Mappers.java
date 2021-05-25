@@ -1,6 +1,7 @@
 package com.moonsky.mapper;
 
 import com.moonsky.mapper.annotation.MapperFor;
+import com.moonsky.mapper.util.CopierNotFoundException;
 import com.moonsky.mapper.util.Keyword;
 
 import java.util.Map;
@@ -14,11 +15,11 @@ public enum Mappers {
     private final static Map<String, BeanMapper<?, ?>> MAPPER_MAP = new ConcurrentHashMap<>();
     private final static Map<String, BeanCopier<?, ?>> COPIER_MAP = new ConcurrentHashMap<>();
 
-    static Class<?> forName(String classname) {
+    static Class<?> forName(String classname, Keyword keyword) {
         try {
             return Class.forName(classname);
         } catch (ClassNotFoundException e) {
-            throw new IllegalStateException(e);
+            throw keyword.newException(classname, e);
         }
     }
 
@@ -30,7 +31,7 @@ public enum Mappers {
         final String cachedKey = keyOf(fromClass, toClass);
         BeanMapper<?, ?> mapper = MAPPER_MAP.get(cachedKey);
         if (mapper == null) {
-            mapper = load(Keyword.MAPPER, fromClass, toClass);
+            mapper = load(Keyword.MAPPER, fromClass, toClass, false);
             MAPPER_MAP.put(cachedKey, mapper);
         }
         return cast(mapper);
@@ -40,35 +41,50 @@ public enum Mappers {
         final String cachedKey = keyOf(fromClass, toClass);
         BeanCopier<?, ?> copier = COPIER_MAP.get(cachedKey);
         if (copier == null) {
-            copier = load(Keyword.COPIER, fromClass, toClass);
+            try {
+                copier = load(Keyword.COPIER, fromClass, toClass, false);
+            } catch (CopierNotFoundException e) {
+                try {
+                    copier = load(Keyword.COPIER, fromClass, toClass, true);
+                } catch (CopierNotFoundException ignored) {
+                    throw e;
+                }
+            }
             COPIER_MAP.put(cachedKey, copier);
         }
         return cast(copier);
     }
 
     private static <T> T load(
-        Keyword keyword, Class<?> fromClass, Class<?> toClass
+        Keyword keyword, Class<?> fromClass, Class<?> toClass, boolean reverse
     ) {
         MapperFor targetMapperFor = null;
-        MapperFor[] mapperForAll = fromClass.getAnnotationsByType(MapperFor.class);
+        Class<?> targetClass = reverse ? fromClass : toClass;
+        Class<?> annotatedClass = reverse ? toClass : fromClass;
+        MapperFor[] mapperForAll = annotatedClass.getAnnotationsByType(MapperFor.class);
         for (int i = mapperForAll.length - 1; i > -1; i--) {
-            targetMapperFor = mapperForAll[i];
-            for (Class<?> aClass : targetMapperFor.value()) {
-                if (aClass == toClass) {
+            MapperFor temp = mapperForAll[i];
+            for (Class<?> aClass : temp.value()) {
+                if (aClass == targetClass) {
+                    targetMapperFor = temp;
                     break;
                 }
             }
         }
         if (targetMapperFor == null) {
-            throw new IllegalStateException("未知映射信息");
+            throw keyword.newException("未知映射信息, 请检查" +
+                annotatedClass.getCanonicalName() +
+                "类是否被 MapperFor 注解，且包含有效值：" +
+                targetClass.getCanonicalName());
         }
         String packageName = Keyword.getPackageName(fromClass);
         String simpleName = Keyword.with(targetMapperFor, fromClass, toClass, keyword);
         String classname = String.join(".", packageName, simpleName);
         try {
-            return cast(forName(classname).newInstance());
+            return cast(forName(classname, keyword).newInstance());
         } catch (InstantiationException | IllegalAccessException e) {
-            throw new IllegalStateException("Mapper|Copier 实例化异常", e);
+            String type = Keyword.capitalize(keyword.name().toLowerCase());
+            throw keyword.newException(type + " 实例化异常", e);
         }
     }
 

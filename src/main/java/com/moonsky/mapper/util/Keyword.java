@@ -2,15 +2,37 @@ package com.moonsky.mapper.util;
 
 import com.moonsky.mapper.annotation.MapperFor;
 
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 /**
  * @author benshaoye
  */
 @SuppressWarnings("all")
 public enum Keyword {
     /** copier */
-    COPIER,
+    COPIER(CopierNotFoundException::new, CopierNotFoundException::new),
     /** mapper */
-    MAPPER;
+    MAPPER(MapperNotFoundException::new, MapperNotFoundException::new);
+
+    private final Function<String, RuntimeException> stringBuilder;
+    private final BiFunction<String, Throwable, RuntimeException> messageCauseBuilder;
+
+    Keyword(
+        Function<String, RuntimeException> stringBuilder,
+        BiFunction<String, Throwable, RuntimeException> messageCauseBuilder
+    ) {
+        this.messageCauseBuilder = messageCauseBuilder;
+        this.stringBuilder = stringBuilder;
+    }
+
+    public RuntimeException newException(String message) {
+        return stringBuilder.apply(message);
+    }
+
+    public RuntimeException newException(String message, Throwable cause) {
+        return messageCauseBuilder.apply(message, cause);
+    }
 
     public static String mapperOf(MapperFor mapperFor, String thisClass, String thatClass) {
         return with(mapperFor, thisClass, thatClass, Keyword.MAPPER);

@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static com.moonsky.processing.declared.ExecutionEnum.GETTER_METHOD;
 import static com.moonsky.processing.declared.ExecutionEnum.SETTER_METHOD;
@@ -23,6 +24,7 @@ import static com.moonsky.processing.declared.PropertyMethodEnum.SETTER;
  */
 public class PropertyMethodDeclared extends MethodDeclared {
 
+    private final Supplier<FieldDeclared> fieldGetter;
     private final TypeDeclared propertyTypeDeclared;
 
     protected PropertyMethodDeclared(
@@ -31,6 +33,7 @@ public class PropertyMethodDeclared extends MethodDeclared {
         TypeElement enclosingElement,
         GenericsMap superGenericsMap,
         ExecutableElement executableElement,
+        Supplier<FieldDeclared> fieldGetter,
         String methodName
     ) {
         super(holders,
@@ -40,6 +43,7 @@ public class PropertyMethodDeclared extends MethodDeclared {
             executableElement,
             methodName.startsWith(Const2.SET) ? SETTER_METHOD : GETTER_METHOD);
         this.propertyTypeDeclared = toPropertyTypeDeclared();
+        this.fieldGetter = fieldGetter;
     }
 
     private TypeDeclared toPropertyTypeDeclared() {
@@ -48,6 +52,24 @@ public class PropertyMethodDeclared extends MethodDeclared {
         } else {
             return getParameterAt(0).toTypeDeclared();
         }
+    }
+
+    private FieldDeclared getFieldDeclared() { return fieldGetter.get(); }
+
+    public <A extends Annotation> A[] getFieldAnnotations(Class<A> annotationType) {
+        FieldDeclared fieldDeclared = this.getFieldDeclared();
+        if (fieldDeclared == null) {
+            @SuppressWarnings("all")
+            A[] array = (A[]) Array.newInstance(annotationType, 0);
+            return array;
+        }
+        VariableElement fieldElement = fieldDeclared.getFieldElement();
+        if (fieldElement == null) {
+            @SuppressWarnings("all")
+            A[] array = (A[]) Array.newInstance(annotationType, 0);
+            return array;
+        }
+        return fieldElement.getAnnotationsByType(annotationType);
     }
 
     public String getPropertyActualType() { return getPropertyTypeDeclared().getActual(); }
@@ -91,13 +113,15 @@ public class PropertyMethodDeclared extends MethodDeclared {
             TypeElement thisElement,
             TypeElement enclosingElement,
             GenericsMap superGenericsMap,
-            ExecutableElement executableElement
+            ExecutableElement executableElement,
+            Supplier<FieldDeclared> fieldGetter
         ) {
             super(holders,
                 thisElement,
                 enclosingElement,
                 superGenericsMap,
                 executableElement,
+                fieldGetter,
                 executableElement.getSimpleName().toString());
         }
 
@@ -113,7 +137,8 @@ public class PropertyMethodDeclared extends MethodDeclared {
                 thisElement,
                 enclosingElement,
                 superGenericsMap,
-                new LombokFieldExecutableElement(holders, fieldDeclared, methodEnum));
+                new LombokFieldExecutableElement(holders, fieldDeclared, methodEnum),
+                () -> fieldDeclared);
         }
     }
 

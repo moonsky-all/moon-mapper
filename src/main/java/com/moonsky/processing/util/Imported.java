@@ -3,8 +3,10 @@ package com.moonsky.processing.util;
 import com.moonsky.mapper.annotation.Copier;
 import com.moonsky.mapper.annotation.Mapper;
 import lombok.Data;
+import org.joda.time.LocalDateTime;
 import org.joda.time.ReadablePeriod;
 import org.joda.time.YearMonth;
+import org.joda.time.Years;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -25,7 +27,9 @@ public enum Imported {
     ;
 
     public final static boolean LOMBOK;
-    public final static boolean JODA_TIME_1X;
+    public final static boolean JODA_TIME_1X0;
+    public final static boolean JODA_TIME_1X3;
+    public final static boolean JODA_TIME_1X4;
     public final static boolean JODA_TIME_2X;
     public final static boolean SPRING_BEAN;
     public final static boolean SPRING_AUTOWIRED;
@@ -42,7 +46,9 @@ public enum Imported {
 
     static {
         LOMBOK = isImported(() -> Data.class);
-        JODA_TIME_1X = isImported(() -> ReadablePeriod.class);
+        JODA_TIME_1X0 = isImported(() -> ReadablePeriod.class);
+        JODA_TIME_1X3 = isImported(() -> LocalDateTime.class);
+        JODA_TIME_1X4 = isImported(() -> Years.class);
         JODA_TIME_2X = isImported(() -> YearMonth.class);
         SPRING_BEAN = isImported(() -> Bean.class);
         SPRING_SERVICE = isImported(() -> Service.class);

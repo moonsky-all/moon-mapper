@@ -4,6 +4,10 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.joda.time.MonthDay;
+import org.joda.time.ReadableInstant;
+import org.joda.time.ReadablePeriod;
+import org.joda.time.YearMonth;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.TypeKind;
@@ -130,6 +134,20 @@ public enum Test2 {
 
     public static boolean isMemberField(Element elem) {
         return isMember(elem) && isField(elem);
+    }
+
+    public static boolean isTypeofAny(String actual, Class<?> expected, Class<?>... classes) {
+        if (isTypeof(expected.getCanonicalName(), actual)) {
+            return true;
+        }
+        if (classes != null) {
+            for (Class<?> klass : classes) {
+                if (isTypeof(klass.getCanonicalName(), actual)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public static boolean isTypeof(String actual, Class<?> expected) {
@@ -326,5 +344,15 @@ public enum Test2 {
     public static boolean isSubtypeOf(TypeElement thisElem, TypeElement superElem) {
         Types types = Processing2.getTypes();
         return thisElem != null && superElem != null && types.isSubtype(thisElem.asType(), superElem.asType());
+    }
+
+    public static boolean isImportedAndJodaDateClass(String actualType) {
+        if (Imported.JODA_TIME_2X && isTypeofAny(actualType, YearMonth.class, MonthDay.class)) {
+            return true;
+        }
+        if (Imported.JODA_TIME_1X0) {
+            return isSubtypeOf(actualType, ReadableInstant.class) || isSubtypeOf(actualType, ReadablePeriod.class);
+        }
+        return false;
     }
 }

@@ -89,7 +89,7 @@ public abstract class BaseExecuteDeclarable extends BaseDeclarable {
 
     public String getSignature() { return parametersSignature; }
 
-    public <A extends Annotation> A[] getAnnotations(Class<A> annotationType) {
+    public <A extends Annotation> A[] getMethodAnnotations(Class<A> annotationType) {
         return getExecutableElement().getAnnotationsByType(annotationType);
     }
 }

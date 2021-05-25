@@ -36,7 +36,7 @@ public enum Conversions {
                 String convertClass;
                 if (Imported.JODA_TIME_2X) {
                     convertClass = Joda2xConvert.class.getCanonicalName();
-                } else if (Imported.JODA_TIME_1X) {
+                } else if (Imported.JODA_TIME_1X0) {
                     convertClass = Joda1xConvert.class.getCanonicalName();
                 } else {
                     convertClass = DateConvert.class.getCanonicalName();
@@ -119,5 +119,10 @@ public enum Conversions {
      */
     public static Conversion findAssignedConversion(String fromClassname, String toClassname) {
         return loadConversions().get(forConversionKey(fromClassname, toClassname));
+    }
+
+    public static Conversion findAssignedConversion(Class<?> fromClass, Class<?> toClass) {
+        // DateTimeFormat.forPattern("").parse
+        return findAssignedConversion(fromClass.getCanonicalName(), toClass.getCanonicalName());
     }
 }

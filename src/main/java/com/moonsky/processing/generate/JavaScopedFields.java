@@ -35,6 +35,11 @@ public class JavaScopedFields extends JavaScopedMembers<JavaElemField> implement
     public String nextConstVar(Object key) { return vars.nextConst(key, getMemberMap().keySet()); }
 
     @Override
+    public boolean contains(String fieldName) {
+        return getMemberMap().containsKey(fieldName);
+    }
+
+    @Override
     public JavaElemField declareField(String fieldName, String fieldTypeTemplate, Object... types) {
         JavaElemField field = newUsingField(fieldName, fieldTypeTemplate, types);
         getMemberMap().put(fieldName, field);

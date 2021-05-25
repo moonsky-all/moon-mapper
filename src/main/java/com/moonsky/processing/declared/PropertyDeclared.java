@@ -203,6 +203,7 @@ public class PropertyDeclared extends BaseDeclarable {
             (TypeElement) elem.getEnclosingElement(),
             getThisGenericsMap(),
             elem,
+            this::getOriginFieldDeclared,
             Element2.getSimpleName(elem));
     }
 
@@ -218,6 +219,7 @@ public class PropertyDeclared extends BaseDeclarable {
                 (TypeElement) elem.getEnclosingElement(),
                 getThisGenericsMap(),
                 elem,
+                this::getOriginFieldDeclared,
                 Element2.getSimpleName(elem)));
     }
 

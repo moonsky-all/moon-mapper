@@ -1,10 +1,16 @@
 package com.moonsky.mapper;
 
 import com.moonsky.mapper.annotation.MapperFor;
+import com.moonsky.mapper.util.Keyword;
+import com.moonsky.mapper.util.MapperNotFoundException;
 
 import static java.lang.Thread.currentThread;
 
 /**
+ * Mapper 映射工具
+ * <p>
+ * {@code 2}与{@code tool}近音，{@code Mapper2}意为{@code Mapper}工具
+ *
  * @author benshaoye
  */
 public enum Mapper2 {
@@ -13,7 +19,7 @@ public enum Mapper2 {
     private final static String MAPPER_FOR_NAME = MapperFor.class.getCanonicalName();
 
     private static Class<?> thisClass() {
-        return Mappers.forName(currentThread().getStackTrace()[3].getClassName());
+        return Mappers.forName(currentThread().getStackTrace()[3].getClassName(), Keyword.MAPPER);
     }
 
     /**
@@ -46,14 +52,14 @@ public enum Mapper2 {
         Class<F> fromClass = Mappers.cast(thisClass());
         MapperFor[] mapperForAll = fromClass.getAnnotationsByType(MapperFor.class);
         if (mapperForAll.length == 0) {
-            throw new IllegalStateException("未知映射目标，请检查 " +
+            throw new MapperNotFoundException("未知映射目标，请检查 " +
                 fromClass.getCanonicalName() +
                 " 是否添加注解: " +
                 MAPPER_FOR_NAME);
         }
         Class<?>[] toClasses = mapperForAll[0].value();
         if (toClasses.length == 0) {
-            throw new IllegalStateException("未知映射目标，请检查 " +
+            throw new MapperNotFoundException("未知映射目标，请检查 " +
                 fromClass.getCanonicalName() +
                 " 注解: " +
                 MAPPER_FOR_NAME +

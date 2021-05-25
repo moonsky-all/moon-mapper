@@ -52,12 +52,13 @@ public class EnterpriseDetail {
 2. 基本数据类型对应的包装类，如: `Boolean`, `Character`, `Integer` 等;
 3. `java.util`, `java.sql`, `java.time`, `joda-time` 日期类型之间的互相转换;
 4. `java.math.BigDecimal`, `java.math.BigInteger`
-5. 枚举
+5. 枚举;
+6. 日期/数字与字符串之间的解析和格式化，使用注解`MappingFormat`;
 
-当然，不同数据类型之间的转换方式各异，也并不是支持所有的转换，比如`BigDecimal`与`Date`之间的转换就是不符合日常使用习惯的，这样的转换没有默认提供，如存在类似不符合日常习惯的属性会默认忽略。
+当然，不同数据类型之间的转换方式各异，也并不是支持所有的转换，比如`BigDecimal`与`Date`之间的转换是不符合日常使用习惯的，这样的转换没有默认提供，类似不符合日常习惯的属性会忽略。
 
 ### 四、 基于`setter`方法重载的类型转换器
-上面提到了默认的数据类型自动转换功能，但是有些情况下肯定是不能满足使用场景的，而且`mapper`暂时没有提供日期与字符串之间的格式化转换的功能，
+上面提到了默认的数据类型自动转换功能，但是有些情况下肯定是不能满足使用场景的，
 所以另外提供了基于`setter`重载的自定义转换器，由于`java`语言特性，同名不同参数类型的方法可以重载，
 当为字段提供另一个不同数据类型的`setter`方法时，这里就相当于提供了一个指定类型的数据转换器，如:
 ``` java
@@ -105,6 +106,7 @@ public class UserVO {
     // other fields, setters, getters
 }
 ```
+**基于`setter`的转换器优先级高于默认类型转换**
 
 ### 五、 支持`Spring`注入
 `moon-mapper`使用的是静态编译，和手写`setter`、`getter`一样，性能有保证，而且在`Spring`环境里会自动加上`Component`注解，如果所在包能被`Spring`扫描到就能使用`Spring`的一些特性，如`Autowired`
