@@ -1,7 +1,7 @@
 # moon-mapper
 A java bean properties mapper
 
-这是一个 Java Bean 属性复制器
+这是一个 Java Bean 属性映射器
 
 **Github**: [https://github.com/moonsky-all/moon-mapper](https://github.com/moonsky-all/moon-mapper)
 
@@ -10,7 +10,7 @@ A java bean properties mapper
 ### 一、 安装
 ``` xml
 <dependency>
-  <groupId>com.github.moonsky-all</groupId>
+  <groupId>io.github.moonsky-all</groupId>
   <artifactId>moon-mapper</artifactId>
   <version>0.1</version>
 </dependency>
