@@ -10,7 +10,7 @@ A java bean properties mapper
 ### 一、 安装
 ``` xml
 <dependency>
-  <groupId>com.github.moonsky-all</groupId>
+  <groupId>io.github.moonsky-all</groupId>
   <artifactId>moon-mapper</artifactId>
   <version>0.1</version>
 </dependency>
