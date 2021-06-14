@@ -4,8 +4,9 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 /**
  * @author benshaoye
@@ -14,7 +15,7 @@ public class Importer {
 
     private final static Map<String, String> GENERICS_MAP = new HashMap<>();
 
-    private final static String EMPTY = "", VARARGS = "...";
+    private final static String EMPTY = "", VARARGS = "...", DOT = ".", LANG_PACKAGE = "java.lang";
 
     private final Map<String, String> shortNameCached = new HashMap<>();
     private final Map<String, String> importCached = new TreeMap<>();
@@ -39,7 +40,7 @@ public class Importer {
         StringBuilder result = new StringBuilder();
         StringBuilder cache = new StringBuilder();
 
-        boolean prevCharIdBlank = false;
+        boolean prevCharIsBlank = false;
         for (int i = 0; i < length; i++) {
             char ch = classname.charAt(i);
             switch (ch) {
@@ -54,21 +55,21 @@ public class Importer {
                     if (ch == ',') {
                         result.append(' ');
                     }
-                    prevCharIdBlank = false;
+                    prevCharIsBlank = false;
                     break;
                 case '?':
                 case '&':
                     result.append(ch);
-                    prevCharIdBlank = false;
+                    prevCharIsBlank = false;
                     break;
                 case ' ':
-                    if (!prevCharIdBlank) {
-                        prevCharIdBlank = true;
+                    if (!prevCharIsBlank) {
+                        prevCharIsBlank = true;
                         cache.append(ch);
                     }
                     break;
                 default:
-                    prevCharIdBlank = false;
+                    prevCharIsBlank = false;
                     cache.append(ch);
             }
         }
@@ -102,13 +103,14 @@ public class Importer {
             return shortName;
         }
         shortName = Element2.getSimpleName(fullName);
-        if (fullName.equals(packageName + "." + shortName)) {
-            shortNameCached.put(shortName, fullName);
+        if (isPackageOf(fullName, shortName, packageName)) {
+            shortNameCached.put(fullName, shortName);
             return shortName;
         }
-        if (importCached.containsKey(shortName)) {
+        String imported = importCached.get(shortName);
+        if (String2.isNotBlank(imported) && !Objects.equals(imported, fullName)) {
             return fullName;
-        } else if (Test2.isPrimitiveClass(fullName) || "void".equals(fullName)) {
+        } else if (Test2.isPrimitiveClass(fullName) || Test2.isVoid(fullName)) {
             shortNameCached.put(fullName, fullName);
             return fullName;
         } else {
@@ -120,17 +122,27 @@ public class Importer {
                     GENERICS_MAP.put(fullName, shortName);
                     return shortName;
                 }
-                importCached.put(shortName, "import " + fullName.trim() + ";");
-            } else if (!(fullName.startsWith("java.lang.") && fullName.split("\\.").length == 3)) {
-                importCached.put(shortName, "import " + fullName.trim() + ";");
+                importCached.put(shortName, fullName.trim());
+            } else if (!isPackageOf(fullName, shortName, LANG_PACKAGE)) {
+                importCached.put(shortName, fullName.trim());
             }
             shortNameCached.put(fullName, shortName);
             return shortName;
         }
     }
 
+    private static boolean isPackageOf(String fullName, String shortName, String expectedPackage) {
+        return (expectedPackage.endsWith(DOT) ? (expectedPackage + shortName)
+            : (expectedPackage + DOT + shortName)).equals(fullName);
+    }
+
     @Override
     public String toString() { return toString(EMPTY); }
 
-    public String toString(String delimiter) { return String.join(delimiter, new TreeSet<>(importCached.values())); }
+    public String toString(String delimiter) {
+        return importCached.values()
+            .stream()
+            .map(name -> "import " + name + ";")
+            .collect(Collectors.joining(delimiter));
+    }
 }

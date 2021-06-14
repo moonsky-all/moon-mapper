@@ -2,7 +2,7 @@ package com.moonsky.processing.generate;
 
 import com.moonsky.mapper.annotation.Copier;
 import com.moonsky.mapper.annotation.Mapper;
-import com.moonsky.processing.util.Imported;
+import com.moonsky.processing.util.Import2;
 import com.moonsky.processing.util.Importer;
 import com.moonsky.processing.util.Processing2;
 import com.moonsky.processing.util.String2;
@@ -130,7 +130,7 @@ public abstract class BaseAnnotatedElement extends AbstractModifierCapable {
     public BaseAnnotatedElement annotateGenerated() { return annotateGeneratedBy(Processor.class); }
 
     public BaseAnnotatedElement annotateGeneratedBy(Class<?> target) {
-        if (Imported.GENERATED) {
+        if (Import2.GENERATED) {
             annotateOf(Generated.class, annotation -> {
                 annotation.stringOf("date", DATETIME);
                 annotation.stringOf("value", target.getCanonicalName());
@@ -140,14 +140,14 @@ public abstract class BaseAnnotatedElement extends AbstractModifierCapable {
     }
 
     public BaseAnnotatedElement annotateRepository() {
-        if (Imported.SPRING_REPOSITORY) {
+        if (Import2.SPRING_REPOSITORY) {
             annotateOf(Repository.class);
         }
         return this;
     }
 
     public BaseAnnotatedElement annotateQualifier(String qualifierName) {
-        if (Imported.SPRING_QUALIFIER) {
+        if (Import2.SPRING_QUALIFIER) {
             annotateOf(Qualifier.class, a -> a.stringOf("value", qualifierName));
         }
         return this;
@@ -163,7 +163,7 @@ public abstract class BaseAnnotatedElement extends AbstractModifierCapable {
     public BaseAnnotatedElement annotateAutowired() { return annotateAutowired(true); }
 
     public BaseAnnotatedElement annotateAutowired(boolean required) {
-        if (Imported.SPRING_AUTOWIRED) {
+        if (Import2.SPRING_AUTOWIRED) {
             annotateOf(Autowired.class, annotation -> {
                 if (!required) {
                     annotation.falseOf("required");
@@ -179,21 +179,21 @@ public abstract class BaseAnnotatedElement extends AbstractModifierCapable {
     }
 
     public BaseAnnotatedElement annotateCopierImplGenerated() {
-        if (Imported.COPIER_IMPL_GENERATED) {
+        if (Import2.COPIER_IMPL_GENERATED) {
             annotateOf(Copier.class);
         }
         return this;
     }
 
     public BaseAnnotatedElement annotateMapperImplGenerated() {
-        if (Imported.MAPPER_IMPL_GENERATED) {
+        if (Import2.MAPPER_IMPL_GENERATED) {
             annotateOf(Mapper.class);
         }
         return this;
     }
 
     public BaseAnnotatedElement annotateComponent() {
-        if (Imported.SPRING_COMPONENT) {
+        if (Import2.SPRING_COMPONENT) {
             annotateOf(Component.class);
         }
         return this;

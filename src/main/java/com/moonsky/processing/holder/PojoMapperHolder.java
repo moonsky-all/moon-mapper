@@ -1,6 +1,6 @@
 package com.moonsky.processing.holder;
 
-import com.moonsky.mapper.annotation.MapperFor;
+import com.moonsky.mapper.annotation.MapperNaming;
 import com.moonsky.processing.definition.PojoCopierDefinition;
 import com.moonsky.processing.definition.PojoMapperDefinition;
 import com.moonsky.processing.processor.JavaFiler;
@@ -21,22 +21,22 @@ public class PojoMapperHolder extends AbstractHolder implements JavaWritable {
 
     public PojoMapperHolder(Holders holders) { super(holders); }
 
-    public PojoMapperDefinition with(MapperFor mapperFor, TypeElement thisElement, TypeElement thatElement) {
+    public PojoMapperDefinition with(MapperNaming naming, TypeElement thisElement, TypeElement thatElement) {
         String thisName = Element2.getQualifiedName(thisElement);
         String thatName = Element2.getQualifiedName(thatElement);
         String mappedKey = String2.keyOf(thisName, thatName);
         PojoMapperDefinition record = mapperRecordMap.get(mappedKey);
         if (record == null) {
-            PojoCopierDefinition forward = copierOf(mapperFor, thisElement, thatElement);
-            PojoCopierDefinition backward = copierOf(mapperFor, thatElement, thisElement);
-            record = new PojoMapperDefinition(getHolders(), mapperFor, forward, backward);
+            PojoCopierDefinition forward = copierOf(naming, thisElement, thatElement);
+            PojoCopierDefinition backward = copierOf(naming, thatElement, thisElement);
+            record = new PojoMapperDefinition(getHolders(), naming, forward, backward);
             mapperRecordMap.put(mappedKey, record);
         }
         return record;
     }
 
-    private PojoCopierDefinition copierOf(MapperFor mapperFor, TypeElement thisElement, TypeElement thatElement) {
-        return pojoCopierHolder().with(mapperFor, thisElement, thatElement);
+    private PojoCopierDefinition copierOf(MapperNaming naming, TypeElement thisElement, TypeElement thatElement) {
+        return pojoCopierHolder().with(naming, thisElement, thatElement);
     }
 
     @Override

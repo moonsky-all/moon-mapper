@@ -7,7 +7,7 @@
   <groupId>io.github.moonsky-all</groupId>
   <artifactId>moon-mapper</artifactId>
   <packaging>jar</packaging>
-  <version>0.1</version>
+  <version>0.2</version>
 
   <name>moon-mapper</name>
   <description>A java bean properties mapper.</description>

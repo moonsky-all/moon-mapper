@@ -2,6 +2,7 @@ package com.moonsky.processing.util;
 
 import javax.lang.model.element.*;
 import javax.lang.model.type.MirroredTypeException;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.function.Function;
 
@@ -20,6 +21,11 @@ public enum Element2 {
 
     public static TypeElement getTypeElement(String classname) {
         return Processing2.getUtils().getTypeElement(classname);
+    }
+
+    @SuppressWarnings("all")
+    public static <T> T[] newArray(Class<T> type, int length) {
+        return (T[]) Array.newInstance(type, length);
     }
 
     @SuppressWarnings("all")

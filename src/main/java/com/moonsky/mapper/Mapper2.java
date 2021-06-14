@@ -1,13 +1,21 @@
 package com.moonsky.mapper;
 
 import com.moonsky.mapper.annotation.MapperFor;
-import com.moonsky.mapper.util.Keyword;
+import com.moonsky.mapper.util.NamingStrategy;
 import com.moonsky.mapper.util.MapperNotFoundException;
 
 import static java.lang.Thread.currentThread;
 
 /**
- * Mapper 映射工具
+ * Mapper 映射工具访问器
+ * <p>
+ * <a href="https://github.com/moonsky-all/moon-mapper">
+ * https://github.com/moonsky-all/moon-mapper
+ * </a>
+ * <p>
+ * <a href="https://gitee.com/moonsky-all/moon-mapper">
+ * https://gitee.com/moonsky-all/moon-mapper
+ * </a>
  * <p>
  * {@code 2}与{@code tool}近音，{@code Mapper2}意为{@code Mapper}工具
  *
@@ -19,7 +27,7 @@ public enum Mapper2 {
     private final static String MAPPER_FOR_NAME = MapperFor.class.getCanonicalName();
 
     private static Class<?> thisClass() {
-        return Mappers.forName(currentThread().getStackTrace()[3].getClassName(), Keyword.MAPPER);
+        return Mappers.forName(currentThread().getStackTrace()[3].getClassName(), NamingStrategy.MAPPER);
     }
 
     /**

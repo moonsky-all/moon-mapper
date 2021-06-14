@@ -1,12 +1,8 @@
 package com.moonsky.mapper.util;
 
 
-import java.math.BigDecimal;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.Calendar;
 import java.util.Date;
@@ -15,6 +11,8 @@ import static java.time.Instant.ofEpochMilli;
 import static java.time.ZoneId.systemDefault;
 
 /**
+ * JDK 自带各种类型日期转换
+ *
  * @author benshaoye
  */
 public abstract class DateConvert {
@@ -35,7 +33,9 @@ public abstract class DateConvert {
 
     public static LocalDate toJdk8LocalDate(Date value) { return toJdk8LocalDate(value.getTime()); }
 
-    public static LocalDate toJdk8LocalDate(Calendar value) { return toJdk8LocalDate(value.getTimeInMillis()); }
+    public static LocalDate toJdk8LocalDate(Calendar value) {
+        return LocalDate.of(value.get(Calendar.YEAR), value.get(Calendar.MONTH) + 1, value.get(Calendar.DAY_OF_MONTH));
+    }
 
     public static LocalDate toJdk8LocalDate(java.sql.Date value) { return value.toLocalDate(); }
 
@@ -265,11 +265,11 @@ public abstract class DateConvert {
 
     public static Timestamp toSqlTimestamp(LocalDate value) { return toSqlTimestamp(value.atStartOfDay()); }
 
-    public static Timestamp toSqlTimestamp(LocalDateTime value) { return toSqlTimestamp(value.atZone(systemDefault())); }
+    public static Timestamp toSqlTimestamp(LocalDateTime value) { return Timestamp.valueOf(value); }
 
-    public static Timestamp toSqlTimestamp(OffsetDateTime value) { return toSqlTimestamp(value.toInstant()); }
+    public static Timestamp toSqlTimestamp(OffsetDateTime value) { return toSqlTimestamp(value.toLocalDateTime()); }
 
-    public static Timestamp toSqlTimestamp(ZonedDateTime value) { return toSqlTimestamp(value.toInstant()); }
+    public static Timestamp toSqlTimestamp(ZonedDateTime value) { return toSqlTimestamp(value.toLocalDateTime()); }
 
     public static Timestamp toSqlTimestamp(Instant value) { return new Timestamp(value.toEpochMilli()); }
 
@@ -364,4 +364,64 @@ public abstract class DateConvert {
     public static Long toLong(java.sql.Date value) { return value.getTime(); }
 
     public static Long toLong(Timestamp value) { return value.getTime(); }
+
+    public static Year toJdk8Year(LocalDate value) { return Year.of(value.getYear()); }
+
+    public static Year toJdk8Year(LocalDateTime value) { return Year.of(value.getYear()); }
+
+    public static Year toJdk8Year(OffsetDateTime value) { return Year.of(value.getYear()); }
+
+    public static Year toJdk8Year(ZonedDateTime value) { return Year.of(value.getYear()); }
+
+    public static Year toJdk8Year(Instant value) { return Year.from(value.atZone(systemDefault())); }
+
+    public static Year toJdk8Year(Date value) { return toJdk8Year(toUtilCalendar(value)); }
+
+    public static Year toJdk8Year(Calendar value) { return Year.of(value.get(Calendar.YEAR)); }
+
+    public static Year toJdk8Year(java.sql.Date value) { return Year.from(value.toLocalDate()); }
+
+    public static Year toJdk8Year(Timestamp value) { return Year.from(value.toLocalDateTime()); }
+
+    public static Year toJdk8Year(Long value) { return toJdk8Year(toUtilCalendar(value)); }
+
+    public static Year toJdk8Year(long value) { return toJdk8Year(toUtilCalendar(value)); }
+
+    public static Year toJdk8Year(Integer value) { return Year.of(value); }
+
+    public static Year toJdk8Year(int value) { return Year.of(value); }
+
+    public static Integer toYearNumber(Year value) { return value.getValue(); }
+
+    public static int toYearValue(Year value) { return value.getValue(); }
+
+    public static Month toJdk8Month(LocalDate value) { return value.getMonth(); }
+
+    public static Month toJdk8Month(LocalDateTime value) { return value.getMonth(); }
+
+    public static Month toJdk8Month(OffsetDateTime value) { return value.getMonth(); }
+
+    public static Month toJdk8Month(ZonedDateTime value) { return value.getMonth(); }
+
+    public static Month toJdk8Month(Instant value) { return Month.from(value.atZone(systemDefault())); }
+
+    public static Month toJdk8Month(Date value) { return toJdk8Month(toUtilCalendar(value)); }
+
+    public static Month toJdk8Month(Calendar value) { return Month.of(value.get(Calendar.MONTH) + 1); }
+
+    public static Month toJdk8Month(java.sql.Date value) { return value.toLocalDate().getMonth(); }
+
+    public static Month toJdk8Month(Timestamp value) { return value.toLocalDateTime().getMonth(); }
+
+    public static Month toJdk8Month(Long value) { return toJdk8Month(toUtilCalendar(value)); }
+
+    public static Month toJdk8Month(long value) { return toJdk8Month(toUtilCalendar(value)); }
+
+    public static Month toJdk8Month(Integer value) { return Month.of(value); }
+
+    public static Month toJdk8Month(int value) { return Month.of(value); }
+
+    public static Integer toMonthNumber(Month value) { return value.getValue(); }
+
+    public static int toMonthValue(Month value) { return value.getValue(); }
 }

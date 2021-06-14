@@ -17,7 +17,7 @@ public class JavaElemMethod extends JavaElemExecutable {
     private final boolean inInterface;
     private final JavaGenericsList genericsList;
     private final String methodName, signature;
-    private final JavaCodeBlockAddr<JavaElemMethod> scopedScripts;
+    private final JavaCodeMethodBlockAddr methodBlockAddr;
     private String returnType;
 
     public JavaElemMethod(
@@ -31,7 +31,7 @@ public class JavaElemMethod extends JavaElemExecutable {
     ) {
         super(importer, classname, JavaElementEnum.METHOD, parameterList);
         this.signature = String.join("#", methodName, parameterList.getSignature());
-        this.scopedScripts = new JavaCodeBlockAddr<>(importer, signature, varsSupplier, this, true);
+        this.methodBlockAddr = new JavaCodeMethodBlockAddr(importer, signature, varsSupplier, this, true);
         this.genericsList = genericsList;
         this.inInterface = inInterface;
         this.methodName = methodName;
@@ -67,11 +67,11 @@ public class JavaElemMethod extends JavaElemExecutable {
 
     public String getSignature() { return signature; }
 
-    public JavaCodeBlockAddr<JavaElemMethod> scripts() { return scopedScripts; }
+    public JavaCodeMethodBlockAddr scripts() { return methodBlockAddr; }
 
     public JavaGenericsList getGenericsList() { return genericsList; }
 
-    private JavaCodeBlockAddr getScopedScripts() { return scopedScripts; }
+    private JavaCodeMethodBlockAddr getScopedScripts() { return methodBlockAddr; }
 
     @Override
     protected boolean isAllowModifierWith(Modifier modifier) {

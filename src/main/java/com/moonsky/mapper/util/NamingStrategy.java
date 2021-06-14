@@ -1,7 +1,8 @@
 package com.moonsky.mapper.util;
 
-import com.moonsky.mapper.annotation.MapperFor;
+import com.moonsky.mapper.annotation.MapperNaming;
 
+import java.lang.annotation.Annotation;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -9,7 +10,7 @@ import java.util.function.Function;
  * @author benshaoye
  */
 @SuppressWarnings("all")
-public enum Keyword {
+public enum NamingStrategy {
     /** copier */
     COPIER(CopierNotFoundException::new, CopierNotFoundException::new),
     /** mapper */
@@ -18,7 +19,7 @@ public enum Keyword {
     private final Function<String, RuntimeException> stringBuilder;
     private final BiFunction<String, Throwable, RuntimeException> messageCauseBuilder;
 
-    Keyword(
+    NamingStrategy(
         Function<String, RuntimeException> stringBuilder,
         BiFunction<String, Throwable, RuntimeException> messageCauseBuilder
     ) {
@@ -34,30 +35,30 @@ public enum Keyword {
         return messageCauseBuilder.apply(message, cause);
     }
 
-    public static String mapperOf(MapperFor mapperFor, String thisClass, String thatClass) {
-        return with(mapperFor, thisClass, thatClass, Keyword.MAPPER);
+    public static String mapperOf(MapperNaming naming, String thisClass, String thatClass) {
+        return with(naming, thisClass, thatClass, NamingStrategy.MAPPER);
     }
 
-    public static String copierOf(MapperFor mapperFor, String thisClass, String thatClass) {
-        return with(mapperFor, thisClass, thatClass, Keyword.COPIER);
+    public static String copierOf(MapperNaming naming, String thisClass, String thatClass) {
+        return with(naming, thisClass, thatClass, NamingStrategy.COPIER);
     }
 
-    public static String with(MapperFor mapperFor, Class<?> thisClass, Class<?> thatClass, Keyword type) {
-        return with(mapperFor, thisClass.getCanonicalName(), thatClass.getCanonicalName(), type);
+    public static String with(MapperNaming naming, Class<?> thisClass, Class<?> thatClass, NamingStrategy type) {
+        return with(naming, thisClass.getCanonicalName(), thatClass.getCanonicalName(), type);
     }
 
-    public static String with(MapperFor mapperFor, String thisClassname, String thatClassname, Keyword type) {
+    public static String with(MapperNaming naming, String thisClassname, String thatClassname, NamingStrategy type) {
         String thisClass = getSimpleName(thisClassname);
         String thatClass = getSimpleName(thatClassname);
 
         String thisPrefix = "", thatPrefix = "";
-        for (String prefix : mapperFor.trimNamePrefix()) {
+        for (String prefix : naming.trimPrefixes()) {
             if (thisClass.startsWith(prefix)) {
                 thisClass = thisClass.substring(prefix.length());
                 thisPrefix = prefix;
             }
         }
-        for (String prefix : mapperFor.trimNamePrefix()) {
+        for (String prefix : naming.trimPrefixes()) {
             if (thatClass.startsWith(prefix)) {
                 thatClass = thatClass.substring(prefix.length());
                 thatPrefix = prefix;
@@ -65,13 +66,13 @@ public enum Keyword {
         }
 
         String thisSuffix = "", thatSuffix = "";
-        for (String suffix : mapperFor.trimNameSuffix()) {
+        for (String suffix : naming.trimSuffixes()) {
             if (thisClass.endsWith(suffix)) {
                 thisClass = thisClass.substring(0, thisClass.length() - suffix.length());
                 thisSuffix = suffix;
             }
         }
-        for (String suffix : mapperFor.trimNameSuffix()) {
+        for (String suffix : naming.trimSuffixes()) {
             if (thatClass.endsWith(suffix)) {
                 thatClass = thatClass.substring(0, thatClass.length() - suffix.length());
                 thatSuffix = suffix;
@@ -79,7 +80,7 @@ public enum Keyword {
         }
 
         String typeStringify = capitalize(type.name().toLowerCase());
-        String namePattern = deleteWhitespace(mapperFor.namePattern());
+        String namePattern = deleteWhitespace(naming.pattern());
         namePattern = replaceAll(namePattern, "{thisPrefix}", thisPrefix);
         namePattern = replaceAll(namePattern, "{thatPrefix}", thatPrefix);
         namePattern = replaceAll(namePattern, "{thisSuffix}", thisSuffix);

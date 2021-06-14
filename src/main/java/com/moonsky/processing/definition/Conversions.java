@@ -5,7 +5,7 @@ import com.moonsky.mapper.util.Joda1xConvert;
 import com.moonsky.mapper.util.Joda2xConvert;
 import com.moonsky.mapper.util.UseForConverter;
 import com.moonsky.processing.util.Element2;
-import com.moonsky.processing.util.Imported;
+import com.moonsky.processing.util.Import2;
 import com.moonsky.processing.util.Processing2;
 import com.moonsky.processing.util.Test2;
 
@@ -34,9 +34,9 @@ public enum Conversions {
             Map<String, Conversion> conversions = new HashMap<>();
             try {
                 String convertClass;
-                if (Imported.JODA_TIME_2X) {
+                if (Import2.JODA_TIME_2X) {
                     convertClass = Joda2xConvert.class.getCanonicalName();
-                } else if (Imported.JODA_TIME_1X0) {
+                } else if (Import2.JODA_TIME_1X0) {
                     convertClass = Joda1xConvert.class.getCanonicalName();
                 } else {
                     convertClass = DateConvert.class.getCanonicalName();

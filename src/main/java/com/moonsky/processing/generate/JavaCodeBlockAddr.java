@@ -57,45 +57,45 @@ public class JavaCodeBlockAddr<T> extends AbstractEndingImportable<T> implements
         this.vars = VarHelper.of(signature, "val", "var");
     }
 
-    public JavaCodeBlockAddr<JavaCodeBlockAddr<T>> onIfNotNull(String varName) {
+    public JavaCodeBlockAddr<? extends JavaCodeBlockAddr<T>> onIfNotNull(String varName) {
         return onIf("{} != null", varName);
     }
 
-    public JavaCodeBlockAddr<JavaCodeBlockAddr<T>> onStringIfNotEmpty(String varName) {
+    public JavaCodeBlockAddr<? extends JavaCodeBlockAddr<T>> onStringIfNotEmpty(String varName) {
         return onIf("{} != null && {}.length() > 0", varName, varName);
     }
 
-    public JavaCodeBlockAddr<JavaCodeBlockAddr<T>> onIf(String ifTemplate, Object... values) {
+    public JavaCodeBlockAddr<? extends JavaCodeBlockAddr<T>> onIf(String ifTemplate, Object... values) {
         return onKeyword(IF, ifTemplate, values);
     }
 
-    public JavaCodeBlockAddr<JavaCodeBlockAddr<T>> onElseIf(String elseIfTemplate, Object... values) {
+    public JavaCodeBlockAddr<? extends JavaCodeBlockAddr<T>> onElseIf(String elseIfTemplate, Object... values) {
         return onKeyword(ELSE_IF, elseIfTemplate, values);
     }
 
-    public JavaCodeBlockAddr<JavaCodeBlockAddr<T>> onElse() {
+    public JavaCodeBlockAddr<? extends JavaCodeBlockAddr<T>> onElse() {
         return onKeyword(ELSE, null);
     }
 
-    public JavaCodeBlockAddr<JavaCodeBlockAddr<T>> onFor(String forTemplate, Object... values) {
+    public JavaCodeBlockAddr<? extends JavaCodeBlockAddr<T>> onFor(String forTemplate, Object... values) {
         return onKeyword(FOR, forTemplate, values);
     }
 
-    public JavaCodeBlockAddr<JavaCodeBlockAddr<T>> onTry() { return onTry(null); }
+    public JavaCodeBlockAddr<? extends JavaCodeBlockAddr<T>> onTry() { return onTry(null); }
 
-    public JavaCodeBlockAddr<JavaCodeBlockAddr<T>> onTry(String tryTemplate, Object... values) {
+    public JavaCodeBlockAddr<? extends JavaCodeBlockAddr<T>> onTry(String tryTemplate, Object... values) {
         return onKeyword(TRY, tryTemplate, values);
     }
 
-    public JavaCodeBlockAddr<JavaCodeBlockAddr<T>> onWhile(String whileTemplate, Object... values) {
+    public JavaCodeBlockAddr<? extends JavaCodeBlockAddr<T>> onWhile(String whileTemplate, Object... values) {
         return onKeyword(WHILE, whileTemplate, values);
     }
 
-    public JavaCodeBlockAddr<JavaCodeBlockAddr<T>> onCatch(String catchTemplate, Object... values) {
+    public JavaCodeBlockAddr<? extends JavaCodeBlockAddr<T>> onCatch(String catchTemplate, Object... values) {
         return onKeyword(CATCH, catchTemplate, values);
     }
 
-    public JavaCodeBlockAddr<JavaCodeBlockAddr<T>> onFinally() {
+    public JavaCodeBlockAddr<? extends JavaCodeBlockAddr<T>> onFinally() {
         return onKeyword(FINALLY, null);
     }
 
@@ -165,16 +165,16 @@ public class JavaCodeBlockAddr<T> extends AbstractEndingImportable<T> implements
         }
     }
 
-    private JavaCodeBlockAddr<JavaCodeBlockAddr<T>> onKeyword(
+    private JavaCodeBlockAddr<? extends JavaCodeBlockAddr<T>> onKeyword(
         JavaCodeKeyword keyword, String template, Object... values
     ) {
         String condition = String2.formatImported(getImporter(), template, values);
-        JavaCodeBlockAddr<JavaCodeBlockAddr<T>> codeAddr = newBlockAddr(keyword, condition, returnable);
+        JavaCodeBlockAddr<? extends JavaCodeBlockAddr<T>> codeAddr = newBlockAddr(keyword, condition, returnable);
         codesMap.put(codeAddr.getKey(), codeAddr);
         return codeAddr;
     }
 
-    private JavaCodeBlockAddr<JavaCodeBlockAddr<T>> newBlockAddr(
+    private JavaCodeBlockAddr<? extends JavaCodeBlockAddr<T>> newBlockAddr(
         JavaCodeKeyword keyword, String condition, boolean returnable
     ) {
         return new JavaCodeBlockAddr<>(getImporter(),

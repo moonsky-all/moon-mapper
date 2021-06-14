@@ -1,7 +1,5 @@
 package com.moonsky.processing.util;
 
-import com.moonsky.processing.wrapper.Import;
-
 import javax.lang.model.element.TypeElement;
 import java.beans.Introspector;
 import java.util.ArrayList;
@@ -332,9 +330,9 @@ public enum String2 {
     }
 
     /**
-     * 格式化可能带有{@link Import}的数据，具体方式参考{@link #format(String, Object...)}
+     * 格式化可能带有{@link Imported}的数据，具体方式参考{@link #format(String, Object...)}
      * <p>
-     * 但是会将{@code types}中的{@link Import}对象进行{@code import}转换
+     * 但是会将{@code types}中的{@link Imported}对象进行{@code import}转换
      *
      * @param importer
      * @param template
@@ -353,8 +351,8 @@ public enum String2 {
         Object[] stringify = new Object[types.length];
         for (int i = 0; i < types.length; i++) {
             value = types[i];
-            if (value instanceof Import<?>) {
-                stringify[i] = ((Import<?>) value).toString(importer);
+            if (value instanceof Imported<?>) {
+                stringify[i] = ((Imported<?>) value).toString(importer);
             } else {
                 stringify[i] = String.valueOf(value);
             }

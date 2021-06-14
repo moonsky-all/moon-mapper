@@ -6,6 +6,20 @@ package com.moonsky.mapper;
 public interface BeanCopier<THIS, THAT> {
 
     /**
+     * 实际获取{@code Copier}的方法
+     *
+     * @param fromClass 复制数据源类
+     * @param toClass   目标类
+     * @param <F>       源类型
+     * @param <T>       目标类型
+     *
+     * @return 源类型至目标类型的复制器
+     */
+    static <F, T> BeanCopier<F, T> get(Class<F> fromClass, Class<T> toClass) {
+        return Mappers.getCopier(fromClass, toClass);
+    }
+
+    /**
      * 属性复制
      * <p>
      * 此方法不会检查{@code thisObject}或{@code thatObject}是否是{@code null}

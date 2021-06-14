@@ -1,8 +1,8 @@
 package com.moonsky.processing.definition;
 
 import com.moonsky.mapper.BeanMapper;
-import com.moonsky.mapper.annotation.MapperFor;
-import com.moonsky.mapper.util.Keyword;
+import com.moonsky.mapper.annotation.MapperNaming;
+import com.moonsky.mapper.util.NamingStrategy;
 import com.moonsky.processing.generate.JavaFileClassDefinition;
 import com.moonsky.processing.generate.JavaScopedFields;
 import com.moonsky.processing.holder.Holders;
@@ -17,18 +17,18 @@ import javax.lang.model.element.Modifier;
  */
 public class PojoMapperDefinition extends PojoBaseDefinition implements JavaSupplier {
 
-    private final MapperFor mapperFor;
+    private final MapperNaming naming;
     private final PojoCopierDefinition forward;
     private final PojoCopierDefinition backward;
 
     public PojoMapperDefinition(
         Holders holders,
-        MapperFor mapperFor,
+        MapperNaming naming,
         PojoCopierDefinition forwardCopierRecord,
         PojoCopierDefinition backwardCopierRecord
     ) {
         super(holders, forwardCopierRecord.getThisPojoDeclared(), forwardCopierRecord.getThatPojoDeclared());
-        this.mapperFor = mapperFor;
+        this.naming = naming;
         this.forward = forwardCopierRecord;
         this.backward = backwardCopierRecord;
     }
@@ -36,7 +36,7 @@ public class PojoMapperDefinition extends PojoBaseDefinition implements JavaSupp
     public String getSimpleName() {
         String thisClass = getThisDeclared().getThisSimpleName();
         String thatClass = getThatDeclared().getThisSimpleName();
-        return Keyword.mapperOf(mapperFor, thisClass, thatClass);
+        return NamingStrategy.mapperOf(naming, thisClass, thatClass);
     }
 
     @Override

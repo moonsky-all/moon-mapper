@@ -1,8 +1,25 @@
 package com.moonsky.mapper;
+
+import com.moonsky.mapper.annotation.MapperFor;
+
 /**
  * @author benshaoye
  */
 public interface BeanMapper<THIS, THAT> {
+
+    /**
+     * 获取指定{@code fromClass}至{@code toClass}之间的映射器
+     *
+     * @param fromClass 复制数据源类（被{@link MapperFor}注解的类）
+     * @param toClass   映射目标类
+     * @param <F>       当前类
+     * @param <T>       目标类
+     *
+     * @return 指定类之间的映射器
+     */
+    static <F, T> BeanMapper<F, T> get(Class<F> fromClass, Class<T> toClass) {
+        return Mappers.getMapper(fromClass, toClass);
+    }
 
     /**
      * null 不安全的属性映射，不会对{@code thisObject}和{@code thatObject}进行{@code null}检查

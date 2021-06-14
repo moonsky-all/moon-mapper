@@ -12,7 +12,12 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.SOURCE)
-public @interface MappingFormat {
+public @interface Mapping {
 
-    String value();
+    /**
+     * 日期和时间格式化以解析字符串为日期/时间
+     *
+     * @return 格式化样式，如果仅为空白字符串，则视为无效
+     */
+    String format() default "";
 }

@@ -5,9 +5,9 @@ import com.moonsky.processing.util.Const2;
 import com.moonsky.processing.util.String2;
 
 import javax.lang.model.element.*;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -18,6 +18,7 @@ import static com.moonsky.processing.declared.ExecutionEnum.GETTER_METHOD;
 import static com.moonsky.processing.declared.ExecutionEnum.SETTER_METHOD;
 import static com.moonsky.processing.declared.PropertyMethodEnum.GETTER;
 import static com.moonsky.processing.declared.PropertyMethodEnum.SETTER;
+import static com.moonsky.processing.util.Element2.newArray;
 
 /**
  * @author benshaoye
@@ -59,15 +60,11 @@ public class PropertyMethodDeclared extends MethodDeclared {
     public <A extends Annotation> A[] getFieldAnnotations(Class<A> annotationType) {
         FieldDeclared fieldDeclared = this.getFieldDeclared();
         if (fieldDeclared == null) {
-            @SuppressWarnings("all")
-            A[] array = (A[]) Array.newInstance(annotationType, 0);
-            return array;
+            return newArray(annotationType, 0);
         }
         VariableElement fieldElement = fieldDeclared.getFieldElement();
         if (fieldElement == null) {
-            @SuppressWarnings("all")
-            A[] array = (A[]) Array.newInstance(annotationType, 0);
-            return array;
+            return newArray(annotationType, 0);
         }
         return fieldElement.getAnnotationsByType(annotationType);
     }
@@ -157,7 +154,7 @@ public class PropertyMethodDeclared extends MethodDeclared {
                 returnType = field.getFieldElement().asType();
             } else {
                 methodName = String2.toSetterName(field.getName());
-                returnType = holders.getUtils().getTypeElement("void").asType();
+                returnType = holders.getBasicTypeMirror(TypeKind.VOID.name());
             }
             this.methodName = new MethodName(methodName);
             this.methodEnum = methodEnum;
@@ -173,7 +170,7 @@ public class PropertyMethodDeclared extends MethodDeclared {
         }
 
         @Override
-        public TypeMirror getReturnType() { return getField().asType(); }
+        public TypeMirror getReturnType() { return returnType; }
 
         @Override
         public List<? extends VariableElement> getParameters() {
@@ -238,8 +235,9 @@ public class PropertyMethodDeclared extends MethodDeclared {
         }
 
         @Override
+        @SuppressWarnings("all")
         public <A extends Annotation> A[] getAnnotationsByType(Class<A> annotationType) {
-            return (A[]) Array.newInstance(annotationType, 0);
+            return newArray(annotationType, 0);
         }
 
         @Override
@@ -250,7 +248,7 @@ public class PropertyMethodDeclared extends MethodDeclared {
 
         private final String name;
 
-        private MethodName(String name) {this.name = name;}
+        private MethodName(String name) { this.name = name; }
 
         @Override
         public boolean contentEquals(CharSequence cs) {

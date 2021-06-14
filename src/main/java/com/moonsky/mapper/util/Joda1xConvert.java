@@ -19,6 +19,26 @@ public abstract class Joda1xConvert extends DateConvert {
 
     Joda1xConvert() { super(); }
 
+    public static MonthDay toJdk8MonthDay(DateTime value) {
+        return MonthDay.of(value.getMonthOfYear(), value.getDayOfMonth());
+    }
+
+    public static MonthDay toJdk8MonthDay(MutableDateTime value) {
+        return MonthDay.of(value.getMonthOfYear(), value.getDayOfMonth());
+    }
+
+    public static MonthDay toJdk8MonthDay(org.joda.time.LocalDate value) {
+        return MonthDay.of(value.getMonthOfYear(), value.getDayOfMonth());
+    }
+
+    public static MonthDay toJdk8MonthDay(org.joda.time.LocalDateTime value) {
+        return MonthDay.of(value.getMonthOfYear(), value.getDayOfMonth());
+    }
+
+    public static MonthDay toJdk8MonthDay(org.joda.time.Instant value) {
+        return toJdk8MonthDay(value.toDateTime());
+    }
+
     public static LocalDate toJdk8LocalDate(DateTime value) { return toJdk8LocalDate(value.getMillis()); }
 
     public static LocalDate toJdk8LocalDate(org.joda.time.LocalDate value) {
@@ -449,6 +469,46 @@ public abstract class Joda1xConvert extends DateConvert {
 
     public static YearMonth toJdk8YearMonth(org.joda.time.Instant value) {
         return toJdk8YearMonth(toJdk8LocalDate(value));
+    }
+
+    public static Year toJdk8Year(DateTime value) {
+        return Year.of(value.getYear());
+    }
+
+    public static Year toJdk8Year(org.joda.time.LocalDate value) {
+        return Year.of(value.getYear());
+    }
+
+    public static Year toJdk8Year(org.joda.time.LocalDateTime value) {
+        return Year.of(value.getYear());
+    }
+
+    public static Year toJdk8Year(MutableDateTime value) {
+        return Year.of(value.getYear());
+    }
+
+    public static Year toJdk8Year(org.joda.time.Instant value) {
+        return toJdk8Year(value.toDateTime());
+    }
+
+    public static Month toJdk8Month(DateTime value) {
+        return Month.of(value.getMonthOfYear());
+    }
+
+    public static Month toJdk8Month(org.joda.time.LocalDate value) {
+        return Month.of(value.getMonthOfYear());
+    }
+
+    public static Month toJdk8Month(org.joda.time.LocalDateTime value) {
+        return Month.of(value.getMonthOfYear());
+    }
+
+    public static Month toJdk8Month(MutableDateTime value) {
+        return Month.of(value.getMonthOfYear());
+    }
+
+    public static Month toJdk8Month(org.joda.time.Instant value) {
+        return toJdk8Month(value.toDateTime());
     }
 
     public static long toPrimitiveLong(DateTime value) { return value.getMillis(); }

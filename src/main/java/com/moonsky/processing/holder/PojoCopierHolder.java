@@ -1,6 +1,6 @@
 package com.moonsky.processing.holder;
 
-import com.moonsky.mapper.annotation.MapperFor;
+import com.moonsky.mapper.annotation.MapperNaming;
 import com.moonsky.processing.declared.PojoDeclared;
 import com.moonsky.processing.definition.PojoCopierDefinition;
 import com.moonsky.processing.processor.JavaFiler;
@@ -21,7 +21,7 @@ public class PojoCopierHolder extends AbstractHolder implements JavaWritable {
 
     protected PojoCopierHolder(Holders holders) { super(holders); }
 
-    public PojoCopierDefinition with(MapperFor mapperFor, TypeElement thisElement, TypeElement thatElement) {
+    public PojoCopierDefinition with(MapperNaming naming, TypeElement thisElement, TypeElement thatElement) {
         String thisName = Element2.getQualifiedName(thisElement);
         String thatName = Element2.getQualifiedName(thatElement);
         String mappedKey = String2.keyOf(thisName, thatName);
@@ -29,7 +29,7 @@ public class PojoCopierHolder extends AbstractHolder implements JavaWritable {
         if (record == null) {
             PojoDeclared thisDeclared = pojoClassHolder().with(thisElement);
             PojoDeclared thatDeclared = pojoClassHolder().with(thatElement);
-            record = new PojoCopierDefinition(getHolders(), mapperFor, thisDeclared, thatDeclared);
+            record = new PojoCopierDefinition(getHolders(), naming, thisDeclared, thatDeclared);
             copierRecordMap.put(mappedKey, record);
         }
         return record;

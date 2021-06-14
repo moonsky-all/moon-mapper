@@ -1,6 +1,7 @@
 package com.moonsky.processing.util;
 
 import javax.tools.Diagnostic;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.moonsky.processing.util.Processing2.getMessager;
@@ -13,10 +14,17 @@ import static javax.tools.Diagnostic.Kind.WARNING;
 public enum Log2 {
     ;
     private final static AtomicInteger INDEXER = new AtomicInteger();
+    private static final AtomicBoolean STARTED = new AtomicBoolean(true);
 
     private static void messageOf(Diagnostic.Kind kind, String message) {
-        getMessager().printMessage(kind, ">> " + INDEXER.getAndIncrement() + " " + message);
+        if (STARTED.get()) {
+            getMessager().printMessage(kind, ">> " + INDEXER.getAndIncrement() + " " + message);
+        }
     }
+
+    public static void start() { STARTED.set(true); }
+
+    public static void end() { STARTED.set(false); }
 
     public static void warn(Object message) { messageOf(WARNING, String.valueOf(message)); }
 

@@ -1,4 +1,4 @@
-package com.moonsky.processing.wrapper;
+package com.moonsky.processing.util;
 
 import java.util.Objects;
 

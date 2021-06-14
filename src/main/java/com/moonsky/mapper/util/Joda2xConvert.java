@@ -53,7 +53,6 @@ public abstract class Joda2xConvert extends Joda1xConvert {
         return toJodaLocalDateTime(toJdk8LocalDate(value));
     }
 
-
     public static MutableDateTime toJodaMutableDateTime(org.joda.time.YearMonth value) {
         return toJodaMutableDateTime(toJdk8LocalDate(value));
     }
@@ -66,6 +65,13 @@ public abstract class Joda2xConvert extends Joda1xConvert {
         return YearMonth.of(value.getYear(), value.getMonthOfYear());
     }
 
+    public static Year toJdk8Year(org.joda.time.YearMonth value) {
+        return Year.of(value.getYear());
+    }
+
+    public static Month toJdk8Month(org.joda.time.YearMonth value) {
+        return Month.of(value.getMonthOfYear());
+    }
 
     public static org.joda.time.YearMonth toJodaYearMonth(YearMonth value) {
         return new org.joda.time.YearMonth(value.getYear(), value.getMonthValue());
@@ -138,4 +144,76 @@ public abstract class Joda2xConvert extends Joda1xConvert {
     public static long toPrimitiveLong(org.joda.time.YearMonth value) { return toPrimitiveLong(toJdk8LocalDate(value)); }
 
     public static Long toLong(org.joda.time.YearMonth value) { return toLong(toJdk8LocalDate(value)); }
+
+    public static org.joda.time.MonthDay toJodaMonthDay(LocalDateTime value) {
+        return new org.joda.time.MonthDay(value.getMonthValue(), value.getDayOfMonth());
+    }
+
+    public static org.joda.time.MonthDay toJodaMonthDay(OffsetDateTime value) {
+        return new org.joda.time.MonthDay(value.getMonthValue(), value.getDayOfMonth());
+    }
+
+    public static org.joda.time.MonthDay toJodaMonthDay(ZonedDateTime value) {
+        return new org.joda.time.MonthDay(value.getMonthValue(), value.getDayOfMonth());
+    }
+
+    public static org.joda.time.MonthDay toJodaMonthDay(LocalDate value) {
+        return new org.joda.time.MonthDay(value.getMonthValue(), value.getDayOfMonth());
+    }
+
+    public static org.joda.time.MonthDay toJodaMonthDay(Instant value) {
+        return new org.joda.time.MonthDay(value.toEpochMilli());
+    }
+
+    public static org.joda.time.MonthDay toJodaMonthDay(Date value) {
+        return org.joda.time.MonthDay.fromDateFields(value);
+    }
+
+    public static org.joda.time.MonthDay toJodaMonthDay(java.sql.Date value) {
+        return org.joda.time.MonthDay.fromDateFields(value);
+    }
+
+    public static org.joda.time.MonthDay toJodaMonthDay(Timestamp value) {
+        return org.joda.time.MonthDay.fromDateFields(value);
+    }
+
+    public static org.joda.time.MonthDay toJodaMonthDay(Calendar value) {
+        return org.joda.time.MonthDay.fromCalendarFields(value);
+    }
+
+    public static org.joda.time.MonthDay toJodaMonthDay(Long value) {
+        return new org.joda.time.MonthDay(value);
+    }
+
+    public static org.joda.time.MonthDay toJodaMonthDay(long value) {
+        return new org.joda.time.MonthDay(value);
+    }
+
+    public static org.joda.time.MonthDay toJodaMonthDay(DateTime value) {
+        return new org.joda.time.MonthDay(value.getMonthOfYear(), value.getDayOfMonth());
+    }
+
+    public static org.joda.time.MonthDay toJodaMonthDay(MutableDateTime value) {
+        return new org.joda.time.MonthDay(value.getMonthOfYear(), value.getDayOfMonth());
+    }
+
+    public static org.joda.time.MonthDay toJodaMonthDay(org.joda.time.LocalDate value) {
+        return new org.joda.time.MonthDay(value.getMonthOfYear(), value.getDayOfMonth());
+    }
+
+    public static org.joda.time.MonthDay toJodaMonthDay(org.joda.time.LocalDateTime value) {
+        return new org.joda.time.MonthDay(value.getMonthOfYear(), value.getDayOfMonth());
+    }
+
+    public static org.joda.time.MonthDay toJodaMonthDay(org.joda.time.Instant value) {
+        return new org.joda.time.MonthDay(value.getMillis());
+    }
+
+    public static org.joda.time.MonthDay toJodaMonthDay(MonthDay value) {
+        return new org.joda.time.MonthDay(value.getMonthValue(), value.getDayOfMonth());
+    }
+
+    public static MonthDay toJdk8MonthDay(org.joda.time.MonthDay value) {
+        return MonthDay.of(value.getMonthOfYear(), value.getDayOfMonth());
+    }
 }

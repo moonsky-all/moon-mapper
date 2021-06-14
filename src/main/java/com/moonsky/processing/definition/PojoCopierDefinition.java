@@ -1,10 +1,11 @@
 package com.moonsky.processing.definition;
 
 import com.moonsky.mapper.BeanCopier;
-import com.moonsky.mapper.annotation.MapperFor;
-import com.moonsky.mapper.annotation.MappingFormat;
+import com.moonsky.mapper.annotation.MapperNaming;
+import com.moonsky.mapper.annotation.Mapping;
 import com.moonsky.mapper.util.Formatter;
-import com.moonsky.mapper.util.Keyword;
+import com.moonsky.mapper.util.NamingStrategy;
+import com.moonsky.processing.converter.Converter;
 import com.moonsky.processing.declared.PojoDeclared;
 import com.moonsky.processing.declared.PropertyDeclared;
 import com.moonsky.processing.declared.PropertyMethodDeclared;
@@ -13,8 +14,8 @@ import com.moonsky.processing.holder.Holders;
 import com.moonsky.processing.processor.JavaDefinition;
 import com.moonsky.processing.processor.JavaSupplier;
 import com.moonsky.processing.util.*;
-import com.moonsky.processing.wrapper.Import;
-import com.moonsky.processing.wrapper.Stringify;
+import com.moonsky.processing.util.Imported;
+import com.moonsky.processing.util.Stringify;
 import org.joda.time.*;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.ISODateTimeFormat;
@@ -60,12 +61,12 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
     private final String classname;
 
     public PojoCopierDefinition(
-        Holders holders, MapperFor mapperFor, PojoDeclared thisDeclared, PojoDeclared thatDeclared
+        Holders holders, MapperNaming naming, PojoDeclared thisDeclared, PojoDeclared thatDeclared
     ) {
         super(holders, thisDeclared, thatDeclared);
         String thisClass = getThisDeclared().getThisSimpleName();
         String thatClass = getThatDeclared().getThisSimpleName();
-        this.simpleName = Keyword.copierOf(mapperFor, thisClass, thatClass);
+        this.simpleName = NamingStrategy.copierOf(naming, thisClass, thatClass);
         this.classname = getPackageName() + '.' + simpleName;
     }
 
@@ -75,9 +76,6 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
 
     @Override
     public JavaDefinition get() {
-        Log2.warn("Imported joda 2x: {}", Imported.JODA_TIME_2X);
-        Log2.warn("Imported joda 13x: {}", Imported.JODA_TIME_1X3);
-        Log2.warn("Imported joda 10x: {}", Imported.JODA_TIME_1X0);
         String packageName = getPackageName();
         String classname = getSimpleName();
         JavaFileClassDefinition definition = new JavaFileClassDefinition(packageName, classname);
@@ -87,7 +85,7 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
         definition.fields()
             .declareField(Const2.CONST, definition.getClassname())
             .assign()
-            .valueOfFormatted("new {}()", Import.nameOf(definition.getClassname()))
+            .valueOfFormatted("new {}()", Imported.nameOf(definition.getClassname()))
             .end()
             .modifierWithAll(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL);
 
@@ -103,14 +101,14 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
         return definition;
     }
 
-    private JavaElemMethod doConvert(JavaCodeBlockAddr<JavaElemMethod> scripts) {
+    private JavaElemMethod doConvert(JavaCodeMethodBlockAddr scripts) {
         scripts.returning("{} == null ? null : unsafeCopy({}, new {}())",
 
-            THIS, THIS, Import.nameOf(getThatClassname()));
+            THIS, THIS, Imported.nameOf(getThatClassname()));
         return scripts.end();
     }
 
-    private JavaElemMethod doUnsafeCopy(JavaCodeBlockAddr<JavaElemMethod> scripts) {
+    private JavaElemMethod doUnsafeCopy(JavaCodeMethodBlockAddr scripts) {
         Map<String, PropertyDeclared> thisProperties = getThisDeclared().getProperties();
         Map<String, PropertyDeclared> thatProperties = getThatDeclared().getProperties();
 
@@ -144,7 +142,7 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
     }
 
     private void doMappingUnsafeCopy(
-        JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
+        JavaCodeMethodBlockAddr scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
     ) {
         String setterActualType = setter.getPropertyActualType();
         String getterActualType = getter.getPropertyActualType();
@@ -196,7 +194,7 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
     }
 
     private boolean doMappingString2Date(
-        JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
+        JavaCodeMethodBlockAddr scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
     ) {
         String setterActualType = setter.getPropertyActualType();
         String getterActualType = getter.getPropertyActualType();
@@ -206,37 +204,35 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
                 OffsetDateTime.class, LocalDate.class, LocalTime.class, Year.class,
 
                 OffsetTime.class, MonthDay.class, YearMonth.class)) {
-                MappingFormat format = getFormatDefinition(setter, getter);
+                String pattern = getFormatOrDefaultIfBlank(setter, getter, null);
                 String var = defineGetterValueVar(scripts, getter);
-                if (format == null) {
+                if (String2.isBlank(pattern)) {
                     scripts.scriptOf("{}.{}({} == null ? null : {}.parse({}))", THAT,
 
-                        setter.getMethodName(), var, Import.nameOf(setterActualType), var);
+                        setter.getMethodName(), var, Imported.nameOf(setterActualType), var);
                 } else {
-                    String formatConst = defineJdk8DateTimeFormatter(scripts, format.value());
+                    String formatConst = defineJdk8DateTimeFormatter(scripts, pattern);
                     scripts.scriptOf("{}.{}({} == null ? null : {}.parse({}, {}))", THAT,
 
-                        setter.getMethodName(), var, Import.nameOf(setterActualType), var, formatConst);
+                        setter.getMethodName(), var, Imported.nameOf(setterActualType), var, formatConst);
                 }
-                return true;
             } else if (Test2.isTypeof(setterActualType, Instant.class)) {
                 String var = defineGetterValueVar(scripts, getter);
                 scripts.scriptOf("{}.{}({} == null ? null : {}.parse({}))", THAT,
 
-                    setter.getMethodName(), var, Import.of(Instant.class), var);
-                return true;
+                    setter.getMethodName(), var, Imported.of(Instant.class), var);
             } else if (Test2.isTypeof(setterActualType, Date.class)) {
                 String var = defineGetterValueVar(scripts, getter);
-                String pattern = getFormatDefinition(setter, getter, Formatter.DATETIME);
+                String pattern = getFormatOrDefaultIfBlank(setter, getter, Formatter.DATETIME);
                 scripts.scriptOf("{}.{}({} == null ? null : {}.parse({}, {}))", THAT,
 
-                    setter.getMethodName(), var, Import.of(Formatter.class), var, Stringify.of(pattern));
+                    setter.getMethodName(), var, Imported.FORMATTER, var, Stringify.of(pattern));
             } else if (Test2.isTypeof(setterActualType, Calendar.class)) {
                 String var = defineGetterValueVar(scripts, getter);
-                String pattern = getFormatDefinition(setter, getter, Formatter.DATETIME);
+                String pattern = getFormatOrDefaultIfBlank(setter, getter, Formatter.DATETIME);
                 scripts.scriptOf("{}.{}({} == null ? null : {}.parseCalendar({}, {}))", THAT,
 
-                    setter.getMethodName(), var, Import.of(Formatter.class), var, Stringify.of(pattern));
+                    setter.getMethodName(), var, Imported.FORMATTER, var, Stringify.of(pattern));
             } else if (Test2.isTypeof(setterActualType, java.sql.Date.class)) {
                 doMappingString2JavaSQLDate(scripts, setter, getter, Formatter.DATE);
             } else if (Test2.isTypeof(setterActualType, java.sql.Time.class)) {
@@ -244,7 +240,7 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
             } else if (Test2.isTypeof(setterActualType, java.sql.Timestamp.class)) {
                 doMappingString2JavaSQLDate(scripts, setter, getter, Formatter.DATETIME);
             } else if (Test2.isImportedAndJodaDateClass(setterActualType)) {
-                if (Imported.JODA_TIME_2X &&
+                if (Import2.JODA_TIME_2X &&
                     Test2.isTypeofAny(setterActualType,
                         DateTime.class,
                         org.joda.time.Instant.class,
@@ -255,22 +251,22 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
                         org.joda.time.YearMonth.class,
                         org.joda.time.MonthDay.class)) {
                     doMappingString2Joda2xNormalDate(scripts, setter, getter, setterActualType);
-                } else if (Imported.JODA_TIME_1X0 &&
+                } else if (Import2.JODA_TIME_1X0 &&
                     Test2.isTypeofAny(setterActualType, DateTime.class, org.joda.time.MutableDateTime.class)) {
                     doMappingString2Joda1xNormalDate(scripts, setter, getter, setterActualType);
-                } else if (Imported.JODA_TIME_1X3 &&
+                } else if (Import2.JODA_TIME_1X3 &&
                     Test2.isTypeofAny(setterActualType,
                         org.joda.time.LocalDate.class,
                         org.joda.time.LocalTime.class,
                         org.joda.time.LocalDateTime.class)) {
                     doMappingString2Joda1xNormalDate(scripts, setter, getter, setterActualType);
-                } else if (Imported.JODA_TIME_1X4 && Test2.isTypeofAny(setterActualType, Years.class,
+                } else if (Import2.JODA_TIME_1X4 && Test2.isTypeofAny(setterActualType, Years.class,
 
                     Months.class, Weeks.class, Days.class, Hours.class, Minutes.class, Seconds.class)) {
                     String var = defineGetterValueVar(scripts, getter);
                     scripts.scriptOf("{}.{}({} == null ? null : {}.parse{}({}))", THAT,
 
-                        setter.getMethodName(), var, Import.nameOf(setterActualType),
+                        setter.getMethodName(), var, Imported.nameOf(setterActualType),
 
                         Element2.getSimpleName(setterActualType), var);
                 }
@@ -283,22 +279,22 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
     }
 
     private void doMappingString2Joda1xNormalDate(
-        JavaCodeBlockAddr<JavaElemMethod> scripts,
+        JavaCodeMethodBlockAddr scripts,
         PropertyMethodDeclared setter,
         PropertyMethodDeclared getter,
         String setterActualType
     ) {
         String var = defineGetterValueVar(scripts, getter);
-        String pattern = getFormatDefinition(setter, getter, null);
+        String pattern = getFormatOrDefaultIfBlank(setter, getter, null);
         String setterSimpleType = Element2.getSimpleName(setterActualType);
-        if (String2.isEmpty(pattern)) {
+        if (String2.isBlank(pattern)) {
             VarSupplier<JavaElemField> fieldHelper = scripts.fieldsHelper();
             String formatterName = org.joda.time.format.DateTimeFormatter.class.getCanonicalName();
             String formatterKey = String2.keyOf(formatterName, setterActualType);
             String formatterConst = fieldHelper.nextConstVar(formatterKey);
             if (!fieldHelper.contains(formatterConst)) {
                 String method = "dateTime";
-                if (Imported.JODA_TIME_1X3) {
+                if (Import2.JODA_TIME_1X3) {
                     if (Test2.isTypeof(setterActualType, org.joda.time.LocalDate.class)) {
                         method = "date";
                     } else if (Test2.isTypeof(setterActualType, org.joda.time.LocalTime.class)) {
@@ -307,7 +303,7 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
                 }
                 fieldHelper.declareField(formatterConst, formatterName)
                     .assign()
-                    .valueOfFormatted("{}.{}()", Import.of(ISODateTimeFormat.class), method);
+                    .valueOfFormatted("{}.{}()", Imported.of(ISODateTimeFormat.class), method);
             }
             scripts.scriptOf("{}.{}({} == null ? null : {}.parse{}({}))", THAT,
 
@@ -321,15 +317,15 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
     }
 
     private void doMappingString2Joda2xNormalDate(
-        JavaCodeBlockAddr<JavaElemMethod> scripts,
+        JavaCodeMethodBlockAddr scripts,
         PropertyMethodDeclared setter,
         PropertyMethodDeclared getter,
         String setterActualType
     ) {
         String var = defineGetterValueVar(scripts, getter);
-        String pattern = getFormatDefinition(setter, getter, null);
-        Import<String> setterImported = Import.nameOf(setterActualType);
-        if (String2.isEmpty(pattern)) {
+        String pattern = getFormatOrDefaultIfBlank(setter, getter, null);
+        Imported<String> setterImported = Imported.nameOf(setterActualType);
+        if (String2.isBlank(pattern)) {
             scripts.scriptOf("{}.{}({} == null ? null : {}.parse({}))", THAT,
 
                 setter.getMethodName(), var, setterImported, var);
@@ -342,22 +338,22 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
     }
 
     private void doMappingString2JavaSQLDate(
-        JavaCodeBlockAddr<JavaElemMethod> scripts,
+        JavaCodeMethodBlockAddr scripts,
         PropertyMethodDeclared setter,
         PropertyMethodDeclared getter,
         String defaultPattern
     ) {
-        String pattern = getFormatDefinition(setter, getter, defaultPattern);
+        String pattern = getFormatOrDefaultIfBlank(setter, getter, defaultPattern);
         String var = defineGetterValueVar(scripts, getter);
         scripts.scriptOf("{}.{}({} == null ? null : new {}({}.parse({}, {}).getTime()))", THAT,
 
-            setter.getMethodName(), var, Import.nameOf(setter.getPropertyActualType()),
+            setter.getMethodName(), var, Imported.nameOf(setter.getPropertyActualType()),
 
-            Import.of(Formatter.class), var, Stringify.of(pattern));
+            Imported.FORMATTER, var, Stringify.of(pattern));
     }
 
     private void doMapping2BigInteger(
-        JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
+        JavaCodeMethodBlockAddr scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
     ) {
         final String longPrimitiveClass = "long";
         String getterActualType = getter.getPropertyActualType();
@@ -366,32 +362,32 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
                 longPrimitiveClass.equals(getterActualType)) {
                 scripts.scriptOf("{}.{}({}.valueOf({}.{}()))", THAT, setter.getMethodName(),
 
-                    Import.of(BigInteger.class), THIS, getter.getMethodName());
+                    Imported.BIG_INTEGER, THIS, getter.getMethodName());
             } else {
                 scripts.scriptOf("{}.{}({}.valueOf((long) {}.{}()))", THAT, setter.getMethodName(),
 
-                    Import.of(BigInteger.class), THIS, getter.getMethodName());
+                    Imported.BIG_INTEGER, THIS, getter.getMethodName());
             }
         } else if (Test2.isSubtypeOf(getterActualType, Number.class)) {
             String var = defineGetterValueVar(scripts, getter);
             scripts.scriptOf("{}.{}({} == null ? null : {}.valueOf({}.longValue()))", THAT,
 
-                setter.getMethodName(), var, Import.of(BigInteger.class), var);
+                setter.getMethodName(), var, Imported.BIG_INTEGER, var);
         } else if (isString(getterActualType)) {
-            final String pattern = getFormatDefinition(setter, getter, null);
+            final String pattern = getFormatOrDefaultIfBlank(setter, getter, null);
             String var = defineGetterValueVar(scripts, getter);
-            if (String2.isEmpty(pattern)) {
+            if (String2.isBlank(pattern)) {
                 scripts.onStringIfNotEmpty(var).scriptOf("{}.{}(new {}({}))",
 
-                    THAT, setter.getMethodName(), Import.of(BigInteger.class), var);
+                    THAT, setter.getMethodName(), Imported.BIG_INTEGER, var);
             } else {
                 String template = "{}.{}({}.valueOf({}.parseNumber({}, {}).longValue()))";
                 scripts.onStringIfNotEmpty(var)
                     .scriptOf(template,
                         THAT,
                         setter.getMethodName(),
-                        Import.of(BigInteger.class),
-                        Import.of(Formatter.class),
+                        Imported.BIG_INTEGER,
+                        Imported.FORMATTER,
                         var,
                         Stringify.of(pattern));
             }
@@ -407,29 +403,29 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
      * @param getter
      */
     private void doMapping2BigDecimal(
-        JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
+        JavaCodeMethodBlockAddr scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
     ) {
         String getterActualType = getter.getPropertyActualType();
         if (Test2.isPrimitiveNumberClass(getterActualType)) {
             scripts.scriptOf("{}.{}({}.valueOf({}.{}()))", THAT, setter.getMethodName(),
 
-                Import.BIG_DECIMAL, THIS, getter.getMethodName());
+                Imported.BIG_DECIMAL, THIS, getter.getMethodName());
         } else if (Test2.isWrappedNumberClass(getterActualType)) {
             String var = defineGetterValueVar(scripts, getter);
             scripts.scriptOf("{}.{}({} == null ? null : {}.valueOf({}))", THAT,
 
-                setter.getMethodName(), var, Import.BIG_DECIMAL, var);
+                setter.getMethodName(), var, Imported.BIG_DECIMAL, var);
         } else if (isString(getterActualType)) {
             String var = defineGetterValueVar(scripts, getter);
-            String pattern = getFormatDefinition(setter, getter, null);
-            if (String2.isEmpty(pattern)) {
+            String pattern = getFormatOrDefaultIfBlank(setter, getter, null);
+            if (String2.isBlank(pattern)) {
                 scripts.onStringIfNotEmpty(var).scriptOf("{}.{}(new {}({}))",
 
-                    THAT, setter.getMethodName(), Import.BIG_DECIMAL, var);
+                    THAT, setter.getMethodName(), Imported.BIG_DECIMAL, var);
             } else {
                 scripts.onStringIfNotEmpty(var).scriptOf("{}.{}({}.parseBigDecimal({}, {}))", THAT,
 
-                    setter.getMethodName(), Import.of(Formatter.class), var, Stringify.of(pattern));
+                    setter.getMethodName(), Imported.FORMATTER, var, Stringify.of(pattern));
             }
             scripts.onElse().scriptOf("{}.{}(null)", THAT, setter.getMethodName());
         } else if (BIG_INTEGER_CLASS.equals(getterActualType)
@@ -438,17 +434,17 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
             String var = defineGetterValueVar(scripts, getter);
             scripts.scriptOf("{}.{}({} == null ? null : new {}({}))", THAT,
 
-                setter.getMethodName(), var, Import.BIG_DECIMAL, var);
+                setter.getMethodName(), var, Imported.BIG_DECIMAL, var);
         } else if (Test2.isSubtypeOf(getterActualType, Number.class)) {
             String var = defineGetterValueVar(scripts, getter);
             scripts.scriptOf("{}.{}({} == null ? null : {}.valueOf({}.doubleValue()))", THAT,
 
-                setter.getMethodName(), var, Import.BIG_DECIMAL, var);
+                setter.getMethodName(), var, Imported.BIG_DECIMAL, var);
         }
     }
 
     private void doMapping2PrimitiveNumber(
-        JavaCodeBlockAddr<JavaElemMethod> scripts,
+        JavaCodeMethodBlockAddr scripts,
         PropertyMethodDeclared setter,
         PropertyMethodDeclared getter,
         String setterPrimitiveType
@@ -466,21 +462,21 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
 
                 THAT, setter.getMethodName(), var, setterPrimitiveType);
         } else if (isString(getterActualType)) {
-            final String pattern = getFormatDefinition(setter, getter, null);
+            final String pattern = getFormatOrDefaultIfBlank(setter, getter, null);
             final String capitalizedSetterPrimitiveType = String2.capitalize(setterPrimitiveType);
             String setterWrappedClass = JAVA_DOT_LANG_DOT +
                 (capitalizedSetterPrimitiveType.equals(INT_CAPITALIZED) ? "Integer" : capitalizedSetterPrimitiveType);
             String var = defineGetterValueVar(scripts, getter);
-            if (String2.isEmpty(pattern)) {
+            if (String2.isBlank(pattern)) {
                 scripts.onStringIfNotEmpty(var).scriptOf("{}.{}({}.parse{}({}))", THAT,
 
-                    setter.getMethodName(), Import.nameOf(setterWrappedClass),
+                    setter.getMethodName(), Imported.nameOf(setterWrappedClass),
 
                     capitalizedSetterPrimitiveType, var);
             } else {
                 scripts.onStringIfNotEmpty(var).scriptOf("{}.{}({}.parseNumber({}, {}).{}Value())",
 
-                    THAT, setter.getMethodName(), Import.of(Formatter.class),
+                    THAT, setter.getMethodName(), Imported.FORMATTER,
 
                     var, Stringify.of(pattern), setterPrimitiveType);
             }
@@ -501,7 +497,7 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
     }
 
     private void doMapping2WrappedNumber(
-        JavaCodeBlockAddr<JavaElemMethod> scripts,
+        JavaCodeMethodBlockAddr scripts,
         PropertyMethodDeclared setter,
         PropertyMethodDeclared getter,
         String lowerCasedSetterSimpleType
@@ -513,7 +509,7 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
         if (Test2.isPrimitiveNumberSubtypeOf(getterActualType, setterPrimitiveType)) {
             scripts.scriptOf("{}.{}({}.valueOf({}.{}()))", THAT, setter.getMethodName(),
 
-                Import.nameOf(setterActualType), THIS, getter.getMethodName());
+                Imported.nameOf(setterActualType), THIS, getter.getMethodName());
         } else if (Test2.isPrimitiveNumberSubtypeOf(setterPrimitiveType, getterActualType)) {
             scripts.scriptOf("{}.{}(({}) {}.{}())", THAT, setter.getMethodName(),
 
@@ -525,20 +521,20 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
                 setter.getMethodName(), var, var, setterPrimitiveType);
         } else if (isString(getterActualType)) {
             String var = defineGetterValueVar(scripts, getter);
-            String pattern = getFormatDefinition(setter, getter, null);
-            if (String2.isEmpty(pattern)) {
+            String pattern = getFormatOrDefaultIfBlank(setter, getter, null);
+            if (String2.isBlank(pattern)) {
                 scripts.onStringIfNotEmpty(var)
                     .scriptOf("{}.{}({}.valueOf({}))",
                         THAT,
                         setter.getMethodName(),
-                        Import.nameOf(setterActualType),
+                        Imported.nameOf(setterActualType),
                         var);
             } else {
                 scripts.onStringIfNotEmpty(var)
                     .scriptOf("{}.{}({}.parseNumber({}, {}).{}Value())",
                         THAT,
                         setter.getMethodName(),
-                        Import.of(Formatter.class),
+                        Imported.FORMATTER,
                         var,
                         Stringify.of(pattern),
                         setterPrimitiveType);
@@ -549,11 +545,11 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
             if (Test2.isPrimitiveNumberSubtypeOf(setterPrimitiveType, INT_PRIMITIVE_CLASS)) {
                 scripts.scriptOf("{}.{}({} == null ? null : {}.valueOf(({}) {}.ordinal()))", THAT,
 
-                    setter.getMethodName(), var, Import.nameOf(setterActualType), setterPrimitiveType, var);
+                    setter.getMethodName(), var, Imported.nameOf(setterActualType), setterPrimitiveType, var);
             } else {
                 scripts.scriptOf("{}.{}({} == null ? null : {}.valueOf({}.ordinal()))", THAT,
 
-                    setter.getMethodName(), var, Import.nameOf(setterActualType), var);
+                    setter.getMethodName(), var, Imported.nameOf(setterActualType), var);
             }
         } else if (isMathNumber(getterActualType)) {
             String var = defineGetterValueVar(scripts, getter);
@@ -564,29 +560,29 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
     }
 
     private void doMappingString2Boolean(
-        JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
+        JavaCodeMethodBlockAddr scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
     ) {
         String getterActualType = getter.getPropertyActualType();
         if (Test2.isTypeof(getterActualType, String.class)) {
             scripts.scriptOf("{}.{}({}.parseBoolean({}.{}()))", THAT,
 
-                setter.getMethodName(), Import.of(Boolean.class), THIS, getter.getMethodName());
+                setter.getMethodName(), Imported.of(Boolean.class), THIS, getter.getMethodName());
         } else if (Test2.isSubtypeOf(getterActualType, CharSequence.class)) {
             String var = defineGetterValueVar(scripts, getter);
             scripts.scriptOf("{}.{}({} != null && {}.parseBoolean({}.toString()))",
 
-                THAT, setter.getMethodName(), var, Import.of(Boolean.class), var);
+                THAT, setter.getMethodName(), var, Imported.of(Boolean.class), var);
         }
     }
 
     private boolean doMappingOnConversion(
-        JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
+        JavaCodeMethodBlockAddr scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
     ) {
         String setterActualType = setter.getPropertyActualType();
         String getterActualType = getter.getPropertyActualType();
         Conversion conversion = Conversions.findAssignedConversion(getterActualType, setterActualType);
         if (conversion != null) {
-            Import<String> convertClass = Import.nameOf(conversion.getConvertClass());
+            Imported<String> convertClass = Imported.nameOf(conversion.getConvertClass());
             if (Test2.isPrimitiveClass(getterActualType)) {
                 scripts.scriptOf("{}.{}({}.{}({}.{}()))", THAT, setter.getMethodName(),
 
@@ -608,16 +604,13 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
     }
 
     private void doMappingToEnum(
-        JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
+        JavaCodeMethodBlockAddr scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
     ) {
         String setterActualType = setter.getPropertyActualType();
         String getterActualType = getter.getPropertyActualType();
 
         if (Test2.isSubtypeOf(getterActualType, String.class)) {
-            String var = defineGetterValueVar(scripts, getter);
-            scripts.scriptOf("{}.{}({} == null ? null : {}.valueOf({}))", THAT,
-
-                setter.getMethodName(), var, Import.nameOf(setterActualType), var);
+            Converter.ENUM.doConvert(scripts, setter, getter);
         } else if (Test2.isPrimitiveNumberClass(getterActualType)) {
             String constVar = defineEnumValues(scripts, setterActualType);
             if (Test2.isPrimitiveNumberSubtypeOf(getterActualType, "long")) {
@@ -648,19 +641,19 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
             String var = defineGetterValueVar(scripts, getter);
             scripts.scriptOf("{}.{}({} == null ? null : {}.valueOf({}.toString()))", THAT,
 
-                setter.getMethodName(), var, Import.nameOf(setterActualType), var);
+                setter.getMethodName(), var, Imported.nameOf(setterActualType), var);
         }
     }
 
     private void doMapping2String(
-        JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
+        JavaCodeMethodBlockAddr scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
     ) {
         String getterActualType = getter.getPropertyActualType();
         if (isString(getterActualType)) {
             scripts.scriptOf("{}.{}({}.{}())", THAT, setter.getMethodName(), THIS, getter.getMethodName());
         } else if (Test2.isSubtypeOf(getterActualType, Number.class)) {
-            String pattern = getFormatDefinition(setter, getter, null);
-            if (String2.isEmpty(pattern)) {
+            String pattern = getFormatOrDefaultIfBlank(setter, getter, null);
+            if (String2.isBlank(pattern)) {
                 doMapping2SimpleString(scripts, setter, getter);
             } else {
                 String var = defineGetterValueVar(scripts, getter);
@@ -668,24 +661,24 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
                     THAT,
                     setter.getMethodName(),
                     var,
-                    Import.of(Formatter.class),
+                    Imported.FORMATTER,
                     var,
                     Stringify.of(pattern));
             }
         } else if (Test2.isPrimitiveNumberClass(getterActualType)) {
-            String pattern = getFormatDefinition(setter, getter, null);
-            if (String2.isEmpty(pattern)) {
+            String pattern = getFormatOrDefaultIfBlank(setter, getter, null);
+            if (String2.isBlank(pattern)) {
                 scripts.scriptOf("{}.{}({}.valueOf({}.{}()))",
                     THAT,
                     setter.getMethodName(),
-                    Import.STRING,
+                    Imported.STRING,
                     THIS,
                     getter.getMethodName());
             } else {
                 scripts.scriptOf("{}.{}({}.format({}.{}(), {}))",
                     THAT,
                     setter.getMethodName(),
-                    Import.of(Formatter.class),
+                    Imported.FORMATTER,
                     THIS,
                     getter.getMethodName(),
                     Stringify.of(pattern));
@@ -694,16 +687,16 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
             scripts.scriptOf("{}.{}({}.valueOf({}.{}()))",
                 THAT,
                 setter.getMethodName(),
-                Import.STRING,
+                Imported.STRING,
                 THIS,
                 getter.getMethodName());
         } else if (Test2.isEnumClass(getterActualType)) {
             String var = defineGetterValueVar(scripts, getter);
             scripts.scriptOf("{}.{}({} == null ? null : {}.name())", THAT, setter.getMethodName(), var, var);
         } else if (Test2.isSubtypeOf(getterActualType, TemporalAccessor.class)) {
-            MappingFormat format = getFormatDefinition(setter, getter);
-            if (format != null) {
-                String formatConst = defineJdk8DateTimeFormatter(scripts, format.value());
+            String pattern = getFormatOrDefaultIfBlank(setter, getter, null);
+            if (String2.isBlank(pattern)) {
+                String formatConst = defineJdk8DateTimeFormatter(scripts, pattern);
                 String var = defineGetterValueVar(scripts, getter);
                 scripts.scriptOf("{}.{}({} == null ? null : {}.format({}))",
 
@@ -712,9 +705,9 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
                 doMapping2SimpleString(scripts, setter, getter);
             }
         } else if (Test2.isImportedAndJodaDateClass(getterActualType)) {
-            MappingFormat format = getFormatDefinition(setter, getter);
-            if (format != null) {
-                String formatConst = defineJodaDateTimeFormatter(scripts, format.value());
+            String pattern = getFormatOrDefaultIfBlank(setter, getter, null);
+            if (String2.isBlank(pattern)) {
+                String formatConst = defineJodaDateTimeFormatter(scripts, pattern);
                 String var = defineGetterValueVar(scripts, getter);
                 scripts.scriptOf("{}.{}({} == null ? null : {}.print({}))",
 
@@ -735,34 +728,33 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
     }
 
     private void doMappingUtilDate2String(
-        JavaCodeBlockAddr<JavaElemMethod> scripts,
+        JavaCodeMethodBlockAddr scripts,
         PropertyMethodDeclared setter,
         PropertyMethodDeclared getter,
         String defaultPattern
     ) {
-        MappingFormat format = getFormatDefinition(setter, getter);
-        Stringify stringify = Stringify.of(format == null ? defaultPattern : format.value());
+        Stringify stringify = Stringify.of(getFormatOrDefaultIfBlank(setter, getter, defaultPattern));
         String var = defineGetterValueVar(scripts, getter);
         scripts.scriptOf("{}.{}({} == null ? null : {}.format({}, {}))", THAT,
 
-            setter.getMethodName(), var, Import.of(Formatter.class), var, stringify);
+            setter.getMethodName(), var, Imported.FORMATTER, var, stringify);
     }
 
     private void doMapping2SimpleString(
-        JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
+        JavaCodeMethodBlockAddr scripts, PropertyMethodDeclared setter, PropertyMethodDeclared getter
     ) {
         String var = defineGetterValueVar(scripts, getter);
         scripts.scriptOf("{}.{}({} == null ? null : {}.toString())", THAT, setter.getMethodName(), var, var);
     }
 
-    private String defineGetterValueVar(JavaCodeBlockAddr<JavaElemMethod> scripts, PropertyMethodDeclared getter) {
+    private String defineGetterValueVar(JavaCodeMethodBlockAddr scripts, PropertyMethodDeclared getter) {
         String var = scripts.varsHelper().next();
         String getterActualType = getter.getPropertyActualType();
-        scripts.scriptOf("{} {} = {}.{}()", Import.nameOf(getterActualType), var, THIS, getter.getMethodName());
+        scripts.scriptOf("{} {} = {}.{}()", Imported.nameOf(getterActualType), var, THIS, getter.getMethodName());
         return var;
     }
 
-    private String defineEnumValues(JavaCodeBlockAddr<JavaElemMethod> scripts, String enumClassname) {
+    private String defineEnumValues(JavaCodeMethodBlockAddr scripts, String enumClassname) {
         VarSupplier<JavaElemField> fieldsSupplier = scripts.fieldsHelper();
         String constVar = fieldsSupplier.nextConstVar(enumClassname);
         if (fieldsSupplier.contains(constVar)) {
@@ -770,13 +762,13 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
         }
         fieldsSupplier.declareField(constVar, "{}[]", enumClassname)
             .assign()
-            .valueOfFormatted("{}.values()", Import.nameOf(enumClassname))
+            .valueOfFormatted("{}.values()", Imported.nameOf(enumClassname))
             .end()
             .modifierWithAll(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
         return constVar;
     }
 
-    private String defineJodaDateTimeFormatter(JavaCodeBlockAddr<JavaElemMethod> scripts, String pattern) {
+    private String defineJodaDateTimeFormatter(JavaCodeMethodBlockAddr scripts, String pattern) {
         VarSupplier<JavaElemField> fieldsSupplier = scripts.fieldsHelper();
         String formatterName = DateTimeFormat.class.getCanonicalName();
         String patternKey = String2.keyOf(formatterName, pattern);
@@ -786,13 +778,13 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
         }
         fieldsSupplier.declareField(constVar, org.joda.time.format.DateTimeFormatter.class.getCanonicalName())
             .assign()
-            .valueOfFormatted("{}.forPattern({})", Import.nameOf(formatterName), Stringify.of(pattern))
+            .valueOfFormatted("{}.forPattern({})", Imported.nameOf(formatterName), Stringify.of(pattern))
             .end()
             .modifierWithAll(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
         return constVar;
     }
 
-    private String defineJdk8DateTimeFormatter(JavaCodeBlockAddr<JavaElemMethod> scripts, String pattern) {
+    private String defineJdk8DateTimeFormatter(JavaCodeMethodBlockAddr scripts, String pattern) {
         VarSupplier<JavaElemField> fieldsSupplier = scripts.fieldsHelper();
         String formatterName = DateTimeFormatter.class.getCanonicalName();
         String patternKey = String2.keyOf(formatterName, pattern);
@@ -802,29 +794,29 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
         }
         fieldsSupplier.declareField(constVar, formatterName)
             .assign()
-            .valueOfFormatted("{}.ofPattern({})", Import.nameOf(formatterName), Stringify.of(pattern))
+            .valueOfFormatted("{}.ofPattern({})", Imported.nameOf(formatterName), Stringify.of(pattern))
             .end()
             .modifierWithAll(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
         return constVar;
     }
 
-    private String getFormatDefinition(
+    private String getFormatOrDefaultIfBlank(
         PropertyMethodDeclared setter, PropertyMethodDeclared getter, String defaultPattern
     ) {
-        MappingFormat format = getFormatDefinition(setter, getter);
-        return format == null ? defaultPattern : format.value();
+        Mapping mapping = getFormatDefinition(setter, getter);
+        return mapping == null ? defaultPattern : String2.isBlank(mapping.format()) ? defaultPattern : mapping.format();
     }
 
-    private MappingFormat getFormatDefinition(PropertyMethodDeclared setter, PropertyMethodDeclared getter) {
-        MappingFormat[] formats = getter.getMethodAnnotations(MappingFormat.class);
+    private Mapping getFormatDefinition(PropertyMethodDeclared setter, PropertyMethodDeclared getter) {
+        Mapping[] formats = getter.getMethodAnnotations(Mapping.class);
         if (formats == null || formats.length == 0) {
-            formats = getter.getFieldAnnotations(MappingFormat.class);
+            formats = getter.getFieldAnnotations(Mapping.class);
         }
         if (formats == null || formats.length == 0) {
-            formats = setter.getMethodAnnotations(MappingFormat.class);
+            formats = setter.getMethodAnnotations(Mapping.class);
         }
         if (formats == null || formats.length == 0) {
-            formats = setter.getFieldAnnotations(MappingFormat.class);
+            formats = setter.getFieldAnnotations(Mapping.class);
         }
         return formats == null || formats.length == 0 ? null : formats[0];
     }

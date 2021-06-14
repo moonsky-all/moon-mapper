@@ -18,6 +18,8 @@ public abstract class AbstractImportable {
 
     protected final Importer getImporter() { return importer; }
 
+    protected final <T> T cast(Object value) { return (T) value; }
+
     public final String onImported(String classname) { return getImporter().onImported(classname); }
 
     public final String onImported(TypeElement type) { return getImporter().onImported(type); }

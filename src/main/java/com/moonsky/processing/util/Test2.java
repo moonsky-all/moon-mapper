@@ -298,7 +298,7 @@ public enum Test2 {
     public static boolean isConstructor(Element elem) { return isElemKind(elem, CONSTRUCTOR); }
 
     public static boolean hasLombokGetter(VariableElement field) {
-        if (Imported.LOMBOK) {
+        if (Import2.LOMBOK) {
             if (field == null) {
                 return false;
             }
@@ -314,7 +314,7 @@ public enum Test2 {
     }
 
     public static boolean hasLombokSetter(VariableElement field) {
-        if (Imported.LOMBOK) {
+        if (Import2.LOMBOK) {
             if (field == null) {
                 return false;
             }
@@ -347,10 +347,10 @@ public enum Test2 {
     }
 
     public static boolean isImportedAndJodaDateClass(String actualType) {
-        if (Imported.JODA_TIME_2X && isTypeofAny(actualType, YearMonth.class, MonthDay.class)) {
+        if (Import2.JODA_TIME_2X && isTypeofAny(actualType, YearMonth.class, MonthDay.class)) {
             return true;
         }
-        if (Imported.JODA_TIME_1X0) {
+        if (Import2.JODA_TIME_1X0) {
             return isSubtypeOf(actualType, ReadableInstant.class) || isSubtypeOf(actualType, ReadablePeriod.class);
         }
         return false;

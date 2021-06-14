@@ -1,86 +1,85 @@
 package com.moonsky.processing.util;
 
-import com.moonsky.mapper.annotation.Copier;
-import com.moonsky.mapper.annotation.Mapper;
-import lombok.Data;
-import org.joda.time.LocalDateTime;
-import org.joda.time.ReadablePeriod;
-import org.joda.time.YearMonth;
-import org.joda.time.Years;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Repository;
-import org.springframework.stereotype.Service;
+import com.moonsky.mapper.util.Formatter;
 
-import javax.annotation.Generated;
 import javax.lang.model.element.TypeElement;
-import java.util.function.Supplier;
+import javax.lang.model.type.TypeMirror;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.Objects;
 
 /**
  * @author benshaoye
  */
-public enum Imported {
-    ;
+public class Imported<T> {
 
-    public final static boolean LOMBOK;
-    public final static boolean JODA_TIME_1X0;
-    public final static boolean JODA_TIME_1X3;
-    public final static boolean JODA_TIME_1X4;
-    public final static boolean JODA_TIME_2X;
-    public final static boolean SPRING_BEAN;
-    public final static boolean SPRING_AUTOWIRED;
-    public final static boolean SPRING_QUALIFIER;
-    public final static boolean SPRING_SERVICE;
-    public final static boolean SPRING_COMPONENT;
-    public final static boolean SPRING_REPOSITORY;
-    public final static boolean SPRING_CONFIGURATION;
-    public final static boolean SPRING_CONDITIONAL_ON_MISSING_BEAN;
-    public final static boolean GENERATED;
-    public final static boolean SAFE_VARARGS;
-    public final static boolean COPIER_IMPL_GENERATED;
-    public final static boolean MAPPER_IMPL_GENERATED;
+    public static final Imported<Class<?>> STRING = Imported.of(String.class);
+    public static final Imported<Class<?>> BIG_INTEGER = Imported.of(BigInteger.class);
+    public static final Imported<Class<?>> BIG_DECIMAL = Imported.of(BigDecimal.class);
+    public static final Imported<Class<?>> FORMATTER = Imported.of(Formatter.class);
 
-    static {
-        LOMBOK = isImported(() -> Data.class);
-        JODA_TIME_1X0 = isImported(() -> ReadablePeriod.class);
-        JODA_TIME_1X3 = isImported(() -> LocalDateTime.class);
-        JODA_TIME_1X4 = isImported(() -> Years.class);
-        JODA_TIME_2X = isImported(() -> YearMonth.class);
-        SPRING_BEAN = isImported(() -> Bean.class);
-        SPRING_SERVICE = isImported(() -> Service.class);
-        SPRING_AUTOWIRED = isImported(() -> Autowired.class);
-        SPRING_QUALIFIER = isImported(() -> Qualifier.class);
-        SPRING_COMPONENT = isImported(() -> Component.class);
-        SPRING_REPOSITORY = isImported(() -> Repository.class);
-        SPRING_CONFIGURATION = isImported(() -> Configuration.class);
-        SPRING_CONDITIONAL_ON_MISSING_BEAN = isImported(() -> ConditionalOnMissingBean.class);
-        GENERATED = isImported(() -> Generated.class);
-        SAFE_VARARGS = isImported(() -> SafeVarargs.class);
-        COPIER_IMPL_GENERATED = isImported(() -> Copier.class);
-        MAPPER_IMPL_GENERATED = isImported(() -> Mapper.class);
+    private final T value;
+    private final boolean classname;
+
+    private Imported(T value, boolean classnameOnString) {
+        this.classname = classnameOnString;
+        this.value = value;
     }
 
-    public static boolean isImportedComponent() { return SPRING_COMPONENT || SPRING_REPOSITORY || SPRING_SERVICE; }
-
-    public static boolean isComponent(TypeElement element) {
-        if (SPRING_COMPONENT && element.getAnnotation(Component.class) != null) {
-            return true;
-        }
-        if (SPRING_REPOSITORY && element.getAnnotation(Repository.class) != null) {
-            return true;
-        }
-        return SPRING_SERVICE && element.getAnnotation(Service.class) != null;
+    /**
+     * 从这里进入的字符串将被认为是需要被 import 的完整类名
+     *
+     * @param classname 完整类名
+     * @param <T>
+     *
+     * @return Import
+     */
+    public static <T extends CharSequence> Imported<T> nameOf(T classname) {
+        return new Imported<>(classname, true);
     }
 
-    private static boolean isImported(Supplier<Class<?>> runner) {
-        try {
-            return runner.get() != null;
-        } catch (Throwable ignored) {
-            return false;
+    /**
+     * 从这里进入的 Class、TypeElement、TypeMirror 会通过 import 引入，并使用引用后的名称
+     *
+     * @param value
+     * @param <T>
+     *
+     * @return
+     */
+    public static <T> Imported<T> of(T value) { return new Imported<>(value, false); }
+
+    public T get() { return value; }
+
+    private boolean isClassname() { return classname; }
+
+    public String toString(Importer importer) {
+        Object value = this.value;
+        if (value instanceof Class<?>) {
+            return importer.onImported((Class<?>) value);
         }
+        if (value instanceof TypeElement) {
+            return importer.onImported((TypeElement) value);
+        }
+        if (value instanceof TypeMirror) {
+            return importer.onImported((TypeMirror) value);
+        }
+        if (value instanceof CharSequence && isClassname()) {
+            return importer.onImported(value.toString());
+        }
+        return String.valueOf(value);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) { return true; }
+        if (o == null || getClass() != o.getClass()) { return false; }
+        Imported<?> anImport = (Imported<?>) o;
+        return classname == anImport.classname && Objects.equals(value, anImport.value);
+    }
+
+    @Override
+    public int hashCode() { return Objects.hash(value, classname); }
+
+    @Override
+    public String toString() { return String.valueOf(get()); }
 }
