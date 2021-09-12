@@ -2,7 +2,6 @@ package com.moonsky.mapper;
 
 import com.moonsky.mapper.annotation.MapperFor;
 import com.moonsky.mapper.annotation.MapperNaming;
-import com.moonsky.mapper.util.DefaultNaming;
 import com.moonsky.mapper.util.NamingStrategy;
 
 import java.util.Map;
@@ -87,12 +86,12 @@ public enum Mappers {
             }
         }
         if (targetMapperFor == null) {
-            throw keyword.newException("未知映射信息, 请检查" +
-                annotatedClass.getCanonicalName() +
-                "类是否被 MapperFor 注解，且包含有效值：" +
+            throw keyword.newException("未知映射信息, 请检查" +//
+                annotatedClass.getCanonicalName() +//
+                "类是否被 MapperFor 注解，且包含有效值：" +//
                 targetClass.getCanonicalName());
         }
-        MapperNaming naming = DefaultNaming.defaultIfNull(annotatedClass.getAnnotation(MapperNaming.class));
+        MapperNaming naming = annotatedClass.getAnnotation(MapperNaming.class);
         String packageName = NamingStrategy.getPackageName(fromClass);
         String simpleName = NamingStrategy.with(naming, fromClass, toClass, keyword);
         String classname = String.join(".", packageName, simpleName);
@@ -105,5 +104,5 @@ public enum Mappers {
     }
 
     @SuppressWarnings("all")
-    static <T> T cast(Object value) { return (T) value; }
+    static <T> T cast(Object value) {return (T) value;}
 }

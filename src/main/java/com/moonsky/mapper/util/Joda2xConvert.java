@@ -73,6 +73,10 @@ public abstract class Joda2xConvert extends Joda1xConvert {
         return Month.of(value.getMonthOfYear());
     }
 
+    public static Month toJdk8Month(org.joda.time.MonthDay value) {
+        return Month.of(value.getMonthOfYear());
+    }
+
     public static org.joda.time.YearMonth toJodaYearMonth(YearMonth value) {
         return new org.joda.time.YearMonth(value.getYear(), value.getMonthValue());
     }

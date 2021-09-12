@@ -2,7 +2,6 @@ package com.moonsky.mapper.util;
 
 import com.moonsky.mapper.annotation.MapperNaming;
 
-import java.lang.annotation.Annotation;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -18,6 +17,11 @@ public enum NamingStrategy {
 
     private final Function<String, RuntimeException> stringBuilder;
     private final BiFunction<String, Throwable, RuntimeException> messageCauseBuilder;
+
+    static final String TRIM_PREFIXES = "trimPrefixes";
+    static final String TRIM_SUFFIXES = "trimSuffixes";
+    static final String PATTERN_NAME = "pattern";
+    static final String[] EMPTIES = {};
 
     NamingStrategy(
         Function<String, RuntimeException> stringBuilder,
@@ -35,31 +39,71 @@ public enum NamingStrategy {
         return messageCauseBuilder.apply(message, cause);
     }
 
+    /**
+     * @param naming
+     * @param thisClass
+     * @param thatClass
+     *
+     * @return
+     *
+     * @see MapperNaming
+     */
     public static String mapperOf(MapperNaming naming, String thisClass, String thatClass) {
         return with(naming, thisClass, thatClass, NamingStrategy.MAPPER);
     }
 
+    /**
+     * @param naming
+     * @param thisClass
+     * @param thatClass
+     *
+     * @return
+     *
+     * @see MapperNaming
+     */
     public static String copierOf(MapperNaming naming, String thisClass, String thatClass) {
         return with(naming, thisClass, thatClass, NamingStrategy.COPIER);
     }
 
+    /**
+     * @param naming
+     * @param thisClass
+     * @param thatClass
+     * @param type
+     *
+     * @return
+     *
+     * @see MapperNaming
+     */
     public static String with(MapperNaming naming, Class<?> thisClass, Class<?> thatClass, NamingStrategy type) {
         return with(naming, thisClass.getCanonicalName(), thatClass.getCanonicalName(), type);
     }
 
-    public static String with(MapperNaming naming, String thisClassname, String thatClassname, NamingStrategy type) {
+    /**
+     * @param naming
+     * @param thisClassname
+     * @param thatClassname
+     * @param type
+     *
+     * @return
+     *
+     * @see MapperNaming
+     */
+    public static String with(
+        MapperNaming naming, String thisClassname, String thatClassname, NamingStrategy type
+    ) {
         String thisClass = getSimpleName(thisClassname);
         String thatClass = getSimpleName(thatClassname);
 
         String thisPrefix = "", thatPrefix = "";
         for (String prefix : naming.trimPrefixes()) {
-            if (thisClass.startsWith(prefix)) {
+            if (hasText(prefix) && thisClass.startsWith(prefix)) {
                 thisClass = thisClass.substring(prefix.length());
                 thisPrefix = prefix;
             }
         }
         for (String prefix : naming.trimPrefixes()) {
-            if (thatClass.startsWith(prefix)) {
+            if (hasText(prefix) && thatClass.startsWith(prefix)) {
                 thatClass = thatClass.substring(prefix.length());
                 thatPrefix = prefix;
             }
@@ -67,20 +111,20 @@ public enum NamingStrategy {
 
         String thisSuffix = "", thatSuffix = "";
         for (String suffix : naming.trimSuffixes()) {
-            if (thisClass.endsWith(suffix)) {
+            if (hasText(suffix) && thisClass.endsWith(suffix)) {
                 thisClass = thisClass.substring(0, thisClass.length() - suffix.length());
                 thisSuffix = suffix;
             }
         }
         for (String suffix : naming.trimSuffixes()) {
-            if (thatClass.endsWith(suffix)) {
+            if (hasText(suffix) && thatClass.endsWith(suffix)) {
                 thatClass = thatClass.substring(0, thatClass.length() - suffix.length());
                 thatSuffix = suffix;
             }
         }
 
         String typeStringify = capitalize(type.name().toLowerCase());
-        String namePattern = deleteWhitespace(naming.pattern());
+        String namePattern = naming.pattern();
         namePattern = replaceAll(namePattern, "{thisPrefix}", thisPrefix);
         namePattern = replaceAll(namePattern, "{thatPrefix}", thatPrefix);
         namePattern = replaceAll(namePattern, "{thisSuffix}", thisSuffix);
@@ -166,5 +210,9 @@ public enum NamingStrategy {
             idx = classname.lastIndexOf('.');
         }
         return classname.substring(0, idx);
+    }
+
+    private static boolean hasText(CharSequence value) {
+        return value != null && value.length() > 0;
     }
 }

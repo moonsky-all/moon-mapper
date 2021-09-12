@@ -23,7 +23,7 @@ public enum DefaultNaming implements MapperNaming {
     public String[] trimPrefixes() { return PREFIXES; }
 
     @Override
-    public String[] trimSuffixes() { return SUFFIXES.split("|"); }
+    public String[] trimSuffixes() { return SUFFIXES.split("\\|"); }
 
     @Override
     public String pattern() { return MapperNaming.DEFAULT_PATTERN; }

@@ -114,6 +114,13 @@
 
   <dependencies>
     <dependency>
+      <groupId>com.github.moonsky-common</groupId>
+      <artifactId>moon-processing</artifactId>
+      <version>0.1</version>
+      <scope>system</scope>
+      <systemPath>D:/WorkSpaces/github/moonsky-common/moon-processing/target/moon-processing-0.1.jar</systemPath>
+    </dependency>
+    <dependency>
       <groupId>org.projectlombok</groupId>
       <artifactId>lombok</artifactId>
       <version>1.18.12</version>

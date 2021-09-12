@@ -279,7 +279,53 @@ public abstract class DateConvert {
 
     public static Timestamp toSqlTimestamp(java.sql.Date value) { return new Timestamp(value.getTime()); }
 
+    public static Timestamp toSqlTimestamp(Long value) { return new Timestamp(value); }
+
     public static Timestamp toSqlTimestamp(long value) { return new Timestamp(value); }
+
+    public static MonthDay toJdk8MonthDay(LocalDate value) {
+        return MonthDay.of(value.getMonthValue(), value.getDayOfMonth());
+    }
+
+    public static MonthDay toJdk8MonthDay(LocalDateTime value) {
+        return MonthDay.of(value.getMonthValue(), value.getDayOfMonth());
+    }
+
+    public static MonthDay toJdk8MonthDay(OffsetDateTime value) {
+        return MonthDay.of(value.getMonthValue(), value.getDayOfMonth());
+    }
+
+    public static MonthDay toJdk8MonthDay(ZonedDateTime value) {
+        return MonthDay.of(value.getMonthValue(), value.getDayOfMonth());
+    }
+
+    public static MonthDay toJdk8MonthDay(Instant value) {
+        return toJdk8MonthDay(value.atZone(systemDefault()));
+    }
+
+    public static MonthDay toJdk8MonthDay(Date value) {
+        return toJdk8MonthDay(value.toInstant());
+    }
+
+    public static MonthDay toJdk8MonthDay(Calendar value) {
+        return toJdk8MonthDay(value.toInstant());
+    }
+
+    public static MonthDay toJdk8MonthDay(java.sql.Date value) {
+        return toJdk8MonthDay(value.toLocalDate());
+    }
+
+    public static MonthDay toJdk8MonthDay(Timestamp value) {
+        return toJdk8MonthDay(value.toLocalDateTime());
+    }
+
+    public static MonthDay toJdk8MonthDay(Long value) {
+        return toJdk8MonthDay(toJdk8LocalDateTime(value));
+    }
+
+    public static MonthDay toJdk8MonthDay(long value) {
+        return toJdk8MonthDay(toJdk8LocalDateTime(value));
+    }
 
     public static YearMonth toJdk8YearMonth(LocalDate value) {
         return YearMonth.of(value.getYear(), value.getMonth());
@@ -383,6 +429,8 @@ public abstract class DateConvert {
 
     public static Year toJdk8Year(Timestamp value) { return Year.from(value.toLocalDateTime()); }
 
+    public static Year toJdk8Year(YearMonth value) { return Year.of(value.getYear()); }
+
     public static Year toJdk8Year(Long value) { return toJdk8Year(toUtilCalendar(value)); }
 
     public static Year toJdk8Year(long value) { return toJdk8Year(toUtilCalendar(value)); }
@@ -412,6 +460,10 @@ public abstract class DateConvert {
     public static Month toJdk8Month(java.sql.Date value) { return value.toLocalDate().getMonth(); }
 
     public static Month toJdk8Month(Timestamp value) { return value.toLocalDateTime().getMonth(); }
+
+    public static Month toJdk8Month(YearMonth value) { return value.getMonth(); }
+
+    public static Month toJdk8Month(MonthDay value) { return value.getMonth(); }
 
     public static Month toJdk8Month(Long value) { return toJdk8Month(toUtilCalendar(value)); }
 
