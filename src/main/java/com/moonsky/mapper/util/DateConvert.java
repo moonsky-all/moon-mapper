@@ -15,7 +15,7 @@ import static java.time.ZoneId.systemDefault;
  *
  * @author benshaoye
  */
-public abstract class DateConvert {
+public abstract class DateConvert extends Convert {
 
     DateConvert() { super(); }
 

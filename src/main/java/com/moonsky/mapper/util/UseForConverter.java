@@ -19,7 +19,9 @@ import java.lang.annotation.Target;
 public @interface UseForConverter {
 
     /**
-     * 标记当前类/公共静态只有一个入参且返回值类型不是{@code void}的方法是否是用作转换器
+     * 标记当前类里只有一个入参且返回值类型不是{@code void}的公共静态方法是否是用作转换器
+     *
+     * 或当前被注解的方法是否用作转换器
      *
      * @return 默认情况下，符合条件的都是
      */
