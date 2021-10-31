@@ -131,7 +131,7 @@ abstract class Classname {
 
     protected static final String findWrappedClass(String primitiveClass) {
         String wrappedClass = MAP_PRIMITIVE_TO_WRAPPED.get(primitiveClass);
-        if (wrappedClass == null && Test2.isPrimitiveClass(primitiveClass)) {
+        if (wrappedClass == null && Test2.isWrappedNumberClass(primitiveClass)) {
             return primitiveClass;
         }
         return wrappedClass;

@@ -19,22 +19,6 @@ enum ConversionUtils {
     final static String THIS = "from";
     final static String THAT = "that";
 
-    static boolean isAfterJoda1x0(String classname) {
-        return Classname.Joda_1x0_CLASSES.contains(classname);
-    }
-
-    static boolean isAfterJoda1x3(String classname) {
-        return Classname.Joda_1x3_CLASSES.contains(classname);
-    }
-
-    static boolean isAfterJoda1x4(String classname) {
-        return Classname.Joda_1x4_CLASSES.contains(classname);
-    }
-
-    static boolean isAfterJoda2x0(String classname) {
-        return Classname.Joda_2x0_CLASSES.contains(classname);
-    }
-
     final static CodeLineNullOrElseHelper<CodeBlockAddr<? extends CodeBlockAddr<ElemMethod>>> onNull(
         CodeMethodBlockAddr scripts, PropertyMethodDeclared setter, String var
     ) {return scripts.onNullOrVerify(THAT, setter.getMethodName(), var);}

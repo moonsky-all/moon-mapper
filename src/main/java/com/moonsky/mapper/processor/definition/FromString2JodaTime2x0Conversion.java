@@ -15,7 +15,7 @@ public class FromString2JodaTime2x0Conversion extends BaseConversion implements 
 
     @Override
     public void register(ConversionRegistry registry) {
-        if (!Import2.JODA_TIME_2X) {
+        if (isNotImported2x()) {
             return;
         }
         for (String classname : Collect2.list(AliasConstant2.Joda_DateTime_ClassName,

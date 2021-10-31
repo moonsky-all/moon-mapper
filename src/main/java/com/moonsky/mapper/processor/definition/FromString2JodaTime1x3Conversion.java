@@ -13,7 +13,7 @@ public class FromString2JodaTime1x3Conversion extends FromString2JodaTime1x0Conv
 
     @Override
     public void register(ConversionRegistry registry) {
-        if (!Import2.JODA_TIME_1X3) {
+        if (isNotImported1x3()) {
             return;
         }
         for (String classname : Collect2.list(AliasConstant2.Joda_LocalDate_ClassName,
