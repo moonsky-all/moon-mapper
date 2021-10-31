@@ -31,7 +31,7 @@ public interface BeanCopier<THIS, THAT> {
      *
      * @return 目标对象
      */
-    default THAT unsafeCopy(THIS thisObject, THAT thatObject) { return thatObject; }
+    default THAT unsafeCopy(THIS thisObject, THAT thatObject) {return thatObject;}
 
     /**
      * 属性复制

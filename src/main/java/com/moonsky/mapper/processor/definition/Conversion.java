@@ -1,46 +1,30 @@
 package com.moonsky.mapper.processor.definition;
 
-import com.moonsky.processor.processing.util.Element2;
-import com.moonsky.processor.processing.util.Generic2;
-import com.moonsky.processor.processing.util.Test2;
-
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
+import com.moonsky.processor.processing.declared.PropertyMethodDeclared;
+import com.moonsky.processor.processing.generate.CodeMethodBlockAddr;
 
 /**
+ * 应该策略化默认代码转换，但是策略化有点问题就是不好做到不同类型之间的互斥
+ *
  * @author benshaoye
  */
-public class Conversion {
+public interface Conversion {
 
-    private final String convertClass;
-    private final String convertMethodName;
-    private final String fromClassname;
-    private final String toClassname;
-    private final boolean fromUsable;
-    private final boolean toUsable;
+    /**
+     * 注册转换器
+     *
+     * @param registry
+     */
+    void register(ConversionRegistry registry);
 
-    Conversion(String convertClass, ExecutableElement method, TypeMirror fromMirror, TypeMirror toMirror) {
-        this.fromClassname = fromMirror.toString();
-        this.toClassname = toMirror.toString();
-        this.convertClass = convertClass;
-        this.convertMethodName = method.getSimpleName().toString();
-
-        String simpleToClassname = Generic2.typeSimplify(this.toClassname);
-        String simpleFromClassname = Generic2.typeSimplify(this.fromClassname);
-        TypeElement fromElement = Element2.getTypeElement(simpleFromClassname);
-        TypeElement toElement = Element2.getTypeElement(simpleToClassname);
-        this.fromUsable = fromElement != null || Test2.isPrimitiveClass(fromClassname);
-        this.toUsable = toElement != null || Test2.isPrimitiveClass(toClassname);
-    }
-
-    public String getConvertClass() { return convertClass; }
-
-    public String getConvertMethodName() { return convertMethodName; }
-
-    public boolean isUsable() { return fromUsable && toUsable; }
-
-    public String getUniqueKey() {
-        return Conversions.forConversionKey(this.fromClassname, this.toClassname);
-    }
+    /**
+     * 执行{@code Mapping}动作
+     *
+     * @param scripts
+     * @param getter
+     * @param setter
+     */
+    void doMapping(
+        CodeMethodBlockAddr scripts, PropertyMethodDeclared getter, PropertyMethodDeclared setter
+    );
 }

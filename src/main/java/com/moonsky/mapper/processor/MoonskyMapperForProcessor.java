@@ -1,18 +1,22 @@
 package com.moonsky.mapper.processor;
 
 import com.google.auto.service.AutoService;
+import com.moonsky.mapper.annotation.Mapper;
 import com.moonsky.mapper.annotation.MapperFor;
 import com.moonsky.mapper.annotation.MapperNaming;
 import com.moonsky.mapper.processor.holder.MapperHolders;
 import com.moonsky.mapper.util.DefaultNaming;
-import com.moonsky.processor.processing.BaseSingletonProcessor;
+import com.moonsky.processor.processing.BaseProcessorAdapter;
+import com.moonsky.processor.processing.util.Collect2;
 import com.moonsky.processor.processing.util.Extract2;
 import com.moonsky.processor.processing.util.OnceProcessor;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Set;
 
@@ -25,7 +29,7 @@ import java.util.Set;
  */
 @SuppressWarnings("all")
 @AutoService(Processor.class)
-public class MoonskyMapperForProcessor extends BaseSingletonProcessor {
+public class MoonskyMapperForProcessor extends BaseProcessorAdapter {
 
     private final static OnceProcessor PROCESSOR = new OnceProcessor();
     private final MapperHolders holders = MapperHolders.HOLDER;
@@ -41,6 +45,7 @@ public class MoonskyMapperForProcessor extends BaseSingletonProcessor {
         Set<? extends TypeElement> annotations, RoundEnvironment roundEnv
     ) {
         PROCESSOR.process(() -> {
+            doProcessingMapper(roundEnv);
             doProcessingMapperFor(roundEnv);
             doWriteJavaFiles();
         });
@@ -50,6 +55,12 @@ public class MoonskyMapperForProcessor extends BaseSingletonProcessor {
     private void doWriteJavaFiles() {
         holders.pojoCopierHolder().write();
         holders.pojoMapperHolder().write();
+    }
+
+    private void doProcessingMapper(RoundEnvironment roundEnv) {
+        for (Element annotated : roundEnv.getElementsAnnotatedWith(Mapper.class)) {
+            holders.autoHolder().with(annotated);
+        }
     }
 
     private void doProcessingMapperFor(RoundEnvironment roundEnv) {
@@ -64,7 +75,7 @@ public class MoonskyMapperForProcessor extends BaseSingletonProcessor {
     }
 
     @Override
-    protected Class<MapperFor> getSupportedAnnotationType() {
-        return MapperFor.class;
+    protected Collection<? extends Class<? extends Annotation>> supportedAnnotationTypes() {
+        return Collect2.list(MapperFor.class, Mapper.class);
     }
 }

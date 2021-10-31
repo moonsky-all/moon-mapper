@@ -2,10 +2,13 @@ package com.moonsky.mapper;
 
 import com.moonsky.mapper.annotation.MapperFor;
 import com.moonsky.mapper.annotation.MapperNaming;
+import com.moonsky.mapper.util.CopierNotFoundException;
+import com.moonsky.mapper.util.MapperNotFoundException;
 import com.moonsky.mapper.util.NamingStrategy;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Objects;
 
 /**
  * 写这个类的目的是为了把一些方法封装起来
@@ -14,8 +17,20 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public enum Mappers {
     ;
-    private final static Map<String, BeanMapper<?, ?>> MAPPER_MAP = new ConcurrentHashMap<>();
-    private final static Map<String, BeanCopier<?, ?>> COPIER_MAP = new ConcurrentHashMap<>();
+    private final static Map<NamingKey, BeanMapper<?, ?>> MAPPER_MAP = new HashMap<>();
+    private final static Map<NamingKey, BeanCopier<?, ?>> COPIER_MAP = new HashMap<>();
+
+    private static void cacheMapper(NamingKey key, BeanMapper<?, ?> mapper) {
+        synchronized (MAPPER_MAP) {
+            MAPPER_MAP.put(key, mapper);
+        }
+    }
+
+    private static void cacheCopier(NamingKey key, BeanCopier<?, ?> copier) {
+        synchronized (COPIER_MAP) {
+            COPIER_MAP.put(key, copier);
+        }
+    }
 
     static Class<?> forName(String classname, NamingStrategy keyword) {
         try {
@@ -23,10 +38,6 @@ public enum Mappers {
         } catch (ClassNotFoundException e) {
             throw keyword.newException(classname, e);
         }
-    }
-
-    private static String keyOf(Class<?> fromClass, Class<?> toClass) {
-        return String.join(":", fromClass.getCanonicalName(), toClass.getCanonicalName());
     }
 
     /**
@@ -38,13 +49,15 @@ public enum Mappers {
      * @param <T>       目标类型
      *
      * @return 源类型至目标类型的映射器
+     *
+     * @throws MapperNotFoundException 不存在指定映射器
      */
     public static <F, T> BeanMapper<F, T> getMapper(Class<F> fromClass, Class<T> toClass) {
-        final String cachedKey = keyOf(fromClass, toClass);
+        final NamingKey cachedKey = NamingKey.of(fromClass, toClass);
         BeanMapper<?, ?> mapper = MAPPER_MAP.get(cachedKey);
         if (mapper == null) {
             mapper = load(NamingStrategy.MAPPER, fromClass, toClass, false);
-            MAPPER_MAP.put(cachedKey, mapper);
+            cacheMapper(cachedKey, mapper);
         }
         return cast(mapper);
     }
@@ -58,15 +71,29 @@ public enum Mappers {
      * @param <T>       目标类型
      *
      * @return 源类型至目标类型的复制器
+     *
+     * @throws CopierNotFoundException 不存在指定复制器
      */
     public static <F, T> BeanCopier<F, T> getCopier(Class<F> fromClass, Class<T> toClass) {
-        final String cachedKey = keyOf(fromClass, toClass);
+        final NamingKey cachedKey = NamingKey.of(fromClass, toClass);
         BeanCopier<?, ?> copier = COPIER_MAP.get(cachedKey);
         if (copier == null) {
             copier = load(NamingStrategy.COPIER, fromClass, toClass, false);
-            COPIER_MAP.put(cachedKey, copier);
+            cacheCopier(cachedKey, copier);
         }
         return cast(copier);
+    }
+
+    static <F, T> BeanCopier<? super F, ? super T> inferCopier(Class<F> fromClass, Class<T> toClass) {
+        return getCopier(fromClass, toClass);
+    }
+
+    static <F, T> BeanMapper<? super F, ? super T> inferMapper(Class<F> fromClass, Class<T> toClass) {
+        return getMapper(fromClass, toClass);
+    }
+
+    private static <T> T inferLoad(NamingStrategy keyword, Class<?> fromClass, Class<?> toClass) {
+        return null;
     }
 
     private static <T> T load(
@@ -94,9 +121,8 @@ public enum Mappers {
         MapperNaming naming = annotatedClass.getAnnotation(MapperNaming.class);
         String packageName = NamingStrategy.getPackageName(fromClass);
         String simpleName = NamingStrategy.with(naming, fromClass, toClass, keyword);
-        String classname = String.join(".", packageName, simpleName);
         try {
-            return cast(forName(classname, keyword).newInstance());
+            return cast(forName(packageName + "." + simpleName, keyword).newInstance());
         } catch (InstantiationException | IllegalAccessException e) {
             String type = NamingStrategy.capitalize(keyword.name().toLowerCase());
             throw keyword.newException(type + " 实例化异常", e);
@@ -105,4 +131,33 @@ public enum Mappers {
 
     @SuppressWarnings("all")
     static <T> T cast(Object value) {return (T) value;}
+
+    private static final class NamingKey {
+
+        private final Class<?> fromClass;
+        private final Class<?> thatClass;
+        private final int hashValue;
+
+        public NamingKey(Class<?> fromClass, Class<?> thatClass) {
+            this.hashValue = (Objects.hashCode(fromClass) + Objects.hashCode(thatClass) + 1) * 31;
+            this.fromClass = fromClass;
+            this.thatClass = thatClass;
+        }
+
+        public static NamingKey of(Class<?> fromClass, Class<?> thatClass) {
+            return new NamingKey(fromClass, thatClass);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof NamingKey) {
+                NamingKey key = (NamingKey) o;
+                return (fromClass == key.fromClass) && (thatClass == key.thatClass);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {return hashValue;}
+    }
 }

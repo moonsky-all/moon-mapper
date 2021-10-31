@@ -14,20 +14,15 @@ public enum MapperHolders {
     private final PublicHolders publicHolders = PublicHolders.INSTANCE;
     private final PojoCopierHolder copierHolder = new PojoCopierHolder(this);
     private final PojoMapperHolder mapperHolder = new PojoMapperHolder(this);
+    private final AutoMapperHolder autoHolder = new AutoMapperHolder(this);
 
-    public void init(ProcessingEnvironment environment) {
-        publicHolders.init(environment);
-    }
+    public void init(ProcessingEnvironment environment) {publicHolders.init(environment);}
 
-    public PojoClassHolder pojoClassHolder() {
-        return publicHolders.pojoClassHolder();
-    }
+    public PojoClassHolder pojoClassHolder() {return publicHolders.pojoClassHolder();}
 
-    public PojoCopierHolder pojoCopierHolder() {
-        return this.copierHolder;
-    }
+    public PojoCopierHolder pojoCopierHolder() {return this.copierHolder;}
 
-    public PojoMapperHolder pojoMapperHolder() {
-        return this.mapperHolder;
-    }
+    public PojoMapperHolder pojoMapperHolder() {return this.mapperHolder;}
+
+    public AutoMapperHolder autoHolder() {return autoHolder;}
 }

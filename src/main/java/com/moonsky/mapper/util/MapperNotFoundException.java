@@ -5,7 +5,7 @@ package com.moonsky.mapper.util;
  */
 public class MapperNotFoundException extends IllegalStateException {
 
-    public MapperNotFoundException(String s) { super(s); }
+    public MapperNotFoundException(String s) {super(s);}
 
     public MapperNotFoundException(String message, Throwable cause) {
         super(message, cause);

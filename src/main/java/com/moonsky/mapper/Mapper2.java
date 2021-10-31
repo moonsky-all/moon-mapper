@@ -1,8 +1,8 @@
 package com.moonsky.mapper;
 
 import com.moonsky.mapper.annotation.MapperFor;
-import com.moonsky.mapper.util.NamingStrategy;
 import com.moonsky.mapper.util.MapperNotFoundException;
+import com.moonsky.mapper.util.NamingStrategy;
 
 import static java.lang.Thread.currentThread;
 
@@ -60,18 +60,11 @@ public enum Mapper2 {
         Class<F> fromClass = Mappers.cast(thisClass());
         MapperFor[] mapperForAll = fromClass.getAnnotationsByType(MapperFor.class);
         if (mapperForAll.length == 0) {
-            throw new MapperNotFoundException("未知映射目标，请检查 " +
-                fromClass.getCanonicalName() +
-                " 是否添加注解: " +
-                MAPPER_FOR_NAME);
+            throw new MapperNotFoundException("未知映射目标，请检查 " + fromClass.getCanonicalName() + " 是否添加注解: " + MAPPER_FOR_NAME);
         }
         Class<?>[] toClasses = mapperForAll[0].value();
         if (toClasses.length == 0) {
-            throw new MapperNotFoundException("未知映射目标，请检查 " +
-                fromClass.getCanonicalName() +
-                " 注解: " +
-                MAPPER_FOR_NAME +
-                "#value() 是否包含有效值");
+            throw new MapperNotFoundException("未知映射目标，请检查 " + fromClass.getCanonicalName() + " 注解: " + MAPPER_FOR_NAME + "#value() 是否包含有效值");
         }
         return get(fromClass, Mappers.cast(toClasses[0]));
     }

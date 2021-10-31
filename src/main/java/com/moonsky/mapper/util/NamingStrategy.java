@@ -5,6 +5,8 @@ import com.moonsky.mapper.annotation.MapperNaming;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static com.moonsky.mapper.util.DefaultNaming.defaultSuffixes;
+
 /**
  * @author benshaoye
  */
@@ -94,15 +96,16 @@ public enum NamingStrategy {
     ) {
         String thisClass = getSimpleName(thisClassname);
         String thatClass = getSimpleName(thatClassname);
-
+        final String[] prefixes = naming.trimPrefixes();
+        final String[] suffixes = naming.trimSuffixes().length == 0 ? defaultSuffixes() : naming.trimSuffixes();
         String thisPrefix = "", thatPrefix = "";
-        for (String prefix : naming.trimPrefixes()) {
+        for (String prefix : prefixes) {
             if (hasText(prefix) && thisClass.startsWith(prefix)) {
                 thisClass = thisClass.substring(prefix.length());
                 thisPrefix = prefix;
             }
         }
-        for (String prefix : naming.trimPrefixes()) {
+        for (String prefix : prefixes) {
             if (hasText(prefix) && thatClass.startsWith(prefix)) {
                 thatClass = thatClass.substring(prefix.length());
                 thatPrefix = prefix;
@@ -110,13 +113,13 @@ public enum NamingStrategy {
         }
 
         String thisSuffix = "", thatSuffix = "";
-        for (String suffix : naming.trimSuffixes()) {
+        for (String suffix : suffixes) {
             if (hasText(suffix) && thisClass.endsWith(suffix)) {
                 thisClass = thisClass.substring(0, thisClass.length() - suffix.length());
                 thisSuffix = suffix;
             }
         }
-        for (String suffix : naming.trimSuffixes()) {
+        for (String suffix : suffixes) {
             if (hasText(suffix) && thatClass.endsWith(suffix)) {
                 thatClass = thatClass.substring(0, thatClass.length() - suffix.length());
                 thatSuffix = suffix;
@@ -132,6 +135,7 @@ public enum NamingStrategy {
         namePattern = replaceAll(namePattern, "{thisClass}", thisClass);
         namePattern = replaceAll(namePattern, "{thatClass}", thatClass);
         namePattern = replaceAll(namePattern, "{type}", typeStringify);
+
         boolean digitStarted = Character.isDigit(namePattern.charAt(0));
         return (digitStarted ? "M" : "") + namePattern;
     }

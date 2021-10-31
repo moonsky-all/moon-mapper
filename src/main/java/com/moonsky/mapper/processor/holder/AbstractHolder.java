@@ -23,7 +23,7 @@ public abstract class AbstractHolder {
         return holders.pojoCopierHolder();
     }
 
-    protected final  PojoMapperHolder pojoMapperHolder() {
+    protected final PojoMapperHolder pojoMapperHolder() {
         return holders.pojoMapperHolder();
     }
 }

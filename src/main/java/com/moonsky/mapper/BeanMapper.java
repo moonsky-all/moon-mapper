@@ -31,7 +31,7 @@ public interface BeanMapper<THIS, THAT> {
      *
      * @return 设置属性后的目标对象 {@code thatObject}
      */
-    default THAT unsafeForward(THIS thisObject, THAT thatObject) { return thatObject; }
+    default THAT unsafeForward(THIS thisObject, THAT thatObject) {return thatObject;}
 
     /**
      * null 不安全的属性映射，不会对{@code thisObject}和{@code thatObject}进行{@code null}检查
@@ -43,7 +43,7 @@ public interface BeanMapper<THIS, THAT> {
      *
      * @return 当前对象 {@code thisObject}
      */
-    default THIS unsafeBackward(THIS thisObject, THAT thatObject) { return thisObject; }
+    default THIS unsafeBackward(THIS thisObject, THAT thatObject) {return thisObject;}
 
     /**
      * 将当前对象{@code thisObject}按属性名映射到另一个对象{@code thatObject}

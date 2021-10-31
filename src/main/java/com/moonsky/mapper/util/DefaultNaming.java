@@ -15,19 +15,19 @@ public enum DefaultNaming implements MapperNaming {
     private static final String[] PREFIXES = {};
     public static final String SUFFIXES = "Entity|Model|VO|DO|BO|BO|DTO";
 
-    public static MapperNaming defaultIfNull(MapperNaming naming) {
-        return naming == null ? DEFAULT : naming;
-    }
+    public static MapperNaming defaultIfNull(MapperNaming naming) {return naming == null ? DEFAULT : naming;}
+
+    public static String[] defaultSuffixes() {return SUFFIXES.split("\\|");}
 
     @Override
-    public String[] trimPrefixes() { return PREFIXES; }
+    public String[] trimPrefixes() {return PREFIXES;}
 
     @Override
-    public String[] trimSuffixes() { return SUFFIXES.split("\\|"); }
+    public String[] trimSuffixes() {return defaultSuffixes();}
 
     @Override
-    public String pattern() { return MapperNaming.DEFAULT_PATTERN; }
+    public String pattern() {return MapperNaming.DEFAULT_PATTERN;}
 
     @Override
-    public Class<? extends Annotation> annotationType() { return MapperNaming.class; }
+    public Class<? extends Annotation> annotationType() {return MapperNaming.class;}
 }

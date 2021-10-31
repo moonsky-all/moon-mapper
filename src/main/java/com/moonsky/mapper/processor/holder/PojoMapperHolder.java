@@ -29,17 +29,13 @@ public class PojoMapperHolder extends AbstractHolder implements JavaWritable {
         String mappedKey = String2.keyOf(thisName, thatName);
         PojoMapperDefinition record = mapperRecordMap.get(mappedKey);
         if (record == null) {
-            PojoCopierDefinition forward = copierOf(namingAttributes, thisElement, thatElement);
-            PojoCopierDefinition backward = copierOf(namingAttributes, thatElement, thisElement);
+            PojoCopierDefinition forward = pojoCopierHolder().with(thisElement, thatElement);
+            PojoCopierDefinition backward = pojoCopierHolder().with(thatElement, thisElement);
             record = new PojoMapperDefinition(getHolders(), namingAttributes, forward, backward);
             mapperRecordMap.put(mappedKey, record);
         }
         return record;
     }
-
-    private PojoCopierDefinition copierOf(
-        MapperNaming namingAttributes, TypeElement thisElement, TypeElement thatElement
-    ) {return pojoCopierHolder().with(namingAttributes, thisElement, thatElement);}
 
     @Override
     public void write() {

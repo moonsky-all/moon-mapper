@@ -7,10 +7,12 @@ import com.moonsky.processor.processing.filer.JavaFileDetails;
 import com.moonsky.processor.processing.filer.JavaSupplier;
 import com.moonsky.processor.processing.generate.JavaFileClassDetails;
 import com.moonsky.processor.processing.generate.ScopedFields;
-import com.moonsky.processor.processing.util.Const2;
+import com.moonsky.processor.processing.util.AliasConstant2;
 
 import javax.lang.model.element.Modifier;
-import java.util.Map;
+
+import static com.moonsky.mapper.processor.definition.ConversionUtils.THAT;
+import static com.moonsky.mapper.processor.definition.ConversionUtils.THIS;
 
 /**
  * @author benshaoye
@@ -44,18 +46,19 @@ public class PojoMapperDefinition extends PojoBaseDefinition implements JavaSupp
         String packageName = getPackageName();
         String classname = getSimpleName();
         JavaFileClassDetails definition = new JavaFileClassDetails(packageName, classname);
-        definition.impls().implement("{}<{}, {}>", Const2.BeanMapper_ClassName, getThisClassname(), getThatClassname());
+        definition.impls()
+            .implement("{}<{}, {}>", AliasConstant2.BeanMapper_ClassName, getThisClassname(), getThatClassname());
         definition.annotateComponent().annotateMapperImplGenerated();
 
         ScopedFields fields = definition.fields();
-        fields.declareField(Const2.FORWARD, forward.getClassname())
+        fields.declareField(AliasConstant2.FORWARD, forward.getClassname())
             .assign()
-            .valueOfStaticRef(forward.getClassname(), Const2.CONST)
+            .valueOfStaticRef(forward.getClassname(), AliasConstant2.CONST)
             .end()
             .modifierWithAll(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
-        fields.declareField(Const2.BACKWARD, backward.getClassname())
+        fields.declareField(AliasConstant2.BACKWARD, backward.getClassname())
             .assign()
-            .valueOfStaticRef(backward.getClassname(), Const2.CONST)
+            .valueOfStaticRef(backward.getClassname(), AliasConstant2.CONST)
             .end()
             .modifierWithAll(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL);
 
@@ -66,7 +69,7 @@ public class PojoMapperDefinition extends PojoBaseDefinition implements JavaSupp
             })
             .typeOf(getThatClassname())
             .scripts()
-            .returning("{}.unsafeCopy({}, {})", Const2.FORWARD, THIS, THAT)
+            .returning("{}.unsafeCopy({}, {})", AliasConstant2.FORWARD, THIS, THAT)
             .end()
             .annotateOverride();
         definition.methods()
@@ -76,7 +79,7 @@ public class PojoMapperDefinition extends PojoBaseDefinition implements JavaSupp
             })
             .typeOf(getThisClassname())
             .scripts()
-            .returning("{}.unsafeCopy({}, {})", Const2.BACKWARD, THAT, THIS)
+            .returning("{}.unsafeCopy({}, {})", AliasConstant2.BACKWARD, THAT, THIS)
             .end()
             .annotateOverride();
         definition.methods()
@@ -85,7 +88,7 @@ public class PojoMapperDefinition extends PojoBaseDefinition implements JavaSupp
             })
             .typeOf(getThatClassname())
             .scripts()
-            .returning("{}.convert({})", Const2.FORWARD, THIS)
+            .returning("{}.convert({})", AliasConstant2.FORWARD, THIS)
             .end()
             .annotateOverride();
         definition.methods()
@@ -94,7 +97,7 @@ public class PojoMapperDefinition extends PojoBaseDefinition implements JavaSupp
             })
             .typeOf(getThisClassname())
             .scripts()
-            .returning("{}.convert({})", Const2.BACKWARD, THAT)
+            .returning("{}.convert({})", AliasConstant2.BACKWARD, THAT)
             .end()
             .annotateOverride();
 

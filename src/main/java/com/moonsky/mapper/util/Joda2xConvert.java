@@ -15,13 +15,13 @@ import static java.time.ZoneId.systemDefault;
  */
 public abstract class Joda2xConvert extends Joda1xConvert {
 
-    Joda2xConvert() { super(); }
+    Joda2xConvert() {super();}
 
     public static LocalDate toJdk8LocalDate(org.joda.time.YearMonth value) {
         return LocalDate.of(value.getYear(), value.getMonthOfYear(), 1);
     }
 
-    public static LocalDateTime toJdk8LocalDateTime(org.joda.time.YearMonth value) { return toJdk8LocalDate(value).atStartOfDay(); }
+    public static LocalDateTime toJdk8LocalDateTime(org.joda.time.YearMonth value) {return toJdk8LocalDate(value).atStartOfDay();}
 
     public static OffsetDateTime toJdk8OffsetDateTime(org.joda.time.YearMonth value) {
         return toJdk8OffsetDateTime(toJdk8LocalDate(value));
@@ -31,19 +31,19 @@ public abstract class Joda2xConvert extends Joda1xConvert {
         return toJdk8ZonedDateTime(toJdk8LocalDate(value));
     }
 
-    public static Instant toJdk8Instant(org.joda.time.YearMonth value) { return toJdk8Instant(toJdk8LocalDate(value)); }
+    public static Instant toJdk8Instant(org.joda.time.YearMonth value) {return toJdk8Instant(toJdk8LocalDate(value));}
 
-    public static Date toUtilDate(org.joda.time.YearMonth value) { return toUtilDate(toJdk8LocalDate(value)); }
+    public static Date toUtilDate(org.joda.time.YearMonth value) {return toUtilDate(toJdk8LocalDate(value));}
 
-    public static Calendar toUtilCalendar(org.joda.time.YearMonth value) { return toUtilCalendar(toJdk8LocalDate(value)); }
+    public static Calendar toUtilCalendar(org.joda.time.YearMonth value) {return toUtilCalendar(toJdk8LocalDate(value));}
 
     public static java.sql.Date toSqlDate(org.joda.time.YearMonth value) {
         return java.sql.Date.valueOf(toJdk8LocalDate(value));
     }
 
-    public static Timestamp toSqlTimestamp(org.joda.time.YearMonth value) { return toSqlTimestamp(toJdk8LocalDate(value)); }
+    public static Timestamp toSqlTimestamp(org.joda.time.YearMonth value) {return toSqlTimestamp(toJdk8LocalDate(value));}
 
-    public static DateTime toJodaDateTime(org.joda.time.YearMonth value) { return toJodaDateTime(toJdk8LocalDate(value)); }
+    public static DateTime toJodaDateTime(org.joda.time.YearMonth value) {return toJodaDateTime(toJdk8LocalDate(value));}
 
     public static org.joda.time.LocalDate toJodaLocalDate(org.joda.time.YearMonth value) {
         return new org.joda.time.LocalDate(value.getYear(), value.getMonthOfYear(), 1);
@@ -145,9 +145,9 @@ public abstract class Joda2xConvert extends Joda1xConvert {
         return toJodaYearMonth(new Date(value));
     }
 
-    public static long toPrimitiveLong(org.joda.time.YearMonth value) { return toPrimitiveLong(toJdk8LocalDate(value)); }
+    public static long toPrimitiveLong(org.joda.time.YearMonth value) {return toPrimitiveLong(toJdk8LocalDate(value));}
 
-    public static Long toLong(org.joda.time.YearMonth value) { return toLong(toJdk8LocalDate(value)); }
+    public static Long toLong(org.joda.time.YearMonth value) {return toLong(toJdk8LocalDate(value));}
 
     public static org.joda.time.MonthDay toJodaMonthDay(LocalDateTime value) {
         return new org.joda.time.MonthDay(value.getMonthValue(), value.getDayOfMonth());
