@@ -12,12 +12,9 @@ public class FromWrappedNumber2BigIntegerConversion extends BaseConversion {
 
     @Override
     public void register(ConversionRegistry registry) {
-        registry.register(CLASS_Double, CLASS_BigInteger, this);
-        registry.register(CLASS_Float, CLASS_BigInteger, this);
-        registry.register(CLASS_Long, CLASS_BigInteger, this);
-        registry.register(CLASS_Integer, CLASS_BigInteger, this);
-        registry.register(CLASS_Short, CLASS_BigInteger, this);
-        registry.register(CLASS_Byte, CLASS_BigInteger, this);
+        for (String wrappedNumberType : WRAPPED_NUMBER_TYPES) {
+            registry.register(wrappedNumberType, CLASS_BigInteger, this);
+        }
     }
 
     @Override

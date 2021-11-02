@@ -2,12 +2,10 @@ package com.moonsky.mapper.processor.definition;
 
 import com.moonsky.processor.processing.declared.PropertyMethodDeclared;
 import com.moonsky.processor.processing.generate.CodeMethodBlockAddr;
-import com.moonsky.processor.processing.util.AliasConstant2;
 import com.moonsky.processor.processing.util.String2;
 import com.moonsky.processor.processing.util.Test2;
 
 import static com.moonsky.mapper.processor.definition.ConversionUtils.*;
-import static com.moonsky.mapper.processor.definition.ConversionUtils.onNull;
 
 /**
  * @author benshaoye
@@ -18,22 +16,17 @@ public class FromJoda2x0TimeStringConversion extends BaseConversion implements C
 
     @Override
     public void register(ConversionRegistry registry) {
-        registry.register(AliasConstant2.Joda_DateTime_ClassName, CLASS_String, this);
-        registry.register(AliasConstant2.Joda_MutableDateTime_ClassName, CLASS_String, this);
-        registry.register(AliasConstant2.Joda_LocalDate_ClassName, CLASS_String, this);
-        registry.register(AliasConstant2.Joda_LocalTime_ClassName, CLASS_String, this);
-        registry.register(AliasConstant2.Joda_LocalDateTime_ClassName, CLASS_String, this);
+        for (String klassName : JODA_1x3_CLASSES) {
+            registry.register(klassName, CLASS_String, this);
+        }
+        for (String klassName : JODA_1x0_CLASSES) {
+            registry.register(klassName, CLASS_String, this);
+        }
+        for (String klassName : JODA_2x0_CLASSES) {
+            registry.register(klassName, CLASS_String, this);
+        }
 
-        registry.register(AliasConstant2.Joda_DateTime_ClassName, CLASS_String, this);
-        registry.register(AliasConstant2.Joda_Instant_ClassName, CLASS_String, this);
-        registry.register(AliasConstant2.Joda_LocalDate_ClassName, CLASS_String, this);
-        registry.register(AliasConstant2.Joda_LocalTime_ClassName, CLASS_String, this);
-        registry.register(AliasConstant2.Joda_LocalDateTime_ClassName, CLASS_String, this);
-        registry.register(AliasConstant2.Joda_MutableDateTime_ClassName, CLASS_String, this);
-        registry.register(AliasConstant2.Joda_YearMonth_ClassName, CLASS_String, this);
-        registry.register(AliasConstant2.Joda_MonthDay_ClassName, CLASS_String, this);
-
-        registry.registerMatches(Test2::isImportedAndJodaDateClass, CLASS_String, this);
+        registry.registerMatches(Test2::isJodaClassname, CLASS_String, this);
     }
 
     @Override

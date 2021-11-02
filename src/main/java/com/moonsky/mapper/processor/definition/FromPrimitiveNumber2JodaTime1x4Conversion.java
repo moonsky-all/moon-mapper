@@ -21,13 +21,10 @@ public class FromPrimitiveNumber2JodaTime1x4Conversion extends BaseConversion im
         if (isNotImported1x4()) {
             return;
         }
-        for (String classname : Joda_1x4_CLASSES) {
-            registry.register(PRIMITIVE_double, classname, this);
-            registry.register(PRIMITIVE_float, classname, this);
-            registry.register(PRIMITIVE_long, classname, this);
-            registry.register(PRIMITIVE_int, classname, this);
-            registry.register(PRIMITIVE_short, classname, this);
-            registry.register(PRIMITIVE_byte, classname, this);
+        for (String classname : JODA_1x4_CLASSES) {
+            for (String primitiveNumberType : PRIMITIVE_NUMBER_TYPES) {
+                registry.register(primitiveNumberType, classname, this);
+            }
         }
     }
 

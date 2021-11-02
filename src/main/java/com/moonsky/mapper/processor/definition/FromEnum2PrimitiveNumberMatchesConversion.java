@@ -16,12 +16,9 @@ public class FromEnum2PrimitiveNumberMatchesConversion extends BaseConversion im
 
     @Override
     public void register(ConversionRegistry registry) {
-        registry.registerMatches(Test2::isEnumClass, PRIMITIVE_double, this);
-        registry.registerMatches(Test2::isEnumClass, PRIMITIVE_float, this);
-        registry.registerMatches(Test2::isEnumClass, PRIMITIVE_long, this);
-        registry.registerMatches(Test2::isEnumClass, PRIMITIVE_int, this);
-        registry.registerMatches(Test2::isEnumClass, PRIMITIVE_short, this);
-        registry.registerMatches(Test2::isEnumClass, PRIMITIVE_byte, this);
+        for (String primitiveNumberType : PRIMITIVE_NUMBER_TYPES) {
+            registry.registerMatches(Test2::isEnumClass, primitiveNumberType, this);
+        }
     }
 
     @Override

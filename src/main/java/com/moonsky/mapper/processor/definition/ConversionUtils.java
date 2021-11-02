@@ -76,13 +76,13 @@ enum ConversionUtils {
 
     static String defineJodaDateTimeFormatter(CodeMethodBlockAddr scripts, String pattern) {
         VarSupplier<ElemField> fieldsSupplier = scripts.fieldsHelper();
-        String formatterName = AliasConstant2.Joda_DateTimeFormat_ClassName;
+        String formatterName = JodaClassnames.CLASS_Joda_DateTimeFormat;
         String patternKey = String2.keyOf(formatterName, pattern);
         String constVar = fieldsSupplier.nextConstVar(patternKey);
         if (fieldsSupplier.contains(constVar)) {
             return constVar;
         }
-        fieldsSupplier.declareField(constVar, AliasConstant2.Joda_DateTimeFormatter_ClassName)
+        fieldsSupplier.declareField(constVar, JodaClassnames.CLASS_Joda_DateTimeFormatter)
             .assign()
             .valueOfFormatted("{}.forPattern({})", Imported.nameOf(formatterName), Stringify.of(pattern))
             .end()

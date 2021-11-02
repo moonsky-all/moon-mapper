@@ -17,12 +17,9 @@ public class FromPrimitiveNumber2BigIntegerConversion extends BaseConversion imp
 
     @Override
     public void register(ConversionRegistry registry) {
-        registry.register(PRIMITIVE_double, CLASS_BigInteger, this);
-        registry.register(PRIMITIVE_float, CLASS_BigInteger, this);
-        registry.register(PRIMITIVE_long, CLASS_BigInteger, this);
-        registry.register(PRIMITIVE_int, CLASS_BigInteger, this);
-        registry.register(PRIMITIVE_short, CLASS_BigInteger, this);
-        registry.register(PRIMITIVE_byte, CLASS_BigInteger, this);
+        for (String primitiveNumberType : PRIMITIVE_NUMBER_TYPES) {
+            registry.register(primitiveNumberType, CLASS_BigInteger, this);
+        }
     }
 
     @Override

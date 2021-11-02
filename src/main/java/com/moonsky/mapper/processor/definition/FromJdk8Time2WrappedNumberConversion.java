@@ -20,19 +20,14 @@ public class FromJdk8Time2WrappedNumberConversion extends BaseConversion impleme
 
     @Override
     public void register(ConversionRegistry registry) {
-        registry.register(classname(Year.class), CLASS_Double, this);
-        registry.register(classname(Year.class), CLASS_Float, this);
-        registry.register(classname(Year.class), CLASS_Long, this);
-        registry.register(classname(Year.class), CLASS_Integer, this);
-        registry.register(classname(Year.class), CLASS_Short, this);
-        registry.register(classname(Year.class), CLASS_Byte, this);
-
-        registry.register(classname(Month.class), CLASS_Double, this);
-        registry.register(classname(Month.class), CLASS_Float, this);
-        registry.register(classname(Month.class), CLASS_Long, this);
-        registry.register(classname(Month.class), CLASS_Integer, this);
-        registry.register(classname(Month.class), CLASS_Short, this);
-        registry.register(classname(Month.class), CLASS_Byte, this);
+        String yearClassname = classname(Year.class);
+        String monthClassname = classname(Month.class);
+        for (String wrappedNumberType : WRAPPED_NUMBER_TYPES) {
+            if (!CLASS_Byte.equals(wrappedNumberType)) {
+                registry.register(yearClassname, wrappedNumberType, this);
+            }
+            registry.register(monthClassname, wrappedNumberType, this);
+        }
     }
 
     @Override

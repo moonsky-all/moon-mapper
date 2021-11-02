@@ -20,14 +20,11 @@ public class FromNumber2Joda1x4TimeMatchesConversion extends BaseConversion impl
         if (isNotImported1x4()) {
             return;
         }
-        for (String classname : Joda_1x4_CLASSES) {
+        for (String classname : JODA_1x4_CLASSES) {
+            for (String wrappedNumberType : WRAPPED_NUMBER_TYPES) {
+                registry.register(wrappedNumberType, classname, this);
+            }
             registry.register(CLASS_Number, classname, this);
-            registry.register(CLASS_Double, classname, this);
-            registry.register(CLASS_Float, classname, this);
-            registry.register(CLASS_Long, classname, this);
-            registry.register(CLASS_Integer, classname, this);
-            registry.register(CLASS_Short, classname, this);
-            registry.register(CLASS_Byte, classname, this);
             registry.registerMatches(NUMBER_TESTER, classname, this);
         }
     }

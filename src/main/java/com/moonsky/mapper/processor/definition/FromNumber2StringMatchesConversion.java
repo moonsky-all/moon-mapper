@@ -16,12 +16,9 @@ public class FromNumber2StringMatchesConversion extends BaseConversion implement
 
     @Override
     public void register(ConversionRegistry registry) {
-        registry.register(CLASS_Double, CLASS_String, this);
-        registry.register(CLASS_Float, CLASS_String, this);
-        registry.register(CLASS_Long, CLASS_String, this);
-        registry.register(CLASS_Integer, CLASS_String, this);
-        registry.register(CLASS_Short, CLASS_String, this);
-        registry.register(CLASS_Byte, CLASS_String, this);
+        for (String wrappedNumberType : WRAPPED_NUMBER_TYPES) {
+            registry.register(wrappedNumberType, CLASS_String, this);
+        }
 
         registry.register(CLASS_BigInteger, CLASS_String, this);
         registry.register(CLASS_BigDecimal, CLASS_String, this);

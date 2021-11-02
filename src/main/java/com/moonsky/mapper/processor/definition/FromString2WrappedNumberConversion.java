@@ -17,12 +17,9 @@ public class FromString2WrappedNumberConversion extends BaseConversion implement
 
     @Override
     public void register(ConversionRegistry registry) {
-        registry.register(CLASS_String, CLASS_Double, this);
-        registry.register(CLASS_String, CLASS_Float, this);
-        registry.register(CLASS_String, CLASS_Long, this);
-        registry.register(CLASS_String, CLASS_Integer, this);
-        registry.register(CLASS_String, CLASS_Short, this);
-        registry.register(CLASS_String, CLASS_Byte, this);
+        for (String wrappedNumberType : WRAPPED_NUMBER_TYPES) {
+            registry.register(CLASS_String, wrappedNumberType, this);
+        }
     }
 
     @Override

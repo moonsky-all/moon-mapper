@@ -7,12 +7,11 @@ import com.moonsky.processor.processing.util.String2;
 import com.moonsky.processor.processing.util.Stringify;
 
 import static com.moonsky.mapper.processor.definition.ConversionUtils.*;
-import static com.moonsky.mapper.processor.definition.ConversionUtils.THAT;
 
 /**
  * @author benshaoye
  */
-public class FromString2NumberConversion extends BaseConversion implements Conversion{
+public class FromString2NumberConversion extends BaseConversion implements Conversion {
 
     public FromString2NumberConversion() {}
 

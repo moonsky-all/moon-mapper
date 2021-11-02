@@ -5,6 +5,7 @@ import com.moonsky.processor.processing.declared.PropertyMethodDeclared;
 import com.moonsky.processor.processing.generate.CodeMethodBlockAddr;
 import com.moonsky.processor.processing.util.Import2;
 import com.moonsky.processor.processing.util.Imported;
+import com.moonsky.processor.processing.util.JodaClassnames;
 import com.moonsky.processor.processing.util.Test2;
 
 import java.util.function.Function;
@@ -16,7 +17,7 @@ import static com.moonsky.mapper.processor.definition.ConversionUtils.onNull;
 /**
  * @author benshaoye
  */
-public abstract class BaseConversion extends Classname implements Conversion {
+public abstract class BaseConversion extends JodaClassnames implements Conversion {
 
     protected static final Imported<Class<Formatter>> FORMATTER_IMPORTED = Imported.of(Formatter.class);
 
@@ -51,18 +52,18 @@ public abstract class BaseConversion extends Classname implements Conversion {
     }
 
     protected static final boolean isNotImported2x() {
-        return !Import2.JODA_TIME_2X;
+        return !IMPORTED_Joda2x0;
     }
 
     protected static final boolean isNotImported1x4() {
-        return !Import2.JODA_TIME_1X4;
+        return !IMPORTED_Joda1x4;
     }
 
     protected static final boolean isNotImported1x3() {
-        return !Import2.JODA_TIME_1X3;
+        return !IMPORTED_Joda1x3;
     }
 
     protected static final boolean isNotImported1x0() {
-        return !Import2.JODA_TIME_1X0;
+        return !IMPORTED_Joda1x0;
     }
 }

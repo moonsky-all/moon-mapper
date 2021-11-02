@@ -2,15 +2,13 @@ package com.moonsky.mapper.processor.definition;
 
 import com.moonsky.processor.processing.declared.PropertyMethodDeclared;
 import com.moonsky.processor.processing.generate.CodeMethodBlockAddr;
-import com.moonsky.processor.processing.util.Imported;
 import com.moonsky.processor.processing.util.Test2;
 
 import java.time.Month;
 import java.time.Year;
 
-import static com.moonsky.mapper.processor.definition.ConversionUtils.*;
 import static com.moonsky.mapper.processor.definition.ConversionUtils.THAT;
-import static com.moonsky.processor.processing.util.Test2.isSubtypeOfInt;
+import static com.moonsky.mapper.processor.definition.ConversionUtils.defineGetterValueVar;
 
 /**
  * @author benshaoye
@@ -21,19 +19,14 @@ public class FromJdk8Time2PrimitiveNumberConversion extends BaseConversion imple
 
     @Override
     public void register(ConversionRegistry registry) {
-        registry.register(classname(Year.class), PRIMITIVE_double, this);
-        registry.register(classname(Year.class), PRIMITIVE_float, this);
-        registry.register(classname(Year.class), PRIMITIVE_long, this);
-        registry.register(classname(Year.class), PRIMITIVE_int, this);
-        registry.register(classname(Year.class), PRIMITIVE_short, this);
-        registry.register(classname(Year.class), PRIMITIVE_byte, this);
-
-        registry.register(classname(Month.class), PRIMITIVE_double, this);
-        registry.register(classname(Month.class), PRIMITIVE_float, this);
-        registry.register(classname(Month.class), PRIMITIVE_long, this);
-        registry.register(classname(Month.class), PRIMITIVE_int, this);
-        registry.register(classname(Month.class), PRIMITIVE_short, this);
-        registry.register(classname(Month.class), PRIMITIVE_byte, this);
+        String yearClassname = classname(Year.class);
+        String monthClassname = classname(Month.class);
+        for (String primitiveNumberType : PRIMITIVE_NUMBER_TYPES) {
+            if (!PRIMITIVE_byte.equals(primitiveNumberType)) {
+                registry.register(yearClassname, primitiveNumberType, this);
+            }
+            registry.register(monthClassname, primitiveNumberType, this);
+        }
     }
 
     @Override

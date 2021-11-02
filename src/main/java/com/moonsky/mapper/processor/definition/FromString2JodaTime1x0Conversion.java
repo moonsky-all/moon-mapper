@@ -3,8 +3,11 @@ package com.moonsky.mapper.processor.definition;
 import com.moonsky.processor.processing.declared.PropertyMethodDeclared;
 import com.moonsky.processor.processing.generate.CodeMethodBlockAddr;
 import com.moonsky.processor.processing.generate.ElemField;
+import com.moonsky.processor.processing.generate.ElemFieldValue;
 import com.moonsky.processor.processing.generate.VarSupplier;
-import com.moonsky.processor.processing.util.*;
+import com.moonsky.processor.processing.util.Element2;
+import com.moonsky.processor.processing.util.Imported;
+import com.moonsky.processor.processing.util.String2;
 
 import static com.moonsky.mapper.processor.definition.ConversionUtils.*;
 
@@ -20,10 +23,21 @@ public class FromString2JodaTime1x0Conversion extends BaseConversion implements 
         if (isNotImported1x0()) {
             return;
         }
-        for (String classname : Collect2.list(AliasConstant2.Joda_DateTime_ClassName,
-            AliasConstant2.Joda_MutableDateTime_ClassName)) {
+        for (String classname : JODA_1x0_CLASSES) {
             registry.register(CLASS_String, classname, this);
         }
+    }
+
+    private String getIsoFormatMethodName(String setterActualType) {
+        if (IMPORTED_Joda1x3) {
+            if (CLASS_Joda_LocalDate.equals(setterActualType)) {
+                return "date";
+            }
+            if (CLASS_Joda_LocalTime.equals(setterActualType)) {
+                return "time";
+            }
+        }
+        return "dateTime";
     }
 
     @Override
@@ -36,23 +50,14 @@ public class FromString2JodaTime1x0Conversion extends BaseConversion implements 
         String setterSimpleType = Element2.getSimpleName(setterActualType);
         if (String2.isBlank(pattern)) {
             VarSupplier<ElemField> fieldHelper = scripts.fieldsHelper();
-            String formatterName = AliasConstant2.Joda_DateTimeFormatter_ClassName;
+            String formatterName = CLASS_Joda_DateTimeFormatter;
             String formatterKey = String2.keyOf(formatterName, setterActualType);
             String formatterConst = fieldHelper.nextConstVar(formatterKey);
             if (!fieldHelper.contains(formatterConst)) {
-                String method = "dateTime";
-                if (Import2.JODA_TIME_1X3) {
-                    if (Test2.isTypeof(setterActualType, AliasConstant2.Joda_LocalDate_ClassName)) {
-                        method = "date";
-                    } else if (Test2.isTypeof(setterActualType, AliasConstant2.Joda_LocalTime_ClassName)) {
-                        method = "time";
-                    }
-                }
-                fieldHelper.declareField(formatterConst, formatterName)
-                    .assign()
-                    .valueOfFormatted("{}.{}()",
-                        Imported.nameOf(AliasConstant2.Joda_ISODateTimeFormat_ClassName),
-                        method);
+                ElemFieldValue valuer = fieldHelper.declareField(formatterConst, formatterName).assign();
+                valuer.valueOfFormatted("{}.{}()",
+                    Imported.nameOf(CLASS_Joda_ISODateTimeFormat),
+                    getIsoFormatMethodName(setterActualType));
             }
             onNull(scripts, setter, var).or("{}.parse{}({})", formatterConst, setterSimpleType, var);
         } else {

@@ -2,7 +2,8 @@ package com.moonsky.mapper.processor.definition;
 
 import com.moonsky.processor.processing.declared.PropertyMethodDeclared;
 import com.moonsky.processor.processing.generate.CodeMethodBlockAddr;
-import com.moonsky.processor.processing.util.*;
+import com.moonsky.processor.processing.util.Element2;
+import com.moonsky.processor.processing.util.Imported;
 
 import static com.moonsky.mapper.processor.definition.ConversionUtils.defineGetterValueVar;
 import static com.moonsky.mapper.processor.definition.ConversionUtils.onNull;
@@ -10,22 +11,16 @@ import static com.moonsky.mapper.processor.definition.ConversionUtils.onNull;
 /**
  * @author benshaoye
  */
-public class FromString2JodaTime1x4Conversion extends BaseConversion implements Conversion{
+public class FromString2JodaTime1x4Conversion extends BaseConversion implements Conversion {
 
     public FromString2JodaTime1x4Conversion() {}
 
     @Override
     public void register(ConversionRegistry registry) {
-        if (!Import2.JODA_TIME_1X4) {
+        if (isNotImported1x4()) {
             return;
         }
-        for (String classname : Collect2.list(AliasConstant2.Joda_Years_ClassName,
-            AliasConstant2.Joda_Months_ClassName,
-            AliasConstant2.Joda_Weeks_ClassName,
-            AliasConstant2.Joda_Days_ClassName,
-            AliasConstant2.Joda_Hours_ClassName,
-            AliasConstant2.Joda_Minutes_ClassName,
-            AliasConstant2.Joda_Seconds_ClassName)) {
+        for (String classname : JODA_1x4_CLASSES) {
             registry.register(CLASS_String, classname, this);
         }
     }

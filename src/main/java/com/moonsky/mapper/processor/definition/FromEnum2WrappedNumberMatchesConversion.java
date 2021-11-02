@@ -5,7 +5,7 @@ import com.moonsky.processor.processing.generate.CodeMethodBlockAddr;
 import com.moonsky.processor.processing.util.Imported;
 import com.moonsky.processor.processing.util.Test2;
 
-import static com.moonsky.mapper.processor.definition.ConversionUtils.*;
+import static com.moonsky.mapper.processor.definition.ConversionUtils.defineGetterValueVar;
 import static com.moonsky.mapper.processor.definition.ConversionUtils.onNull;
 import static com.moonsky.processor.processing.util.Test2.isSubtypeOfInt;
 
@@ -18,12 +18,9 @@ public class FromEnum2WrappedNumberMatchesConversion extends BaseConversion impl
 
     @Override
     public void register(ConversionRegistry registry) {
-        registry.registerMatches(Test2::isEnumClass, CLASS_Double, this);
-        registry.registerMatches(Test2::isEnumClass, CLASS_Float, this);
-        registry.registerMatches(Test2::isEnumClass, CLASS_Long, this);
-        registry.registerMatches(Test2::isEnumClass, CLASS_Integer, this);
-        registry.registerMatches(Test2::isEnumClass, CLASS_Short, this);
-        registry.registerMatches(Test2::isEnumClass, CLASS_Byte, this);
+        for (String wrappedNumberType : WRAPPED_NUMBER_TYPES) {
+            registry.registerMatches(Test2::isEnumClass, wrappedNumberType, this);
+        }
     }
 
     @Override

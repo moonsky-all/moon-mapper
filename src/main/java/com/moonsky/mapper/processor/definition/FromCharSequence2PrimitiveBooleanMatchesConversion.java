@@ -4,7 +4,8 @@ import com.moonsky.processor.processing.declared.PropertyMethodDeclared;
 import com.moonsky.processor.processing.generate.CodeMethodBlockAddr;
 import com.moonsky.processor.processing.util.Imported;
 
-import static com.moonsky.mapper.processor.definition.ConversionUtils.*;
+import static com.moonsky.mapper.processor.definition.ConversionUtils.THAT;
+import static com.moonsky.mapper.processor.definition.ConversionUtils.defineGetterValueVar;
 
 /**
  * @author benshaoye

@@ -12,10 +12,7 @@ import com.moonsky.processor.processing.filer.JavaSupplier;
 import com.moonsky.processor.processing.generate.CodeMethodBlockAddr;
 import com.moonsky.processor.processing.generate.ElemMethod;
 import com.moonsky.processor.processing.generate.JavaFileClassDetails;
-import com.moonsky.processor.processing.util.AliasConstant2;
-import com.moonsky.processor.processing.util.Imported;
-import com.moonsky.processor.processing.util.String2;
-import com.moonsky.processor.processing.util.Test2;
+import com.moonsky.processor.processing.util.*;
 
 import javax.lang.model.element.Modifier;
 import java.util.Map;
@@ -97,13 +94,15 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
             }
 
             String thisPropertyType = thisProperty.getPropertyType();
-            String getterRef = thisProperty.getGetterReferenced(THIS);
-            String setterScript = thatProperty.getTypeFulledSetterReferenced(THAT, getterRef, thisPropertyType);
+            String getterRef = thisProperty.getRefGetterMethod(THIS);
+            String setterScript = thatProperty.getRefTypeFulledSetterMethod(THAT, getterRef, thisPropertyType);
 
             // 基于自定义 setter 的转换器，包括同类型直接映射
             if (String2.isNotBlank(setterScript)) {
                 scripts.scriptOf(setterScript);
                 continue;
+            } else if (thatProperty.isMaybeWritable()) {
+
             }
 
             // TODO: 2021/11/1 多 setter 的情况下支持子类兼容性的映射
@@ -148,7 +147,7 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
         String setterActualType = setter.getPropertyActualType();
         String getterActualType = getter.getPropertyActualType();
 
-        if (Test2.isTypeof(getterActualType, Classname.CLASS_String)) {
+        if (Test2.isTypeof(getterActualType, Classnames.CLASS_String)) {
             String var = defineGetterValueVar(scripts, getter);
             scripts.scriptOf("{}.{}({} == null ? null : {}.valueOf({}))", THAT,
 
@@ -164,14 +163,14 @@ public class PojoCopierDefinition extends PojoBaseDefinition implements JavaSupp
 
                     setter.getMethodName(), constVar, THIS, getter.getMethodName());
             }
-        } else if (Test2.isSubtypeOf(getterActualType, Classname.CLASS_Number)) {
+        } else if (Test2.isSubtypeOf(getterActualType, Classnames.CLASS_Number)) {
             String getterVar = defineGetterValueVar(scripts, getter);
             String constVar = defineEnumValues(scripts, setterActualType);
-            String getterPrimitiveCls = Classname.findPrimitiveClass(getterActualType);
+            String getterPrimitiveCls = Classnames.findPrimitiveClass(getterActualType);
             boolean isSubtypeOfLong = getterPrimitiveCls == null || Test2.isSubtypeOfLong(getterPrimitiveCls);
             String valueTemplate = isSubtypeOfLong ? "{}[{}]" : "{}[{}.intValue()]";
             onNull(scripts, setter, getterVar).or(valueTemplate, constVar, getterVar);
-        } else if (Test2.isSubtypeOf(getterActualType, Classname.CLASS_CharSequence)) {
+        } else if (Test2.isSubtypeOf(getterActualType, Classnames.CLASS_CharSequence)) {
             String var = defineGetterValueVar(scripts, getter);
             onNull(scripts, setter, var).or("{}.valueOf({}.toString())",
                 FORMATTER_IMPORTED,

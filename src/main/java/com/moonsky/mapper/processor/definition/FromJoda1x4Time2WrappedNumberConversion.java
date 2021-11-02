@@ -2,7 +2,9 @@ package com.moonsky.mapper.processor.definition;
 
 import com.moonsky.processor.processing.declared.PropertyMethodDeclared;
 import com.moonsky.processor.processing.generate.CodeMethodBlockAddr;
-import com.moonsky.processor.processing.util.*;
+import com.moonsky.processor.processing.util.Element2;
+import com.moonsky.processor.processing.util.Imported;
+import com.moonsky.processor.processing.util.Log2;
 
 import static com.moonsky.mapper.processor.definition.ConversionUtils.defineGetterValueVar;
 import static com.moonsky.mapper.processor.definition.ConversionUtils.onNull;
@@ -17,18 +19,13 @@ public class FromJoda1x4Time2WrappedNumberConversion extends BaseConversion impl
 
     @Override
     public void register(ConversionRegistry registry) {
-        if (!Import2.JODA_TIME_1X4) {
+        if (isNotImported1x4()) {
             return;
         }
         String[] wrappedNumberClasses = {
-            CLASS_Double,
-            CLASS_Float,
-            CLASS_Long,
-            CLASS_Integer,
-            CLASS_Short,
-            CLASS_Byte,
+            CLASS_Double, CLASS_Float, CLASS_Long, CLASS_Integer, CLASS_Short, CLASS_Byte,
         };
-        for (String joda1x4Class : Joda_1x4_CLASSES) {
+        for (String joda1x4Class : JODA_1x4_CLASSES) {
             for (String wrappedNumberClass : wrappedNumberClasses) {
                 registry.register(joda1x4Class, wrappedNumberClass, this);
             }

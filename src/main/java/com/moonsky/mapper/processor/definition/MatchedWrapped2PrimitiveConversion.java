@@ -3,6 +3,8 @@ package com.moonsky.mapper.processor.definition;
 import com.moonsky.processor.processing.declared.PropertyMethodDeclared;
 import com.moonsky.processor.processing.generate.CodeMethodBlockAddr;
 
+import java.util.Map;
+
 import static com.moonsky.mapper.processor.definition.ConversionUtils.THAT;
 import static com.moonsky.mapper.processor.definition.ConversionUtils.defineGetterValueVar;
 
@@ -16,13 +18,9 @@ public class MatchedWrapped2PrimitiveConversion extends BaseConversion implement
     @SuppressWarnings("all")
     @Override
     public void register(ConversionRegistry registry) {
-        registry.register(CLASS_Character, PRIMITIVE_char, this);
-        registry.register(CLASS_Double, PRIMITIVE_double, this);
-        registry.register(CLASS_Float, PRIMITIVE_float, this);
-        registry.register(CLASS_Long, PRIMITIVE_long, this);
-        registry.register(CLASS_Integer, PRIMITIVE_int, this);
-        registry.register(CLASS_Short, PRIMITIVE_short, this);
-        registry.register(CLASS_Byte, PRIMITIVE_byte, this);
+        for (Map.Entry<String, String> entry : MAP_WRAPPED_TO_PRIMITIVE.entrySet()) {
+            registry.register(entry.getKey(), entry.getValue(), this);
+        }
     }
 
     @Override

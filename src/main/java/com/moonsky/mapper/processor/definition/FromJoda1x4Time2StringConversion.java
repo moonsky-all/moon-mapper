@@ -2,7 +2,6 @@ package com.moonsky.mapper.processor.definition;
 
 import com.moonsky.processor.processing.declared.PropertyMethodDeclared;
 import com.moonsky.processor.processing.generate.CodeMethodBlockAddr;
-import com.moonsky.processor.processing.util.AliasConstant2;
 
 /**
  * @author benshaoye
@@ -13,13 +12,9 @@ public class FromJoda1x4Time2StringConversion extends BaseConversion implements 
 
     @Override
     public void register(ConversionRegistry registry) {
-        registry.register(AliasConstant2.Joda_Years_ClassName, CLASS_String, this);
-        registry.register(AliasConstant2.Joda_Months_ClassName, CLASS_String, this);
-        registry.register(AliasConstant2.Joda_Weeks_ClassName, CLASS_String, this);
-        registry.register(AliasConstant2.Joda_Days_ClassName, CLASS_String, this);
-        registry.register(AliasConstant2.Joda_Hours_ClassName, CLASS_String, this);
-        registry.register(AliasConstant2.Joda_Minutes_ClassName, CLASS_String, this);
-        registry.register(AliasConstant2.Joda_Seconds_ClassName, CLASS_String, this);
+        for (String joda1x4Class : JODA_1x4_CLASSES) {
+            registry.register(joda1x4Class, CLASS_String, this);
+        }
     }
 
     @Override

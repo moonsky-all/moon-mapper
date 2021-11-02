@@ -22,7 +22,7 @@ public class FromCharSequence2Joda1x4TimeMatchesConversion extends BaseConversio
         }
         String classnameOfStringBuffer = classname(StringBuffer.class);
         String classnameOfStringBuilder = classname(StringBuilder.class);
-        for (String classname : Joda_1x4_CLASSES) {
+        for (String classname : JODA_1x4_CLASSES) {
             registry.register(CLASS_CharSequence, classname, this);
             registry.register(classnameOfStringBuffer, classname, this);
             registry.register(classnameOfStringBuilder, classname, this);

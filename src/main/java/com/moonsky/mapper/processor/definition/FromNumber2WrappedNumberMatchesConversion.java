@@ -16,33 +16,12 @@ public class FromNumber2WrappedNumberMatchesConversion extends BaseConversion im
 
     @Override
     public void register(ConversionRegistry registry) {
-        registry.register(CLASS_BigDecimal, CLASS_Double, this);
-        registry.register(CLASS_BigDecimal, CLASS_Float, this);
-        registry.register(CLASS_BigDecimal, CLASS_Long, this);
-        registry.register(CLASS_BigDecimal, CLASS_Integer, this);
-        registry.register(CLASS_BigDecimal, CLASS_Short, this);
-        registry.register(CLASS_BigDecimal, CLASS_Byte, this);
-
-        registry.register(CLASS_BigInteger, CLASS_Double, this);
-        registry.register(CLASS_BigInteger, CLASS_Float, this);
-        registry.register(CLASS_BigInteger, CLASS_Long, this);
-        registry.register(CLASS_BigInteger, CLASS_Integer, this);
-        registry.register(CLASS_BigInteger, CLASS_Short, this);
-        registry.register(CLASS_BigInteger, CLASS_Byte, this);
-
-        registry.register(CLASS_Number, CLASS_Double, this);
-        registry.register(CLASS_Number, CLASS_Float, this);
-        registry.register(CLASS_Number, CLASS_Long, this);
-        registry.register(CLASS_Number, CLASS_Integer, this);
-        registry.register(CLASS_Number, CLASS_Short, this);
-        registry.register(CLASS_Number, CLASS_Byte, this);
-
-        registry.registerMatches(NUMBER_TESTER, CLASS_Double, this);
-        registry.registerMatches(NUMBER_TESTER, CLASS_Float, this);
-        registry.registerMatches(NUMBER_TESTER, CLASS_Long, this);
-        registry.registerMatches(NUMBER_TESTER, CLASS_Integer, this);
-        registry.registerMatches(NUMBER_TESTER, CLASS_Short, this);
-        registry.registerMatches(NUMBER_TESTER, CLASS_Byte, this);
+        for (String wrappedNumberType : WRAPPED_NUMBER_TYPES) {
+            registry.register(CLASS_BigDecimal, wrappedNumberType, this);
+            registry.register(CLASS_BigInteger, wrappedNumberType, this);
+            registry.register(CLASS_Number, wrappedNumberType, this);
+            registry.registerMatches(NUMBER_TESTER, wrappedNumberType, this);
+        }
     }
 
     @Override

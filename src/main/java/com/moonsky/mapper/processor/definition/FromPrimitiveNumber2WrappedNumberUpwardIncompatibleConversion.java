@@ -11,7 +11,8 @@ import static com.moonsky.mapper.processor.definition.ConversionUtils.THIS;
  * @author benshaoye
  */
 @SuppressWarnings("all")
-public class FromPrimitiveNumber2WrappedNumberUpwardIncompatibleConversion extends BaseConversion implements Conversion {
+public class FromPrimitiveNumber2WrappedNumberUpwardIncompatibleConversion extends BaseConversion
+    implements Conversion {
 
     public FromPrimitiveNumber2WrappedNumberUpwardIncompatibleConversion() {}
 

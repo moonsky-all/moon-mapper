@@ -2,7 +2,8 @@ package com.moonsky.mapper.processor.definition;
 
 import com.moonsky.processor.processing.declared.PropertyMethodDeclared;
 import com.moonsky.processor.processing.generate.CodeMethodBlockAddr;
-import com.moonsky.processor.processing.util.*;
+import com.moonsky.processor.processing.util.Imported;
+import com.moonsky.processor.processing.util.String2;
 
 import static com.moonsky.mapper.processor.definition.ConversionUtils.*;
 
@@ -18,15 +19,14 @@ public class FromString2JodaTime2x0Conversion extends BaseConversion implements 
         if (isNotImported2x()) {
             return;
         }
-        for (String classname : Collect2.list(AliasConstant2.Joda_DateTime_ClassName,
-            AliasConstant2.Joda_Instant_ClassName,
-            AliasConstant2.Joda_LocalDate_ClassName,
-            AliasConstant2.Joda_LocalTime_ClassName,
-            AliasConstant2.Joda_LocalDateTime_ClassName,
-            AliasConstant2.Joda_MutableDateTime_ClassName,
-            AliasConstant2.Joda_YearMonth_ClassName,
-            AliasConstant2.Joda_MonthDay_ClassName)) {
-            registry.register(CLASS_String, classname, this);
+        for (String klassName : JODA_1x0_CLASSES) {
+            registry.register(CLASS_String, klassName, this);
+        }
+        for (String klassName : JODA_1x3_CLASSES) {
+            registry.register(CLASS_String, klassName, this);
+        }
+        for (String klassName : JODA_2x0_CLASSES) {
+            registry.register(CLASS_String, klassName, this);
         }
     }
 

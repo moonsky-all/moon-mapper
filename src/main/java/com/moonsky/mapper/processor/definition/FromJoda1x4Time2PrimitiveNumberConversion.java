@@ -2,11 +2,11 @@ package com.moonsky.mapper.processor.definition;
 
 import com.moonsky.processor.processing.declared.PropertyMethodDeclared;
 import com.moonsky.processor.processing.generate.CodeMethodBlockAddr;
-import com.moonsky.processor.processing.util.*;
+import com.moonsky.processor.processing.util.Element2;
+import com.moonsky.processor.processing.util.Test2;
 
-import static com.moonsky.mapper.processor.definition.ConversionUtils.*;
 import static com.moonsky.mapper.processor.definition.ConversionUtils.THAT;
-import static com.moonsky.processor.processing.util.Test2.isSubtypeOfInt;
+import static com.moonsky.mapper.processor.definition.ConversionUtils.defineGetterValueVar;
 
 /**
  * @author benshaoye
@@ -17,24 +17,12 @@ public class FromJoda1x4Time2PrimitiveNumberConversion extends BaseConversion im
 
     @Override
     public void register(ConversionRegistry registry) {
-        if (!Import2.JODA_TIME_1X4) {
+        if (isNotImported1x4()) {
             return;
         }
-        String[] joda1x4Classes = {
-            AliasConstant2.Joda_Years_ClassName,
-            AliasConstant2.Joda_Months_ClassName,
-            AliasConstant2.Joda_Weeks_ClassName,
-            AliasConstant2.Joda_Days_ClassName,
-            AliasConstant2.Joda_Hours_ClassName,
-            AliasConstant2.Joda_Minutes_ClassName,
-            AliasConstant2.Joda_Seconds_ClassName
-        };
-        String[] wrappedNumberClasses = {
-            PRIMITIVE_double, PRIMITIVE_float, PRIMITIVE_long, PRIMITIVE_int, PRIMITIVE_short, PRIMITIVE_byte,
-        };
-        for (String joda1x4Class : joda1x4Classes) {
-            for (String wrappedNumberClass : wrappedNumberClasses) {
-                registry.register(joda1x4Class, wrappedNumberClass, this);
+        for (String joda1x4Class : JODA_1x4_CLASSES) {
+            for (String primitiveNumberClass : PRIMITIVE_NUMBER_TYPES) {
+                registry.register(joda1x4Class, primitiveNumberClass, this);
             }
         }
     }

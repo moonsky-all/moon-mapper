@@ -11,25 +11,15 @@ public class FromNumber2PrimitiveNumberMatchesConversion extends FromWrappedNumb
 
     @Override
     public void register(ConversionRegistry registry) {
-        registry.register(CLASS_BigDecimal, PRIMITIVE_double, this);
-        registry.register(CLASS_BigDecimal, PRIMITIVE_float, this);
-        registry.register(CLASS_BigDecimal, PRIMITIVE_long, this);
-        registry.register(CLASS_BigDecimal, PRIMITIVE_int, this);
-        registry.register(CLASS_BigDecimal, PRIMITIVE_short, this);
-        registry.register(CLASS_BigDecimal, PRIMITIVE_byte, this);
-
-        registry.register(CLASS_BigInteger, PRIMITIVE_double, this);
-        registry.register(CLASS_BigInteger, PRIMITIVE_float, this);
-        registry.register(CLASS_BigInteger, PRIMITIVE_long, this);
-        registry.register(CLASS_BigInteger, PRIMITIVE_int, this);
-        registry.register(CLASS_BigInteger, PRIMITIVE_short, this);
-        registry.register(CLASS_BigInteger, PRIMITIVE_byte, this);
-
-        registry.registerMatches(NUMBER_TESTER, PRIMITIVE_double, this);
-        registry.registerMatches(NUMBER_TESTER, PRIMITIVE_float, this);
-        registry.registerMatches(NUMBER_TESTER, PRIMITIVE_long, this);
-        registry.registerMatches(NUMBER_TESTER, PRIMITIVE_int, this);
-        registry.registerMatches(NUMBER_TESTER, PRIMITIVE_short, this);
-        registry.registerMatches(NUMBER_TESTER, PRIMITIVE_byte, this);
+        /**
+         * TODO: 2021/11/1 参考{@link FromNumber2WrappedNumberMatchesConversion}
+         * 那里注册了 registry.register(CLASS_Number, wrappedNumberType, this);
+         * 这里需要检查是否有遗漏
+         */
+        for (String primitiveNumberType : PRIMITIVE_NUMBER_TYPES) {
+            registry.register(CLASS_BigDecimal, primitiveNumberType, this);
+            registry.register(CLASS_BigInteger, primitiveNumberType, this);
+            registry.registerMatches(NUMBER_TESTER, primitiveNumberType, this);
+        }
     }
 }

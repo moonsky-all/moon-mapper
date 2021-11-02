@@ -45,9 +45,9 @@ enum ConversionRegistry {
     static {
         try {
             String convertClass;
-            if (Import2.JODA_TIME_2X) {
+            if (JodaClassnames.IMPORTED_Joda2x0) {
                 convertClass = AliasConstant2.Joda2xConvert_ClassName;
-            } else if (Import2.JODA_TIME_1X0) {
+            } else if (JodaClassnames.IMPORTED_Joda1x0) {
                 convertClass = AliasConstant2.Joda1xConvert_ClassName;
             } else {
                 convertClass = AliasConstant2.DateConvert_ClassName;

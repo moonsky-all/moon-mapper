@@ -24,11 +24,8 @@ public class FromPrimitiveCharOrPrimitiveBoolean2StringConversion extends BaseCo
     public void doMapping(
         CodeMethodBlockAddr scripts, PropertyMethodDeclared getter, PropertyMethodDeclared setter
     ) {
-        scripts.scriptOf("{}.{}({}.valueOf({}.{}()))",
-            THAT,
-            setter.getMethodName(),
-            Imported.STRING,
-            THIS,
-            getter.getMethodName());
+        scripts.scriptOf("{}.{}({}.valueOf({}.{}()))", THAT,
+
+            setter.getMethodName(), Imported.STRING, THIS, getter.getMethodName());
     }
 }

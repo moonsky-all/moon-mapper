@@ -17,12 +17,9 @@ public class FromString2PrimitiveNumberConversion extends BaseConversion impleme
 
     @Override
     public void register(ConversionRegistry registry) {
-        registry.register(CLASS_String, PRIMITIVE_double, this);
-        registry.register(CLASS_String, PRIMITIVE_float, this);
-        registry.register(CLASS_String, PRIMITIVE_long, this);
-        registry.register(CLASS_String, PRIMITIVE_int, this);
-        registry.register(CLASS_String, PRIMITIVE_short, this);
-        registry.register(CLASS_String, PRIMITIVE_byte, this);
+        for (String primitiveNumberType : PRIMITIVE_NUMBER_TYPES) {
+            registry.register(CLASS_String, primitiveNumberType, this);
+        }
     }
 
     @Override
