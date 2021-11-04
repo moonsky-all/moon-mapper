@@ -1,6 +1,5 @@
 package com.moonsky.mapper;
 
-import com.moonsky.mapper.annotation.MapperFor;
 import com.moonsky.mapper.annotation.MapperNaming;
 import com.moonsky.mapper.util.CopierNotFoundException;
 import com.moonsky.mapper.util.MapperNotFoundException;
@@ -20,6 +19,8 @@ public enum Mappers {
     private final static Map<NamingKey, BeanMapper<?, ?>> MAPPER_MAP = new HashMap<>();
     private final static Map<NamingKey, BeanCopier<?, ?>> COPIER_MAP = new HashMap<>();
 
+    public static final String CONST = "CONST";
+
     private static void cacheMapper(NamingKey key, BeanMapper<?, ?> mapper) {
         synchronized (MAPPER_MAP) {
             MAPPER_MAP.put(key, mapper);
@@ -32,11 +33,11 @@ public enum Mappers {
         }
     }
 
-    static Class<?> forName(String classname, NamingStrategy keyword) {
+    static Class<?> forName(String classname, NamingStrategy strategy) {
         try {
             return Class.forName(classname);
         } catch (ClassNotFoundException e) {
-            throw keyword.newException(classname, e);
+            throw strategy.newException(classname, e);
         }
     }
 
@@ -56,7 +57,7 @@ public enum Mappers {
         final NamingKey cachedKey = NamingKey.of(fromClass, toClass);
         BeanMapper<?, ?> mapper = MAPPER_MAP.get(cachedKey);
         if (mapper == null) {
-            mapper = load(NamingStrategy.MAPPER, fromClass, toClass, false);
+            mapper = load(NamingStrategy.MAPPER, fromClass, toClass);
             cacheMapper(cachedKey, mapper);
         }
         return cast(mapper);
@@ -78,54 +79,34 @@ public enum Mappers {
         final NamingKey cachedKey = NamingKey.of(fromClass, toClass);
         BeanCopier<?, ?> copier = COPIER_MAP.get(cachedKey);
         if (copier == null) {
-            copier = load(NamingStrategy.COPIER, fromClass, toClass, false);
+            copier = load(NamingStrategy.COPIER, fromClass, toClass);
             cacheCopier(cachedKey, copier);
         }
         return cast(copier);
     }
 
-    static <F, T> BeanCopier<? super F, ? super T> inferCopier(Class<F> fromClass, Class<T> toClass) {
-        return getCopier(fromClass, toClass);
-    }
-
-    static <F, T> BeanMapper<? super F, ? super T> inferMapper(Class<F> fromClass, Class<T> toClass) {
-        return getMapper(fromClass, toClass);
-    }
-
-    private static <T> T inferLoad(NamingStrategy keyword, Class<?> fromClass, Class<?> toClass) {
-        return null;
-    }
-
-    private static <T> T load(
-        NamingStrategy keyword, Class<?> fromClass, Class<?> toClass, boolean reverse
-    ) {
-        MapperFor targetMapperFor = null;
-        Class<?> targetClass = reverse ? fromClass : toClass;
-        Class<?> annotatedClass = reverse ? toClass : fromClass;
-        MapperFor[] mapperForAll = annotatedClass.getAnnotationsByType(MapperFor.class);
-        for (int i = mapperForAll.length - 1; i > -1; i--) {
-            MapperFor temp = mapperForAll[i];
-            for (Class<?> aClass : temp.value()) {
-                if (aClass == targetClass) {
-                    targetMapperFor = temp;
-                    break;
-                }
-            }
-        }
-        if (targetMapperFor == null) {
-            throw keyword.newException("未知映射信息, 请检查" +//
-                annotatedClass.getCanonicalName() +//
-                "类是否被 MapperFor 注解，且包含有效值：" +//
-                targetClass.getCanonicalName());
-        }
-        MapperNaming naming = annotatedClass.getAnnotation(MapperNaming.class);
+    /**
+     * 加载指定类型映射器/复制器
+     *
+     * @param strategy  映射器类型
+     * @param fromClass 源类
+     * @param toClass   目标类
+     * @param <T>       映射器类型
+     *
+     * @return 指定映射器
+     *
+     * @throws MapperNotFoundException 不存在指定映射器时抛出
+     * @throws CopierNotFoundException 不存在指定复制器时抛出
+     */
+    private static <T> T load(NamingStrategy strategy, Class<?> fromClass, Class<?> toClass) {
         String packageName = NamingStrategy.getPackageName(fromClass);
-        String simpleName = NamingStrategy.with(naming, fromClass, toClass, keyword);
+        MapperNaming naming = fromClass.getAnnotation(MapperNaming.class);
+        String simpleName = NamingStrategy.with(naming, fromClass, toClass, strategy);
         try {
-            return cast(forName(packageName + "." + simpleName, keyword).newInstance());
-        } catch (InstantiationException | IllegalAccessException e) {
-            String type = NamingStrategy.capitalize(keyword.name().toLowerCase());
-            throw keyword.newException(type + " 实例化异常", e);
+            return cast(forName(packageName + "." + simpleName, strategy).getField(CONST).get(null));
+        } catch (Exception e) {
+            String type = NamingStrategy.capitalize(strategy.name().toLowerCase());
+            throw strategy.newException(type + " 映射器不存在", e);
         }
     }
 

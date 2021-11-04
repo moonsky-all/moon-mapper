@@ -5,6 +5,7 @@ import com.moonsky.mapper.annotation.MapperNaming;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static com.moonsky.mapper.util.DefaultNaming.defaultIfNull;
 import static com.moonsky.mapper.util.DefaultNaming.defaultSuffixes;
 
 /**
@@ -92,8 +93,9 @@ public enum NamingStrategy {
      * @see MapperNaming
      */
     public static String with(
-        MapperNaming naming, String thisClassname, String thatClassname, NamingStrategy type
+        MapperNaming mapperNaming, String thisClassname, String thatClassname, NamingStrategy type
     ) {
+        MapperNaming naming = defaultIfNull(mapperNaming);
         String thisClass = getSimpleName(thisClassname);
         String thatClass = getSimpleName(thatClassname);
         final String[] prefixes = naming.trimPrefixes();

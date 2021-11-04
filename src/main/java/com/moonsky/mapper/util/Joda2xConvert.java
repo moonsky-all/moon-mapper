@@ -15,7 +15,7 @@ import static java.time.ZoneId.systemDefault;
  */
 public abstract class Joda2xConvert extends Joda1xConvert {
 
-    Joda2xConvert() {super();}
+    private Joda2xConvert() {super();}
 
     public static LocalDate toJdk8LocalDate(org.joda.time.YearMonth value) {
         return LocalDate.of(value.getYear(), value.getMonthOfYear(), 1);

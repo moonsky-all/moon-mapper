@@ -114,35 +114,10 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.github.moonsky-common</groupId>
-      <artifactId>moon-processing</artifactId>
-      <version>0.1</version>
-      <scope>system</scope>
-      <systemPath>D:/WorkSpaces/github/moonsky-common/moon-processing/target/moon-processing-0.1.jar</systemPath>
-    </dependency>
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-      <version>1.18.12</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-autoconfigure</artifactId>
-      <version>2.1.0.RELEASE</version>
-      <optional>true</optional>
-    </dependency>
-    <dependency>
       <groupId>joda-time</groupId>
       <artifactId>joda-time</artifactId>
       <version>2.10.5</version>
       <optional>true</optional>
-    </dependency>
-    <dependency>
-      <groupId>com.google.auto.service</groupId>
-      <artifactId>auto-service</artifactId>
-      <version>1.0-rc7</version>
-      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
