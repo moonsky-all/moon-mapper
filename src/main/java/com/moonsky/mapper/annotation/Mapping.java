@@ -20,4 +20,11 @@ public @interface Mapping {
      * @return 格式化样式，如果仅为空白字符串，则视为无效
      */
     String format() default "";
+
+    /**
+     * 指定默认值
+     *
+     * @return
+     */
+    String[] defaultOf() default {};
 }

@@ -4,7 +4,9 @@ import com.moonsky.mapper.annotation.MapperNaming;
 import com.moonsky.mapper.util.CopierNotFoundException;
 import com.moonsky.mapper.util.MapperNotFoundException;
 import com.moonsky.mapper.util.NamingStrategy;
+import sun.misc.Unsafe;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -16,8 +18,28 @@ import java.util.Objects;
  */
 public enum Mappers {
     ;
+
+    private final static Unsafe UNSAFE;
     private final static Map<NamingKey, BeanMapper<?, ?>> MAPPER_MAP = new HashMap<>();
     private final static Map<NamingKey, BeanCopier<?, ?>> COPIER_MAP = new HashMap<>();
+
+    static {
+        Unsafe unsafe = null;
+        try {
+            Field f = Unsafe.class.getDeclaredField("theUnsafe");
+            f.setAccessible(true);
+            unsafe = (Unsafe) f.get(null);
+        } catch (Exception ignored) {}
+        UNSAFE = unsafe;
+    }
+
+    public static <T> T create(Class<T> klass) {
+        try {
+            return (T) UNSAFE.allocateInstance(klass);
+        } catch (InstantiationException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
     public static final String CONST = "CONST";
 
