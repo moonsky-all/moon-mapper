@@ -17,6 +17,13 @@ public enum Formatter {
     public static final String TIME = "HH:mm:ss";
     public static final String DATETIME = "yyyy-MM-dd HH:mm:ss";
 
+    public static String format(Date value, String pattern) {
+        return new SimpleDateFormat(pattern).format(value);
+    }
+
+    public static String format(Calendar value, String pattern) {
+        return new SimpleDateFormat(pattern).format(value.getTime());
+    }
 
     public static String format(long value, String pattern) {
         return new DecimalFormat(pattern).format(value);
@@ -49,22 +56,14 @@ public enum Formatter {
     }
 
     public static Calendar parseCalendar(String value, String pattern) {
-        return DateConvert.toUtilCalendar(parse(value, pattern));
+        return DateConvert.toUtilCalendar(parseUtilDate(value, pattern));
     }
 
-    public static Date parse(String value, String pattern) {
+    public static Date parseUtilDate(String value, String pattern) {
         try {
             return new SimpleDateFormat(pattern).parse(value);
         } catch (ParseException e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    public static String format(Date value, String pattern) {
-        return new SimpleDateFormat(pattern).format(value);
-    }
-
-    public static String format(Calendar value, String pattern) {
-        return new SimpleDateFormat(pattern).format(value.getTime());
     }
 }
