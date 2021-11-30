@@ -1,6 +1,7 @@
 package com.moonsky.mapper;
 
 import com.moonsky.mapper.util.Convert;
+import com.moonsky.mapper.util.DateConvert;
 
 import java.beans.Introspector;
 import java.lang.reflect.Method;
@@ -23,7 +24,7 @@ public class TestSuperclass {
         public String getStatement() {return statement;}
     }
 
-    public static final void printlnConvertTestAll(Class<? extends Convert> convertClass) {
+    public static final void printlnConvertTestAll(Class<? extends DateConvert> convertClass) {
         Map<String, List<String>> infosMap = new HashMap<>();
         String template = "// %s %s = %s.%s(%s);"; // {@link %s#%s(%s)}
         String convertSimpleName = convertClass.getSimpleName();

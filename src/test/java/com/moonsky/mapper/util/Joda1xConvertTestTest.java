@@ -3,6 +3,11 @@ package com.moonsky.mapper.util;
 import com.moonsky.mapper.TestSuperclass;
 import org.junit.jupiter.api.Test;
 
+import java.time.*;
+import java.util.Date;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
  * @author benshaoye
  */
@@ -365,23 +370,33 @@ class Joda1xConvertTestTest extends TestSuperclass {
     void testToJdk8Instant() {
         {
             startingOf("// Instant instant = Joda1xConvert.toJdk8Instant(org.joda.time.DateTime);");
-            final long var = System.currentTimeMillis();
+            org.joda.time.DateTime datetime = org.joda.time.DateTime.now();
+            Instant instant = Joda1xConvert.toJdk8Instant(datetime);
+            assertEquals(instant.toEpochMilli(), datetime.getMillis());
         }
         {
             startingOf("// Instant instant = Joda1xConvert.toJdk8Instant(org.joda.time.LocalDate);");
-            final long var = System.currentTimeMillis();
+            org.joda.time.LocalDate datetime = org.joda.time.LocalDate.now();
+            Instant instant = Joda1xConvert.toJdk8Instant(datetime);
+            assertEquals(instant.toEpochMilli(), datetime.toDate().getTime());
         }
         {
             startingOf("// Instant instant = Joda1xConvert.toJdk8Instant(org.joda.time.MutableDateTime);");
-            final long var = System.currentTimeMillis();
+            org.joda.time.MutableDateTime datetime = org.joda.time.MutableDateTime.now();
+            Instant instant = Joda1xConvert.toJdk8Instant(datetime);
+            assertEquals(instant.toEpochMilli(), datetime.getMillis());
         }
         {
             startingOf("// Instant instant = Joda1xConvert.toJdk8Instant(org.joda.time.Instant);");
-            final long var = System.currentTimeMillis();
+            org.joda.time.Instant datetime = org.joda.time.Instant.now();
+            Instant instant = Joda1xConvert.toJdk8Instant(datetime);
+            assertEquals(instant.toEpochMilli(), datetime.getMillis());
         }
         {
             startingOf("// Instant instant = Joda1xConvert.toJdk8Instant(org.joda.time.LocalDateTime);");
-            final long var = System.currentTimeMillis();
+            org.joda.time.LocalDateTime datetime = org.joda.time.LocalDateTime.now();
+            Instant instant = Joda1xConvert.toJdk8Instant(datetime);
+            assertEquals(instant.toEpochMilli(), datetime.toDate().getTime());
         }
     }
 
@@ -557,23 +572,39 @@ class Joda1xConvertTestTest extends TestSuperclass {
     void testToJdk8YearMonth() {
         {
             startingOf("// YearMonth yearMonth = Joda1xConvert.toJdk8YearMonth(org.joda.time.LocalDateTime);");
-            final long var = System.currentTimeMillis();
+            org.joda.time.LocalDateTime datetime = org.joda.time.LocalDateTime.now();
+            YearMonth yearMonth = Joda1xConvert.toJdk8YearMonth(datetime);
+            assertEquals(yearMonth.getYear(), datetime.getYear());
+            assertEquals(yearMonth.getMonthValue(), datetime.getMonthOfYear());
         }
         {
             startingOf("// YearMonth yearMonth = Joda1xConvert.toJdk8YearMonth(org.joda.time.LocalDate);");
-            final long var = System.currentTimeMillis();
+            org.joda.time.LocalDate localDate = org.joda.time.LocalDate.now();
+            YearMonth yearMonth = Joda1xConvert.toJdk8YearMonth(localDate);
+            assertEquals(yearMonth.getYear(), localDate.getYear());
+            assertEquals(yearMonth.getMonthValue(), localDate.getMonthOfYear());
         }
         {
             startingOf("// YearMonth yearMonth = Joda1xConvert.toJdk8YearMonth(org.joda.time.MutableDateTime);");
-            final long var = System.currentTimeMillis();
+            org.joda.time.MutableDateTime datetime = org.joda.time.MutableDateTime.now();
+            YearMonth yearMonth = Joda1xConvert.toJdk8YearMonth(datetime);
+            assertEquals(yearMonth.getYear(), datetime.getYear());
+            assertEquals(yearMonth.getMonthValue(), datetime.getMonthOfYear());
         }
         {
             startingOf("// YearMonth yearMonth = Joda1xConvert.toJdk8YearMonth(org.joda.time.DateTime);");
-            final long var = System.currentTimeMillis();
+            org.joda.time.DateTime datetime = org.joda.time.DateTime.now();
+            YearMonth yearMonth = Joda1xConvert.toJdk8YearMonth(datetime);
+            assertEquals(yearMonth.getYear(), datetime.getYear());
+            assertEquals(yearMonth.getMonthValue(), datetime.getMonthOfYear());
         }
         {
             startingOf("// YearMonth yearMonth = Joda1xConvert.toJdk8YearMonth(org.joda.time.Instant);");
-            final long var = System.currentTimeMillis();
+            org.joda.time.Instant instant = org.joda.time.Instant.now();
+            org.joda.time.DateTime datetime = instant.toDateTime();
+            YearMonth yearMonth = Joda1xConvert.toJdk8YearMonth(instant);
+            assertEquals(yearMonth.getYear(), datetime.getYear());
+            assertEquals(yearMonth.getMonthValue(), datetime.getMonthOfYear());
         }
     }
 
@@ -713,23 +744,40 @@ class Joda1xConvertTestTest extends TestSuperclass {
     void testToJdk8ZonedDateTime() {
         {
             startingOf("// ZonedDateTime zonedDateTime = Joda1xConvert.toJdk8ZonedDateTime(org.joda.time.LocalDateTime);");
-            final long var = System.currentTimeMillis();
+            org.joda.time.LocalDateTime datetime = org.joda.time.LocalDateTime.now();
+            ZonedDateTime zonedDateTime = Joda1xConvert.toJdk8ZonedDateTime(datetime);
+            long timeNow = datetime.toDate().getTime();
+            assertEquals(zonedDateTime.toInstant().toEpochMilli(), timeNow);
         }
         {
             startingOf("// ZonedDateTime zonedDateTime = Joda1xConvert.toJdk8ZonedDateTime(org.joda.time.LocalDate);");
-            final long var = System.currentTimeMillis();
+            org.joda.time.LocalDate datetime = org.joda.time.LocalDate.now();
+            ZonedDateTime zonedDateTime = Joda1xConvert.toJdk8ZonedDateTime(datetime);
+            long timeNow = datetime.toDate().getTime();
+            assertEquals(zonedDateTime.toInstant().toEpochMilli(), timeNow);
+            assertEquals(zonedDateTime.getHour(), 0);
+            assertEquals(zonedDateTime.getMinute(), 0);
+            assertEquals(zonedDateTime.getSecond(), 0);
+            assertEquals(zonedDateTime.getNano(), 0);
         }
         {
             startingOf("// ZonedDateTime zonedDateTime = Joda1xConvert.toJdk8ZonedDateTime(org.joda.time.DateTime);");
-            final long var = System.currentTimeMillis();
+            org.joda.time.DateTime datetime = org.joda.time.DateTime.now();
+            ZonedDateTime zonedDateTime = Joda1xConvert.toJdk8ZonedDateTime(datetime);
+            assertEquals(zonedDateTime.toInstant().toEpochMilli(), datetime.getMillis());
         }
         {
             startingOf("// ZonedDateTime zonedDateTime = Joda1xConvert.toJdk8ZonedDateTime(org.joda.time.MutableDateTime);");
-            final long var = System.currentTimeMillis();
+            org.joda.time.MutableDateTime datetime = org.joda.time.MutableDateTime.now();
+            ZonedDateTime zonedDateTime = Joda1xConvert.toJdk8ZonedDateTime(datetime);
+            assertEquals(zonedDateTime.toInstant().toEpochMilli(), datetime.getMillis());
         }
         {
             startingOf("// ZonedDateTime zonedDateTime = Joda1xConvert.toJdk8ZonedDateTime(org.joda.time.Instant);");
-            final long var = System.currentTimeMillis();
+            org.joda.time.Instant instant = org.joda.time.Instant.now();
+            ZonedDateTime zonedDateTime = Joda1xConvert.toJdk8ZonedDateTime(instant);
+            Date utilDate = instant.toDate();
+            assertEquals(Instant.ofEpochMilli(utilDate.getTime()), zonedDateTime.toInstant());
         }
     }
 
@@ -805,23 +853,37 @@ class Joda1xConvertTestTest extends TestSuperclass {
     void testToJdk8OffsetDateTime() {
         {
             startingOf("// OffsetDateTime offsetDateTime = Joda1xConvert.toJdk8OffsetDateTime(org.joda.time.LocalDate);");
-            final long var = System.currentTimeMillis();
+            org.joda.time.LocalDate localDate = org.joda.time.LocalDate.now();
+            OffsetDateTime datetime = Joda1xConvert.toJdk8OffsetDateTime(localDate);
+            LocalDate jdkLocalDate = localDate.toDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            assertEquals(datetime.toLocalDate(), jdkLocalDate);
+            assertEquals(datetime.getHour(), 0);
+            assertEquals(datetime.getMinute(), 0);
+            assertEquals(datetime.getSecond(), 0);
         }
         {
             startingOf("// OffsetDateTime offsetDateTime = Joda1xConvert.toJdk8OffsetDateTime(org.joda.time.LocalDateTime);");
-            final long var = System.currentTimeMillis();
+            org.joda.time.LocalDateTime dt = org.joda.time.LocalDateTime.now();
+            OffsetDateTime datetime = Joda1xConvert.toJdk8OffsetDateTime(dt);
+            assertEquals(datetime, dt.toDate().toInstant().atZone(ZoneId.systemDefault()).toOffsetDateTime());
         }
         {
             startingOf("// OffsetDateTime offsetDateTime = Joda1xConvert.toJdk8OffsetDateTime(org.joda.time.Instant);");
-            final long var = System.currentTimeMillis();
+            org.joda.time.Instant instant = org.joda.time.Instant.now();
+            OffsetDateTime datetime = Joda1xConvert.toJdk8OffsetDateTime(instant);
+            assertEquals(instant.getMillis(), datetime.toInstant().toEpochMilli());
         }
         {
             startingOf("// OffsetDateTime offsetDateTime = Joda1xConvert.toJdk8OffsetDateTime(org.joda.time.DateTime);");
-            final long var = System.currentTimeMillis();
+            org.joda.time.DateTime datetime = org.joda.time.DateTime.now();
+            OffsetDateTime offsetDateTime = Joda1xConvert.toJdk8OffsetDateTime(datetime);
+            assertEquals(datetime.getMillis(), offsetDateTime.toInstant().toEpochMilli());
         }
         {
             startingOf("// OffsetDateTime offsetDateTime = Joda1xConvert.toJdk8OffsetDateTime(org.joda.time.MutableDateTime);");
-            final long var = System.currentTimeMillis();
+            org.joda.time.MutableDateTime datetime = org.joda.time.MutableDateTime.now();
+            OffsetDateTime offsetDateTime = Joda1xConvert.toJdk8OffsetDateTime(datetime);
+            assertEquals(datetime.getMillis(), offsetDateTime.toInstant().toEpochMilli());
         }
     }
 }

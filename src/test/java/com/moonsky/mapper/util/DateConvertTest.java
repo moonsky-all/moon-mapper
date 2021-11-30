@@ -13,10 +13,48 @@ import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class DateConvertTest extends TestSuperclass {
+
+    private final static char[] DIGITS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".toCharArray();
+    private final static AtomicInteger INDEXER = new AtomicInteger();
+
+    public static String toString(long value, int radix) {
+        int ten = 10;
+        if (radix < Character.MIN_RADIX) {
+            radix = ten;
+        }
+        if (radix > DIGITS.length) {
+            radix = DIGITS.length;
+        }
+        if (radix == ten) {
+            return Long.toString(value);
+        }
+        int maxLen = radix < ten ? 65 : 20;
+
+        char[] buf = new char[maxLen];
+        int charPos = maxLen - 1;
+        boolean negative = (value < 0);
+
+        if (!negative) {
+            value = -value;
+        }
+
+        while (value <= -radix) {
+            buf[charPos--] = DIGITS[(int) (-(value % radix))];
+            value = value / radix;
+        }
+        buf[charPos] = DIGITS[(int) (-value)];
+
+        if (negative) {
+            buf[--charPos] = '-';
+        }
+
+        return new String(buf, charPos, (maxLen - charPos));
+    }
 
     @BeforeEach
     void setUp() {
@@ -37,6 +75,15 @@ class DateConvertTest extends TestSuperclass {
     static final DateTimeFormatter yyyy_MM = DateTimeFormatter.ofPattern(SOURCE_yyyy_MM);
     static final DateTimeFormatter MM_dd = DateTimeFormatter.ofPattern(SOURCE_MM_dd);
     static final DateTimeFormatter HHmmss = DateTimeFormatter.ofPattern(SOURCE_HHmmss);
+
+    @Test
+    void testRunDefaultMethod() throws Exception {
+        for (int i = 0; i < 64; i++) {
+            System.out.println("v"//
+                + toString(System.currentTimeMillis(), 64)//
+                + toString(INDEXER.getAndIncrement(), 64));
+        }
+    }
 
     @Test
     void testToJdk8LocalDate() throws ParseException {
@@ -736,62 +783,124 @@ class DateConvertTest extends TestSuperclass {
         {
             startingOf("// Month month = DateConvert.toJdk8Month(java.sql.Date);");
             final long var = System.currentTimeMillis();
+            Instant instant = Instant.ofEpochMilli(var);
+            LocalDate localDate = instant.atZone(ZoneId.systemDefault()).toLocalDate();
+            Month month = DateConvert.toJdk8Month(localDate);
+            assertEquals(month.getValue(), localDate.getMonthValue());
         }
         {
             startingOf("// Month month = DateConvert.toJdk8Month(java.lang.Long);");
             final long var = System.currentTimeMillis();
+            Instant instant = Instant.ofEpochMilli(var);
+            Month month = DateConvert.toJdk8Month(instant);
+            LocalDateTime localDate = instant.atZone(ZoneId.systemDefault()).toLocalDateTime();
+            assertEquals(month.getValue(), localDate.getMonthValue());
         }
         {
             startingOf("// Month month = DateConvert.toJdk8Month(java.time.MonthDay);");
             final long var = System.currentTimeMillis();
+            Instant instant = Instant.ofEpochMilli(var);
+            OffsetDateTime datetime = instant.atZone(ZoneId.systemDefault()).toOffsetDateTime();
+            Month month = DateConvert.toJdk8Month(datetime);
+            assertEquals(month.getValue(), datetime.getMonthValue());
         }
         {
             startingOf("// Month month = DateConvert.toJdk8Month(java.time.YearMonth);");
             final long var = System.currentTimeMillis();
+            Instant instant = Instant.ofEpochMilli(var);
+            Month month = DateConvert.toJdk8Month(instant);
+            ZonedDateTime datetime = instant.atZone(ZoneId.systemDefault());
+            assertEquals(month.getValue(), datetime.getMonthValue());
         }
         {
             startingOf("// Month month = DateConvert.toJdk8Month(java.sql.Timestamp);");
             final long var = System.currentTimeMillis();
+            Instant instant = Instant.ofEpochMilli(var);
+            ZonedDateTime datetime = instant.atZone(ZoneId.systemDefault());
+            Month month = DateConvert.toJdk8Month(datetime);
+            assertEquals(month.getValue(), datetime.getMonthValue());
         }
         {
             startingOf("// Month month = DateConvert.toJdk8Month(java.time.LocalDate);");
             final long var = System.currentTimeMillis();
+            Instant instant = Instant.ofEpochMilli(var);
+            Month month = DateConvert.toJdk8Month(instant);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(var);
+            assertEquals(month.getValue(), calendar.get(Calendar.MONTH) + 1);
         }
         {
             startingOf("// Month month = DateConvert.toJdk8Month(int);");
             final long var = System.currentTimeMillis();
+            Date utilDate = new Date(var);
+            Month month = DateConvert.toJdk8Month(utilDate);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(utilDate);
+            assertEquals(month.getValue(), calendar.get(Calendar.MONTH) + 1);
         }
         {
             startingOf("// Month month = DateConvert.toJdk8Month(java.lang.Integer);");
             final long var = System.currentTimeMillis();
+            java.sql.Date utilDate = new java.sql.Date(var);
+            Month month = DateConvert.toJdk8Month(utilDate);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(var);
+            assertEquals(month.getValue(), calendar.get(Calendar.MONTH) + 1);
         }
         {
             startingOf("// Month month = DateConvert.toJdk8Month(long);");
             final long var = System.currentTimeMillis();
+            java.sql.Timestamp utilDate = new java.sql.Timestamp(var);
+            Month month = DateConvert.toJdk8Month(utilDate);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTimeInMillis(var);
+            assertEquals(month.getValue(), calendar.get(Calendar.MONTH) + 1);
         }
         {
             startingOf("// Month month = DateConvert.toJdk8Month(java.time.LocalDateTime);");
             final long var = System.currentTimeMillis();
+            Instant instant = Instant.ofEpochMilli(var);
+            ZonedDateTime datetime = instant.atZone(ZoneId.systemDefault());
+            YearMonth yearMonth = YearMonth.from(datetime);
+            Month month = DateConvert.toJdk8Month(yearMonth);
+            assertEquals(month.getValue(), datetime.getMonthValue());
         }
         {
             startingOf("// Month month = DateConvert.toJdk8Month(java.time.ZonedDateTime);");
             final long var = System.currentTimeMillis();
+            Instant instant = Instant.ofEpochMilli(var);
+            ZonedDateTime datetime = instant.atZone(ZoneId.systemDefault());
+            MonthDay monthDay = MonthDay.from(datetime);
+            Month month = DateConvert.toJdk8Month(monthDay);
+            assertEquals(month.getValue(), datetime.getMonthValue());
         }
         {
             startingOf("// Month month = DateConvert.toJdk8Month(java.time.Instant);");
             final long var = System.currentTimeMillis();
+            Month month = DateConvert.toJdk8Month(var);
+            Instant instant = Instant.ofEpochMilli(var);
+            ZonedDateTime datetime = instant.atZone(ZoneId.systemDefault());
+            assertEquals(month.getValue(), datetime.getMonthValue());
         }
         {
             startingOf("// Month month = DateConvert.toJdk8Month(java.util.Date);");
-            final long var = System.currentTimeMillis();
+            final Long var = System.currentTimeMillis();
+            Month month = DateConvert.toJdk8Month(var);
+            Instant instant = Instant.ofEpochMilli(var);
+            ZonedDateTime datetime = instant.atZone(ZoneId.systemDefault());
+            assertEquals(month.getValue(), datetime.getMonthValue());
         }
         {
             startingOf("// Month month = DateConvert.toJdk8Month(java.util.Calendar);");
-            final long var = System.currentTimeMillis();
+            final int monthValue = 2;
+            Month month = DateConvert.toJdk8Month(monthValue);
+            assertEquals(monthValue, month.getValue());
         }
         {
             startingOf("// Month month = DateConvert.toJdk8Month(java.time.OffsetDateTime);");
-            final long var = System.currentTimeMillis();
+            final Integer monthValue = 2;
+            Month month = DateConvert.toJdk8Month(monthValue);
+            assertEquals(monthValue.intValue(), month.getValue());
         }
     }
 
@@ -845,8 +954,10 @@ class DateConvertTest extends TestSuperclass {
 
     @Test
     void testToMonthValue() {
-        startingOf("// int int = DateConvert.toMonthValue(java.time.Month);");
-        final long var = System.currentTimeMillis();
+        int monthValue = Calendar.getInstance().get(Calendar.MONTH) + 1;
+        Month month = Month.of(monthValue);
+        int value = DateConvert.toMonthValue(month);
+        assertEquals(value, monthValue);
     }
 
     @Test
@@ -1021,7 +1132,10 @@ class DateConvertTest extends TestSuperclass {
     @Test
     void testToMonthNumber() {
         startingOf("// Integer integer = DateConvert.toMonthNumber(java.time.Month);");
-        final long var = System.currentTimeMillis();
+        Integer monthValue = Calendar.getInstance().get(Calendar.MONTH) + 1;
+        Month month = Month.of(monthValue);
+        int value = DateConvert.toMonthValue(month);
+        assertEquals(Integer.valueOf(value), monthValue);
     }
 
     @Test

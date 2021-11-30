@@ -15,9 +15,11 @@ import static java.time.ZoneId.systemDefault;
  *
  * @author benshaoye
  */
-public abstract class DateConvert extends Convert {
+public abstract class DateConvert {
 
-    DateConvert() {super();}
+    DateConvert() {
+        throw new AssertionError("No " + getClass().getCanonicalName() + " instances for you!");
+    }
 
     public static LocalDate toJdk8LocalDate(YearMonth value) {
         return LocalDate.of(value.getYear(), value.getMonthValue(), 1);
@@ -116,6 +118,26 @@ public abstract class DateConvert extends Convert {
     public static OffsetDateTime toJdk8OffsetDateTime(Long value) {return toJdk8OffsetDateTime(ofEpochMilli(value));}
 
     public static OffsetDateTime toJdk8OffsetDateTime(long value) {return toJdk8OffsetDateTime(ofEpochMilli(value));}
+
+    public static OffsetTime toJdk8OffsetTime(LocalDateTime value) {
+        return toJdk8OffsetTime(value.atZone(systemDefault()));
+    }
+
+    public static OffsetTime toJdk8OffsetTime(ZonedDateTime value) {return value.toOffsetDateTime().toOffsetTime();}
+
+    public static OffsetTime toJdk8OffsetTime(Instant value) {
+        return toJdk8OffsetTime(value.atZone(systemDefault()));
+    }
+
+    public static OffsetTime toJdk8OffsetTime(Date value) {return toJdk8OffsetTime(value.toInstant());}
+
+    public static OffsetTime toJdk8OffsetTime(Calendar value) {return toJdk8OffsetTime(value.toInstant());}
+
+    public static OffsetTime toJdk8OffsetTime(Timestamp value) {return toJdk8OffsetTime(value.toInstant());}
+
+    public static OffsetTime toJdk8OffsetTime(Long value) {return toJdk8OffsetTime(ofEpochMilli(value));}
+
+    public static OffsetTime toJdk8OffsetTime(long value) {return toJdk8OffsetTime(ofEpochMilli(value));}
 
     public static ZonedDateTime toJdk8ZonedDateTime(YearMonth value) {return toJdk8ZonedDateTime(toJdk8LocalDate(value));}
 

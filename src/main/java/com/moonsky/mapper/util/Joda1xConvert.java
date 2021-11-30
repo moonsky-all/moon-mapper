@@ -101,6 +101,16 @@ public abstract class Joda1xConvert extends DateConvert {
 
     public static OffsetDateTime toJdk8OffsetDateTime(org.joda.time.Instant value) {return toJdk8OffsetDateTime(value.getMillis());}
 
+    public static OffsetTime toJdk8OffsetTime(DateTime value) {return toJdk8OffsetTime(value.getMillis());}
+
+    public static OffsetTime toJdk8OffsetTime(org.joda.time.LocalDateTime value) {
+        return toJdk8OffsetTime(value.toDate());
+    }
+
+    public static OffsetTime toJdk8OffsetTime(MutableDateTime value) {return toJdk8OffsetTime(value.getMillis());}
+
+    public static OffsetTime toJdk8OffsetTime(org.joda.time.Instant value) {return toJdk8OffsetTime(value.getMillis());}
+
     public static ZonedDateTime toJdk8ZonedDateTime(DateTime value) {return toJdk8ZonedDateTime(value.getMillis());}
 
     public static ZonedDateTime toJdk8ZonedDateTime(org.joda.time.LocalDate value) {return toJdk8ZonedDateTime(value.toDate());}
