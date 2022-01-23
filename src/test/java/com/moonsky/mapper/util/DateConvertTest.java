@@ -909,46 +909,83 @@ class DateConvertTest extends TestSuperclass {
         {
             startingOf("// LocalDateTime localDateTime = DateConvert.toJdk8LocalDateTime(java.sql.Date);");
             final long var = System.currentTimeMillis();
+            java.sql.Date date = new java.sql.Date(var);
+            LocalDateTime time1 = LocalDateTime.ofInstant(Instant.ofEpochMilli(date.getTime()), ZoneId.systemDefault());
+            LocalDateTime time2 = DateConvert.toJdk8LocalDateTime(date);
+            assertEquals(time1, time2);
         }
         {
             startingOf("// LocalDateTime localDateTime = DateConvert.toJdk8LocalDateTime(java.time.YearMonth);");
-            final long var = System.currentTimeMillis();
+            YearMonth yearMonth = YearMonth.now();
+            int year = yearMonth.getYear();
+            int month = yearMonth.getMonthValue();
+            LocalDateTime time1 = LocalDate.of(year, month, 1).atStartOfDay();
+            LocalDateTime time2 = DateConvert.toJdk8LocalDateTime(yearMonth);
+            assertEquals(time1, time2);
         }
         {
             startingOf("// LocalDateTime localDateTime = DateConvert.toJdk8LocalDateTime(java.util.Date);");
             final long var = System.currentTimeMillis();
+            Date date = new Date(var);
+            LocalDateTime time1 = LocalDateTime.ofInstant(Instant.ofEpochMilli(var), ZoneId.systemDefault());
+            LocalDateTime time2 = DateConvert.toJdk8LocalDateTime(date);
+            assertEquals(time1, time2);
         }
         {
             startingOf("// LocalDateTime localDateTime = DateConvert.toJdk8LocalDateTime(java.time.Instant);");
             final long var = System.currentTimeMillis();
+            Instant instant = Instant.ofEpochMilli(var);
+            LocalDateTime time1 = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+            LocalDateTime time2 = DateConvert.toJdk8LocalDateTime(instant);
+            assertEquals(time1, time2);
         }
         {
             startingOf("// LocalDateTime localDateTime = DateConvert.toJdk8LocalDateTime(java.time.ZonedDateTime);");
             final long var = System.currentTimeMillis();
+            ZonedDateTime zoned = ZonedDateTime.ofInstant(Instant.ofEpochMilli(var), ZoneId.systemDefault());
+            assertEquals(zoned.toLocalDateTime(), DateConvert.toJdk8LocalDateTime(zoned));
         }
         {
             startingOf("// LocalDateTime localDateTime = DateConvert.toJdk8LocalDateTime(java.time.OffsetDateTime);");
             final long var = System.currentTimeMillis();
+            OffsetDateTime offset = OffsetDateTime.ofInstant(Instant.ofEpochMilli(var), ZoneId.systemDefault());
+            assertEquals(offset.toLocalDateTime(), DateConvert.toJdk8LocalDateTime(offset));
         }
         {
             startingOf("// LocalDateTime localDateTime = DateConvert.toJdk8LocalDateTime(java.time.LocalDate);");
-            final long var = System.currentTimeMillis();
+            LocalDate date = LocalDate.now();
+            assertEquals(date.atStartOfDay(), DateConvert.toJdk8LocalDateTime(date));
         }
         {
             startingOf("// LocalDateTime localDateTime = DateConvert.toJdk8LocalDateTime(long);");
             final long var = System.currentTimeMillis();
+            assertEquals(LocalDateTime.ofInstant(Instant.ofEpochMilli(var), ZoneId.systemDefault()),
+                DateConvert.toJdk8LocalDateTime(var));
         }
         {
             startingOf("// LocalDateTime localDateTime = DateConvert.toJdk8LocalDateTime(java.lang.Long);");
             final long var = System.currentTimeMillis();
+            LocalDateTime time1 = LocalDateTime.ofInstant(Instant.ofEpochMilli(var), ZoneId.systemDefault());
+            LocalDateTime time2 = DateConvert.toJdk8LocalDateTime(var);
+            assertEquals(time1, time2);
         }
         {
             startingOf("// LocalDateTime localDateTime = DateConvert.toJdk8LocalDateTime(java.sql.Timestamp);");
             final long var = System.currentTimeMillis();
+            Timestamp timestamp = new Timestamp(var);
+            LocalDateTime time1 = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp.getTime()), ZoneId.systemDefault());
+            LocalDateTime time2 = DateConvert.toJdk8LocalDateTime(timestamp);
+            assertEquals(time1, time2);
         }
         {
             startingOf("// LocalDateTime localDateTime = DateConvert.toJdk8LocalDateTime(java.util.Calendar);");
             final long var = System.currentTimeMillis();
+            Calendar calendar = Calendar.getInstance();
+            calendar.clear();
+            calendar.setTimeInMillis(var);
+            LocalDateTime time1 = LocalDateTime.ofInstant(Instant.ofEpochMilli(calendar.getTimeInMillis()), ZoneId.systemDefault());
+            LocalDateTime time2 = DateConvert.toJdk8LocalDateTime(calendar);
+            assertEquals(time1, time2);
         }
     }
 

@@ -71,18 +71,28 @@ public abstract class DateConvert {
 
     public static LocalDateTime toJdk8LocalDateTime(LocalDate value) {return value.atStartOfDay();}
 
-    public static LocalDateTime toJdk8LocalDateTime(OffsetDateTime value) {return toJdk8LocalDateTime(value.toInstant());}
+    public static LocalDateTime toJdk8LocalDateTime(OffsetDateTime value) {return value.toLocalDateTime();}
 
-    public static LocalDateTime toJdk8LocalDateTime(ZonedDateTime value) {return toJdk8LocalDateTime(value.toInstant());}
+    public static LocalDateTime toJdk8LocalDateTime(ZonedDateTime value) {return value.toLocalDateTime();}
 
     public static LocalDateTime toJdk8LocalDateTime(Instant value) {
         return LocalDateTime.ofInstant(value, systemDefault());
     }
 
-    public static LocalDateTime toJdk8LocalDateTime(Date value) {return toJdk8LocalDateTime(value.getTime());}
+    public static LocalDateTime toJdk8LocalDateTime(Date value) {return toJdk8LocalDateTime(value.toInstant());}
 
-    public static LocalDateTime toJdk8LocalDateTime(Calendar value) {return toJdk8LocalDateTime(value.getTimeInMillis());}
+    public static LocalDateTime toJdk8LocalDateTime(Calendar value) {return toJdk8LocalDateTime(value.toInstant());}
 
+    /**
+     * LocalDateTime.ofInstant(Instant.ofEpochMilli(value), ZoneId.systemDefault())
+     *
+     * @param value
+     *
+     * @return
+     *
+     * @see java.sql.Date#toLocalDate()
+     * @see LocalDate#atStartOfDay()
+     */
     public static LocalDateTime toJdk8LocalDateTime(java.sql.Date value) {return toJdk8LocalDateTime(value.getTime());}
 
     public static LocalDateTime toJdk8LocalDateTime(Timestamp value) {return value.toLocalDateTime();}
