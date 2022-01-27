@@ -1002,6 +1002,9 @@ class DateConvertTest extends TestSuperclass {
         {
             startingOf("// Date date = DateConvert.toSqlDate(java.util.Date);");
             final long var = System.currentTimeMillis();
+            Date utilDate = new Date(var);
+            java.sql.Date sqlDate = DateConvert.toSqlDate(utilDate);
+            assertEquals(new java.sql.Date(var), sqlDate);
         }
         {
             startingOf("// Date date = DateConvert.toSqlDate(java.util.Calendar);");
