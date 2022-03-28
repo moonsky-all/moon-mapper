@@ -1,5 +1,9 @@
 package com.moonsky.mapper;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 /**
  * @author benshaoye
  */
@@ -61,5 +65,37 @@ public interface BeanCopier<THIS, THAT> {
     default THAT convert(THIS thisObject) {
         // return thisObject == null ? null :unsafeCopy(thisObject, new <THAT>());
         throw new UnsupportedOperationException("unknown target type of: THAT convert(Object)");
+    }
+
+
+    /**
+     * 转换{@code thisObject}数据列表为{@code THAT}数据列表
+     *
+     * @param thisIterable 数据列表
+     *
+     * @return 转换后的数据列表
+     */
+    default List<THAT> convertAll(Iterable<THIS> thisIterable) {
+        return thisIterable == null ? null : convertAll(thisIterable, new ArrayList<>());
+    }
+
+
+    /**
+     * 转换{@code thisObject}数据列表为{@code THAT}数据列表
+     *
+     * @param thisIterable 数据列表
+     * @param container    转换后的数据容器
+     * @param <C>          返回结果数据类型
+     *
+     * @return 入参数据容器
+     */
+    default <C extends Collection<THAT>> C convertAll(Iterable<THIS> thisIterable, C container) {
+        if (thisIterable == null) {
+            return container;
+        }
+        for (THIS thisObject : thisIterable) {
+            container.add(convert(thisObject));
+        }
+        return container;
     }
 }
