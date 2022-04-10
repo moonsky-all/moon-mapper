@@ -75,8 +75,8 @@ public interface BeanCopier<THIS, THAT> {
      *
      * @return 转换后的数据列表
      */
-    default List<THAT> convertAll(Iterable<THIS> thisIterable) {
-        return thisIterable == null ? null : convertAll(thisIterable, new ArrayList<>());
+    default List<THAT> convertAll(Collection<THIS> thisIterable) {
+        return thisIterable == null ? null : convertAll(thisIterable, new ArrayList<>(thisIterable.size()));
     }
 
 

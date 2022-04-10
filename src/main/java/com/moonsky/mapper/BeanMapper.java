@@ -108,8 +108,8 @@ public interface BeanMapper<THIS, THAT> {
      *
      * @return 转换后的数据列表
      */
-    default List<THAT> doForwardAll(Iterable<THIS> thisIterable) {
-        return thisIterable == null ? null : doForwardAll(thisIterable, new ArrayList<>());
+    default List<THAT> doForwardAll(Collection<THIS> thisIterable) {
+        return thisIterable == null ? null : doForwardAll(thisIterable, new ArrayList<>(thisIterable.size()));
     }
 
     /**
@@ -138,8 +138,8 @@ public interface BeanMapper<THIS, THAT> {
      *
      * @return 转换后的数据列表
      */
-    default List<THIS> doBackwardAll(Iterable<THAT> thatIterable) {
-        return thatIterable == null ? null : doBackwardAll(thatIterable, new ArrayList<>());
+    default List<THIS> doBackwardAll(Collection<THAT> thatIterable) {
+        return thatIterable == null ? null : doBackwardAll(thatIterable, new ArrayList<>(thatIterable.size()));
     }
 
     /**
