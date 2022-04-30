@@ -4,6 +4,12 @@ import com.moonsky.mapper.annotation.MapperFor;
 import com.moonsky.mapper.util.MapperNotFoundException;
 import com.moonsky.mapper.util.NamingStrategy;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import static java.lang.Thread.currentThread;
 
 /**
@@ -94,5 +100,11 @@ public enum Mapper2 {
      */
     public static <F, T> BeanMapper<F, T> get(Class<F> fromClass, Class<T> toClass) {
         return Mappers.getMapper(fromClass, toClass);
+    }
+
+    public static <S, T> List<? extends T> doMappingAll(
+        Collection<? extends S> collection, Function<? super S, ? extends T> converter
+    ) {
+        return collection == null ? new ArrayList<>() : collection.stream().map(converter).collect(Collectors.toList());
     }
 }

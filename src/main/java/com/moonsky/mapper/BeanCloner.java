@@ -1,6 +1,5 @@
 package com.moonsky.mapper;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -58,26 +57,7 @@ public interface BeanCloner<R> {
      *
      * @return 复制后的集合数据
      */
-    default List<R> cloneAll(Collection<R> data) {
-        return data == null ? null : cloneAll(data, new ArrayList<>(data.size()));
-    }
-
-    /**
-     * 浅拷贝所有项到指定容器
-     *
-     * @param data      数据
-     * @param container 数据容器
-     * @param <C>       容器类型
-     *
-     * @return 数据容器
-     */
-    default <C extends Collection<R>> C cloneAll(Iterable<R> data, C container) {
-        if (data == null) {
-            return container;
-        }
-        for (R record : data) {
-            container.add(clone(record));
-        }
-        return container;
+    default List<? extends R> cloneAll(Collection<R> data) {
+        return Mapper2.doMappingAll(data, this::clone);
     }
 }

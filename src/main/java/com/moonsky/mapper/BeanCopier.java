@@ -1,6 +1,5 @@
 package com.moonsky.mapper;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -71,31 +70,11 @@ public interface BeanCopier<THIS, THAT> {
     /**
      * 转换{@code thisObject}数据列表为{@code THAT}数据列表
      *
-     * @param thisIterable 数据列表
+     * @param collection 数据列表
      *
      * @return 转换后的数据列表
      */
-    default List<THAT> convertAll(Collection<THIS> thisIterable) {
-        return thisIterable == null ? null : convertAll(thisIterable, new ArrayList<>(thisIterable.size()));
-    }
-
-
-    /**
-     * 转换{@code thisObject}数据列表为{@code THAT}数据列表
-     *
-     * @param thisIterable 数据列表
-     * @param container    转换后的数据容器
-     * @param <C>          返回结果数据类型
-     *
-     * @return 入参数据容器
-     */
-    default <C extends Collection<THAT>> C convertAll(Iterable<THIS> thisIterable, C container) {
-        if (thisIterable == null) {
-            return container;
-        }
-        for (THIS thisObject : thisIterable) {
-            container.add(convert(thisObject));
-        }
-        return container;
+    default List<? extends THAT> convertAll(Collection<THIS> collection) {
+        return Mapper2.doMappingAll(collection, this::convert);
     }
 }

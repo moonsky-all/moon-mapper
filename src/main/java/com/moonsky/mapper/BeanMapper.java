@@ -2,7 +2,6 @@ package com.moonsky.mapper;
 
 import com.moonsky.mapper.annotation.MapperFor;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -104,60 +103,22 @@ public interface BeanMapper<THIS, THAT> {
     /**
      * 正向映射{@code thisObject}数据列表为{@code THAT}数据列表
      *
-     * @param thisIterable 数据列表
+     * @param collection 数据列表
      *
      * @return 转换后的数据列表
      */
-    default List<THAT> doForwardAll(Collection<THIS> thisIterable) {
-        return thisIterable == null ? null : doForwardAll(thisIterable, new ArrayList<>(thisIterable.size()));
-    }
-
-    /**
-     * 正向映射{@code thisObject}数据列表为{@code THAT}数据列表
-     *
-     * @param thisIterable 数据列表
-     * @param container    转换后的数据容器
-     * @param <C>          返回结果数据类型
-     *
-     * @return 入参数据容器
-     */
-    default <C extends Collection<THAT>> C doForwardAll(Iterable<THIS> thisIterable, C container) {
-        if (thisIterable == null) {
-            return container;
-        }
-        for (THIS thisObject : thisIterable) {
-            container.add(doForward(thisObject));
-        }
-        return container;
+    default List<? extends THAT> doForwardAll(Collection<THIS> collection) {
+        return Mapper2.doMappingAll(collection, this::doForward);
     }
 
     /**
      * 反向映射{@code thatObject}数据列表为{@code THIS}数据列表
      *
-     * @param thatIterable 数据列表
+     * @param collection 数据列表
      *
      * @return 转换后的数据列表
      */
-    default List<THIS> doBackwardAll(Collection<THAT> thatIterable) {
-        return thatIterable == null ? null : doBackwardAll(thatIterable, new ArrayList<>(thatIterable.size()));
-    }
-
-    /**
-     * 反向映射{@code thatObject}数据列表为{@code THIS}数据列表
-     *
-     * @param thisIterable 数据列表
-     * @param container    转换后的数据容器
-     * @param <C>          返回结果数据类型
-     *
-     * @return 入参数据容器
-     */
-    default <C extends Collection<THIS>> C doBackwardAll(Iterable<THAT> thisIterable, C container) {
-        if (thisIterable == null) {
-            return container;
-        }
-        for (THAT thisObject : thisIterable) {
-            container.add(doBackward(thisObject));
-        }
-        return container;
+    default List<? extends THIS> doBackwardAll(Collection<THAT> collection) {
+        return Mapper2.doMappingAll(collection, this::doBackward);
     }
 }

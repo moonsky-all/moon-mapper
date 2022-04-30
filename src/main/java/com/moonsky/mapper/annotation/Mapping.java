@@ -15,7 +15,7 @@ import java.lang.annotation.Target;
 public @interface Mapping {
 
     /**
-     * 日期和时间格式化以解析字符串为日期/时间
+     * 数字、日期、时间格式化以解析字符串为日期/时间
      *
      * @return 格式化样式，如果仅为空白字符串，则视为无效
      */
